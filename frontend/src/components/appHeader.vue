@@ -53,6 +53,7 @@ export default {
 
 .figTop {
   position: fixed;
+  z-index: 1;
   top: 0;
   left: 0;
   width: 10rem;
@@ -136,6 +137,7 @@ export default {
   position: fixed;
   justify-content: space-evenly;
   align-items: center;
+  z-index: 1;
 
 }
 
