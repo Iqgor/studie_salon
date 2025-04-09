@@ -69,7 +69,7 @@ export default {
         fetch('https://api.api-ninjas.com/v1/quotes', {
           method: 'GET',
           headers: {
-            'X-Api-Key': 'O6v0Bj/8HG7sCs4NuNZPXA==GzcsUltYZfXLxQnH'
+            'X-Api-Key': import.meta.env.VITE_APP_API_KEY_QUOTE
           }
         })
           .then(response => {
