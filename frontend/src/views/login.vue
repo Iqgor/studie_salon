@@ -5,8 +5,8 @@
                 <img src="/public/logo.png" alt="logo" class="logo">
 
                 <div class="slideshow">
-                    <div class="mySlides fade">
-                        <div class="text">{{activeSlide }}{{ slideIndex }}</div>
+                    <div class="mySlides ">
+                        <div class="slidetext">{{activeSlide}}</div>
                     </div>
 
                     <div class="bars">
@@ -15,7 +15,20 @@
                 </div>
 
             </div>
+            <form @submit.prevent="login()" class="form">
+                <h2 class="title">Inloggen</h2>
+                <div class="input-container">
+                    <input type="email" placeholder="Email" class="input" required v-model.trim="email">
+                    <input type="password" placeholder="Wachtwoord" class="input" required v-model.trim="password">
+                    <label for="remember" class="checkbox-label"><input type="checkbox" name="remember" id="remember" class="checkbox" v-model="remember"> Onthoud mij</label>
+                    
+                </div>
 
+                <div class="buttons">
+                    <button type="submit" class="btn">Inloggen</button>
+                    <p class="text">Nog geen account? <a href="/register" class="link">Maak er een aan</a></p>
+                </div>
+            </form>
 
 
         </section>
@@ -36,6 +49,10 @@ export default {
                 "Beste tips voor thuis leren zonder afleidingen.",
             ],
             activeSlide: '',
+
+            email: '',
+            password: '',
+            remember: false,
         };
     },
     mounted() {
@@ -43,20 +60,29 @@ export default {
     },
     methods: {
         showSlides() {
+            let fadingtext = document.getElementsByClassName("mySlides");
+            fadingtext[0].classList.add("fade")
+
+            setTimeout(() => {fadingtext[0].classList.remove("fade")}, 1000);
+            
             if (this.slideIndex >= this.slides.length) { this.slideIndex = 0 }
-            let i;
             if (!this.activeSlide) {
                 this.activeSlide = this.slides[0];
             } else {
                 this.activeSlide = this.slides[this.slideIndex];
             }
+            
             this.slideIndex++;
             setTimeout(this.showSlides, 5000); // Change image every 5 seconds
+        },
+        login() {
+            console.log(this.email, this.password, this.remember);
+            
         },
     }
 }      
 </script>
-<style>
+<style scoped lang="css" >
     .main {
         display: flex;
         justify-content: center;
@@ -71,22 +97,23 @@ export default {
     }
 
     .card{
-        background: red;
+        background: #3384ff;
         padding: 2rem;
         width: 100%;
         height: 100%;
         border-radius: 1.5rem;
+        display: flex;
     }
 
     .slideshow-container{
         width: 50%;
-        height: 30rem;
+        aspect-ratio: 16/9;
         display: flex;
         justify-content: space-between;
         align-items: start;
         padding: 1rem; 
         flex-direction: column;
-        background-image: url('https://images.pexels.com/photos/957040/night-photograph-starry-sky-night-sky-star-957040.jpeg?auto=compress&cs=tinysrgb&w=600');
+        background-image: url("https://images.pexels.com/photos/20318186/pexels-photo-20318186/free-photo-of-trap-trappen-kunst-treden.jpeg?auto=compress&cs=tinysrgb&w=600");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -102,7 +129,7 @@ export default {
         align-items: start;
     }
 
-    .text {
+    .slidetext {
         color: white;
         width: 75%;
         text-align: start;
@@ -111,7 +138,7 @@ export default {
 
     .fade {
         animation-name: fade;
-        animation-duration: 3s;
+        animation-duration: 1.5s;
     }
 
     @keyframes fade {
@@ -139,4 +166,106 @@ export default {
     .active {
         background-color: #24ABCD;
     }
+
+
+    .form {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: start;
+        gap: 1rem;
+        width: 50%;
+        padding: 0rem 2rem;
+    }
+
+    .title {
+        font-size: 2rem;
+        color: white;
+        text-align: start;
+    }
+
+    .input-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .input {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        outline: none;
+        width: 100%;
+        background-color: #b0cfff;
+    }
+    .input:focus {
+        background-color: #8ab8ff;
+        color: white;
+    }
+
+    .input::placeholder {
+        color: #777;
+    }
+    .input:focus::placeholder {
+        color: white;
+    }
+
+    .checkbox {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: 0.5rem;
+        cursor: pointer;
+    }
+    .checkbox:checked {
+        background-color: #24ABCD;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        font-size: 1.2rem;
+    }
+    .checkbox-label:hover {
+        cursor: pointer;
+    }
+
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+    .btn {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        outline: none;
+        width: 100%;
+        background-color: #24ABCD;
+        color: white;
+        font-size: 1.25rem;
+    }
+    .btn:hover {
+        background-color: #3384ff;
+    }
+    .text {
+        color: white;
+        font-size: 1.2rem;
+    }
+    .link {
+        text-decoration: none;
+    }
+    .link:hover {
+        text-decoration: underline;
+    }
+    .link:visited {
+        color: #24ABCD;
+    }
+    .link:active {
+        color: #3384ff;
+    }
+
 </style>
