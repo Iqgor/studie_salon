@@ -97,7 +97,7 @@ export default {
     }
 
     .card{
-        background: #3384ff;
+        background: var(--color-primary-500);
         padding: 2rem;
         width: 100%;
         height: 100%;
@@ -164,7 +164,7 @@ export default {
     }
 
     .active {
-        background-color: #24ABCD;
+        background-color: var(--color-primary-300);
     }
 
 
@@ -197,18 +197,18 @@ export default {
         border: none;
         outline: none;
         width: 100%;
-        background-color: #b0cfff;
+        background-color: var(--color-primary-300);
     }
     .input:focus {
-        background-color: #8ab8ff;
+        background-color: var(--color-primary-200);
         color: white;
     }
 
     .input::placeholder {
-        color: #777;
+        color: var(--color-primary-100);
     }
     .input:focus::placeholder {
-        color: white;
+        color: --color-background-100;
     }
 
     .checkbox {
@@ -218,7 +218,7 @@ export default {
         cursor: pointer;
     }
     .checkbox:checked {
-        background-color: #24ABCD;
+        background-color: var(--color-primary-500);
     }
 
     .checkbox-label {
@@ -244,12 +244,12 @@ export default {
         border: none;
         outline: none;
         width: 100%;
-        background-color: #24ABCD;
+        background-color: var(--color-primary-400);
         color: white;
         font-size: 1.25rem;
     }
     .btn:hover {
-        background-color: #3384ff;
+        background-color: var(--color-primary-600);
     }
     .text {
         color: white;
