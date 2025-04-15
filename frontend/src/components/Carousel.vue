@@ -76,6 +76,9 @@ export default {
   gap: 1.2rem;
   overflow-x: scroll;
   margin-right: -10rem;
+  margin-left: -10rem;
+  padding-left: 10rem;
+
 }
 
 .carousel-container::-webkit-scrollbar {
