@@ -252,20 +252,20 @@ export default {
         background-color: var(--color-primary-600);
     }
     .text {
-        color: white;
+        color: var(--color-text);
         font-size: 1.2rem;
     }
     .link {
-        text-decoration: none;
+        color: var(--color-secondary-500);
     }
     .link:hover {
         text-decoration: underline;
     }
     .link:visited {
-        color: #24ABCD;
+        color: var(--color-secondary-300);
     }
     .link:active {
-        color: #3384ff;
+        color: var(--color-secondary-800);
     }
 
 </style>
