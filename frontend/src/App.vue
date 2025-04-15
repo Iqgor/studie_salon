@@ -4,7 +4,7 @@ import appheader from './components/appHeader.vue'
 import { onMounted } from 'vue';
 
 onMounted(() => {
-    switchTheme('light');
+    switchTheme('dark');
   });
 
   function switchTheme(theme) {

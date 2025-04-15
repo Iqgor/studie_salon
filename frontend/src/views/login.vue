@@ -16,7 +16,16 @@
 
             </div>
             <form @submit.prevent="login()" class="form">
-                <h2 class="title">Inloggen</h2>
+
+                <div class="login__header">
+                    <h1 class="title">Welkom terug</h1>
+                    <span class="text__container">
+                        <p class="text">Goed om je weer terug te zien 👋</p>
+                        <p class="text">Log in om verder te gaan</p>
+                    </span>
+                </div>
+
+                
                 <div class="input-container">
                     <input type="email" placeholder="Email" class="input" required v-model.trim="email">
                     <input type="password" placeholder="Wachtwoord" class="input" required v-model.trim="password">
@@ -91,6 +100,8 @@ export default {
         width: 100%;
     }
 
+    /**slideShow */
+
     .logo{
         width: 10rem;
         border-radius: 1rem;
@@ -113,11 +124,13 @@ export default {
         align-items: start;
         padding: 1rem; 
         flex-direction: column;
-        background-image: url("https://images.pexels.com/photos/20318186/pexels-photo-20318186/free-photo-of-trap-trappen-kunst-treden.jpeg?auto=compress&cs=tinysrgb&w=600");
+        background-image: url("public/Placeholder.svg");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         border-radius: 1rem;
+
+        box-shadow: inset 0 -10rem 10rem rgba(0, 0, 0, 0.5);
     }
 
     .slideshow{
@@ -167,6 +180,7 @@ export default {
         background-color: var(--color-primary-300);
     }
 
+    /**login form */
 
     .form {
         display: flex;
@@ -178,9 +192,31 @@ export default {
         padding: 0rem 2rem;
     }
 
+    .login__header {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
     .title {
         font-size: 2rem;
         color: white;
+        text-align: start;
+    }
+
+    .text__container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .text__container .text{
+        font-size: 1.5rem;
+    }
+    .text {
+        color: white;
+        font-size: 1.2rem;
         text-align: start;
     }
 
@@ -251,10 +287,6 @@ export default {
     .btn:hover {
         background-color: var(--color-primary-600);
     }
-    .text {
-        color: var(--color-text);
-        font-size: 1.2rem;
-    }
     .link {
         color: var(--color-secondary-500);
     }
@@ -266,6 +298,39 @@ export default {
     }
     .link:active {
         color: var(--color-secondary-800);
+    }
+
+    @media screen and (max-width: 800px) {
+        
+        .card {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .slideshow-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+        }
+        .slideshow {
+            width: 100%;
+            padding: 0rem;
+            gap: 1rem;
+        }
+        .form {
+            width: 100%;
+            padding: 0rem;
+        }
+        .logo {
+            width: 5rem;
+        }
+        .slidetext {
+            font-size: 1.5rem;
+        }
+        .bars{
+            justify-content: start;
+        }
+        .bar{
+            width: 3rem;
+        }
     }
 
 </style>

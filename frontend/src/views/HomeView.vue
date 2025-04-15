@@ -173,7 +173,7 @@ export default {
 
 
 .typewriter::before {
-  background: white;
+  background: var(--color-background-500);
   animation: typewriter 2s steps(var(--text-length)) 0.5s forwards;
 }
 
