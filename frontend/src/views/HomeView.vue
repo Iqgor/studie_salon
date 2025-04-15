@@ -9,15 +9,18 @@
       </span>
     </p>
     <Calander />
+    <Carousel />
   </main>
 </template>
 <script>
+import Carousel from '@/components/Carousel.vue';
 import Calander from '../components/Calendar.vue';
 
 export default {
   name: 'HomeView',
   components: {
-    Calander
+    Calander,
+    Carousel
   },
   data() {
     return {
