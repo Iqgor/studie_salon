@@ -1,15 +1,89 @@
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
-  --color-text: #333;
-  --color-background: #fff;
-  --color-primary: #41b883;
-  --color-secondary: #35495e;
-  --color-accent: #41b883;
-  --color-error: #f56c6c;
-  --color-info: #3498db;
-  --color-success: #67c23a;
-  --color-warning: #e6a23c;
+  /* STATUSKLEUREN (blijven altijd gelijk) */
+  --color-success: #28a745;
+  --color-error: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+
+  /* VASTE basis kleuren */
+  --color-white: #ffffff;
+  --color-black: #000000;
 }
+
+/* THEMA: Light */
+.theme-light {
+    --color-primary-100: #cce0ff;
+    --color-primary-200: #99c1ff;
+    --color-primary-300: #66a3ff;
+    --color-primary-400: #3384ff;
+    --color-primary-500: #0065ff;
+    --color-primary-600: #0051cc;
+    --color-primary-700: #003d99;
+    --color-primary-800: #002866;
+    --color-primary-900: #001433;
+
+
+    --color-secondary-100: #eee5e3;
+    --color-secondary-200: #decbc8;
+    --color-secondary-300: #cdb0ac;
+    --color-secondary-400: #bd9691;
+    --color-secondary-500: #ac7c75;
+    --color-secondary-600: #8a635e;
+    --color-secondary-700: #674a46;
+    --color-secondary-800: #45322f;
+    --color-secondary-900: #221917;
+
+    --color-background-100: #ffffff;
+    --color-background-200: #ffffff;
+    --color-background-300: #ffffff;
+    --color-background-400: #ffffff;
+    --color-background-500: #ffffff;
+    --color-background-600: #cccccc;
+    --color-background-700: #999999;
+    --color-background-800: #666666;
+    --color-background-900: #333333;
+
+    
+  --color-text: #212529;
+}
+
+/* THEMA: Dark */
+.theme-dark {
+    --color-primary-100: #ebdef0;
+    --color-primary-200: #d7bde2;
+    --color-primary-300: #c39bd3;
+    --color-primary-400: #af7ac5;
+    --color-primary-500: #9b59b6;
+    --color-primary-600: #7c4792;
+    --color-primary-700: #5d356d;
+    --color-primary-800: #3e2449;
+    --color-primary-900: #1f1224;
+
+    --color-secondary-100: #fae5d3;
+    --color-secondary-200: #f5cba7;
+    --color-secondary-300: #f0b27a;
+    --color-secondary-400: #eb984e;
+    --color-secondary-500: #e67e22;
+    --color-secondary-600: #b8651b;
+    --color-secondary-700: #8a4c14;
+    --color-secondary-800: #5c320e;
+    --color-secondary-900: #2e1907;
+
+    --color-background-100: #d2d2d2;
+    --color-background-200: #a5a5a5;
+    --color-background-300: #787878;
+    --color-background-400: #4b4b4b;
+    --color-background-500: #1e1e1e;
+    --color-background-600: #181818;
+    --color-background-700: #121212;
+    --color-background-800: #0c0c0c;
+    --color-background-900: #060606;
+
+  --color-text: #f1f1f1;
+}
+
+
 
 *,
 *::before,
@@ -32,10 +106,12 @@ input {
 body {
   min-height: 110vh;
   font-size: 1.6rem;
+  background: var(--color-background-500);
+
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--color-primary-500);
   text-decoration: none;
   transition: color 0.3s;
 }

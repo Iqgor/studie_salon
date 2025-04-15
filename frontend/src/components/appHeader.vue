@@ -58,8 +58,8 @@ export default {
   left: 0;
   width: 10rem;
   height: 10rem;
-  background: rgb(65, 184, 131);
-  background: linear-gradient(169deg, rgba(65, 184, 131, 1) 10%, rgba(53, 73, 94, 1) 90%);
+  background: var(--color-secondary-500);
+  background: linear-gradient(169deg, var(--color-secondary-500) 10%, var(--color-primary-500) 90%);
   border-bottom-right-radius: 60%;
   cursor: pointer;
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -89,7 +89,7 @@ export default {
 
 .figTopMenu {
   font-size: 2rem;
-  color: white;
+  color: var(--color-background-100);
   text-align: center;
   font-weight: bold;
   text-transform: uppercase;
@@ -121,7 +121,7 @@ export default {
 }
 
 .topMenuNav>ul a {
-  color: white;
+  color: var(--color-background-100);
   font-size: 120%;
   font-weight: 200;
 
@@ -150,7 +150,7 @@ export default {
 }
 
 .icons>i:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-500);
   cursor: pointer;
 }
 

@@ -429,9 +429,9 @@ export default {
 }
 
 .calendar-header>button {
-  background-color: var(--color-background);
+  background-color: var(--color-background-500);
   border: none;
-  color: var(--color-primary);
+  color: var(--color-primary-500);
   font-size: 125%;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -446,7 +446,7 @@ export default {
 }
 
 .calendar-day {
-  background-color: var(--color-background);
+  background-color: var(--color-background-500);
   padding: 1rem;
   width: max-content;
   aspect-ratio: 1/1;
@@ -466,20 +466,20 @@ export default {
 
 
 .calendar-day:hover {
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-500);
   color: white;
   opacity: 1 !important;
 }
 
 .week-day {
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-500);
   color: white;
   font-weight: bold;
   opacity: 0.5;
 }
 
 .current-day {
-  background-color: var(--color-primary) !important;
+  background-color: var(--color-primary-500) !important;
   color: white;
   font-weight: bold;
   transition: 0.3s opacity;
@@ -487,14 +487,14 @@ export default {
 }
 
 .clicked-day {
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-400);
   color: white;
   font-weight: bold;
   opacity: 1 !important;
 }
 
 .current-day:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-700);
   color: white;
 
 }
@@ -588,7 +588,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 2px;
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-500);
 }
 
 .hourLine>figure {
@@ -597,7 +597,7 @@ export default {
   height: 1.5rem;
   left: -0.75rem;
   aspect-ratio: 1/1;
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-500);
   border-radius: 50%;
 }
 
