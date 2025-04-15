@@ -101,7 +101,7 @@ export default {
 }
 
 .entry {
-  margin-top: 2rem;
+  margin: 2rem 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -192,6 +192,39 @@ export default {
 @keyframes typewriter {
   to {
     left: 100%;
+  }
+
+}
+
+@media screen and (max-width: 1200px) {
+  .main {
+    padding: 0 5rem
+  }
+
+  .entry {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .typewriter {
+    font-size: 250%;
+  }
+
+}
+
+@media screen and (max-width: 768px) {
+  .main {
+    padding: 0 1rem
+  }
+
+  .typewriter {
+    font-size: 200%;
+  }
+
+  .quote {
+    width: 100%;
+    padding-left: 2rem;
   }
 
 }

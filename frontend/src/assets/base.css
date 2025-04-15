@@ -25,6 +25,10 @@ html {
   color: var(--color-text);
 }
 
+input {
+  font-family: 'Roboto', sans-serif;
+}
+
 body {
   min-height: 110vh;
   font-size: 1.6rem;

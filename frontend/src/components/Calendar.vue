@@ -1,18 +1,24 @@
 <template>
   <div class="calendar">
-    <aside class="calendar-sidebar">
+    <aside v-if="!activityClicked" class="calendar-sidebar">
+      <button @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
+        day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
+        day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
+        day.year === (this.setDate ? this.setDate.getFullYear() : this.shownDate.getFullYear())
+      ), new Date().getHours())" class="createActivityButton"><span>+</span> Maak Activiteit</button>
       <div class="calendar-header">
         <button @click="changeMonth(-1)">
           <i class="fa-solid fa-arrow-left"></i>
         </button>
         <h2>
-          {{ shownDate.toLocaleString('default', { month: 'long' }) }}
+          {{ shownDate.toLocaleString('default', { month: 'short' }) }}
           {{ shownDate.getFullYear() }}
         </h2>
         <button @click="changeMonth(1)">
           <i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
+
       <div class="calendar-grid">
         <div class="calendar-dayName" v-for="dayName in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
           :key="dayName">
@@ -44,27 +50,50 @@
         </div>
       </div>
     </aside>
+    <div class="createActivity" v-else>
+      <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
+        @input="newActivityName = $event.target.value" />
+      <div class="time">
+        <input type="date" v-model="newActivityDate">
+        <div>
+          <input type="time" v-model="newActivityBegintime">
+          <span>-</span>
+          <input type="time" v-model="newActivityEndTime">
+        </div>
+      </div>
+      <button @click="activityClicked = false, newActivityName = null"><i
+          class="fa-regular fa-circle-xmark"></i></button>
+      <button><i class="fa-regular fa-circle-check"></i></button>
+    </div>
+
     <div class="calendar-week">
       <div class="calendar-weekTop">
         <div v-for="days in getDaysOfWeek()" @click="selectDate(days.day, days.month, days.year)"><span
+            class="dayNumber"
             :class="{ 'current-day': isCurrentDay(days.day, 0, days.month), 'clicked-day': isClickedDay(days.day, 0, days.month) }">{{
               days.day
             }}</span><span>{{ days.name }}</span></div>
       </div>
       <div class="calendar-weekBottom">
-
         <ul class="calendar-weekBottomList">
+          <div :title="newActivityName || `(afspraaknaam)`" v-if="activityClicked" class="newActivity" ref="newActivity"
+            @resize="handleResize">
+            {{ newActivityName || `(afspraaknaam)` }}
+            <p class="activityTime">
+              {{ newActivityBegintime }} - {{ newActivityEndTime }}
+            </p>
+          </div>
           <!--Voor nu nog standaard gewoon 7 dagen zonder iets er in -->
-          <li v-for="(days, i) in getDaysOfWeek()"
+          <li v-for="(days, i) in getDaysOfWeek()" :id="`day-${days.day}-${days.month}`"
             :class="{ 'currentlist-day': isCurrentDay(days.day, 0, days.month) || isClickedDay(days.day, 0, days.month) }"
             :key="i">
-            <div v-for="hour in 24" :key="hour" class="calendar-hourSlot">
+            <div :id="`hour-${hour}`" v-for="hour in 24" :key="hour" class="calendar-hourSlot"
+              @click="makeActivity(i, hour - 1)">
               <figure :style="timeLineStyle()" class="hourLine"
                 v-if="new Date().getHours() === (hour - 1) && isCurrentDay(days.day, 0, days.month)">
                 <figure></figure>
               </figure>
               <p v-if="i === 0">
-
                 <span class="hourSlot">
                   {{ hour < 10 ? '0' + hour - 1 : hour - 1 }}:00 </span>
               </p>
@@ -87,6 +116,11 @@ export default {
       nextMonthDays: [],
       currentTime: new Date(),
       intervalId: null, // Store the interval ID for clearing it later
+      activityClicked: false, // Flag to prevent multiple activity creation
+      newActivityDate: null,
+      newActivityBegintime: null,
+      newActivityEndTime: null,
+      newActivityName: null
     };
   },
   computed: {
@@ -107,7 +141,7 @@ export default {
         const parentElement = currentHourLine.parentElement;
         if (calendarWeekBottom) {
           calendarWeekBottom.scrollTo({
-            top: parentElement.offsetTop - calendarWeekBottom.offsetTop - 150,
+            top: parentElement.offsetTop - calendarWeekBottom.offsetTop + 150,
             behavior: 'smooth',
           });
         }
@@ -118,7 +152,162 @@ export default {
   beforeDestroy() {
     clearInterval(this.intervalId)
   },
+  watch: {
+    newActivityBegintime(newValue) {
+      const newActivityElement = document.querySelector('.newActivity');
+      if (newActivityElement && this.newActivityEndTime) {
+        const [startHours, startMinutes] = newValue.split(':').map(Number);
+        const [endHours, endMinutes] = this.newActivityEndTime.split(':').map(Number);
+
+        const startTimeInMinutes = startHours * 60 + startMinutes;
+        const endTimeInMinutes = endHours * 60 + endMinutes;
+
+        if (startTimeInMinutes >= endTimeInMinutes) {
+          const adjustedStartTimeInMinutes = endTimeInMinutes - 60; // Subtract 60 minutes
+          const adjustedStartHours = Math.floor(adjustedStartTimeInMinutes / 60);
+          const adjustedStartMinutes = adjustedStartTimeInMinutes % 60;
+          this.newActivityBegintime = `${adjustedStartHours < 10 ? '0' + adjustedStartHours : adjustedStartHours}:${adjustedStartMinutes < 10 ? '0' + adjustedStartMinutes : adjustedStartMinutes}`;
+          return;
+        }
+
+        const topPosition = startHours * 6 + (startMinutes / 10); // Convert time to position (6rem per hour)
+        newActivityElement.style.top = `${topPosition}rem`;
+        const durationInMinutes = endTimeInMinutes - startTimeInMinutes;
+        const calculatedHeight = (durationInMinutes / 10); // Assuming 6rem per hour (60 minutes)
+        if (Math.abs(calculatedHeight - newActivityElement.offsetHeight / 10) > 0.1) {
+          newActivityElement.style.height = `${calculatedHeight}rem`;
+        }
+
+        const calendarWeekBottom = document.querySelector('.calendar-weekBottomList');
+        if (calendarWeekBottom) {
+          calendarWeekBottom.scrollTo({
+            top: newActivityElement.offsetTop - calendarWeekBottom.offsetTop + 150,
+            behavior: 'smooth',
+          });
+        }
+
+      }
+    },
+    newActivityEndTime(newValue) {
+      const newActivityElement = document.querySelector('.newActivity');
+      if (newActivityElement && this.newActivityBegintime) {
+        const [startHours, startMinutes] = this.newActivityBegintime.split(':').map(Number);
+        const [endHours, endMinutes] = newValue.split(':').map(Number);
+
+        const startTimeInMinutes = startHours * 60 + startMinutes;
+        const endTimeInMinutes = endHours * 60 + endMinutes;
+
+        if (endTimeInMinutes <= startTimeInMinutes) {
+          const adjustedEndTimeInMinutes = startTimeInMinutes + 30; // Add 30 minutes
+          const adjustedEndHours = Math.floor(adjustedEndTimeInMinutes / 60);
+          const adjustedEndMinutes = adjustedEndTimeInMinutes % 60;
+          this.newActivityEndTime = `${adjustedEndHours < 10 ? '0' + adjustedEndHours : adjustedEndHours}:${adjustedEndMinutes < 10 ? '0' + adjustedEndMinutes : adjustedEndMinutes}`;
+          return;
+        }
+
+        const durationInMinutes = endTimeInMinutes - startTimeInMinutes;
+        const heightInRem = (durationInMinutes / 10); // Assuming 6rem per hour (60 minutes)
+
+        newActivityElement.style.height = `${heightInRem}rem`;
+      }
+    },
+    newActivityDate() {
+
+      const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
+      const newElement = document.getElementsByClassName('newActivity')[0];
+      const dayIndex = this.getDaysOfWeek().findIndex(day =>
+        `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === this.newActivityDate
+      );
+      const [year, month, day] = this.newActivityDate.split('-').map(Number);
+      this.setDate = new Date(year, month - 1, day)
+      if (dayIndex === -1) {
+        this.shownDate = new Date(year, month - 1, day);
+        this.daysInMonth = this.getDaysInMonth(this.shownDate);
+        const dayIndex = this.getDaysOfWeek().findIndex(day =>
+          `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === this.newActivityDate
+        );
+        newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
+      }
+      console.log(this.newActivityDate);
+      if (dayIndex !== -1 && slotElement && newElement) {
+        newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
+      }
+    }
+  },
   methods: {
+    makeActivity(day, hour) {
+
+      if (!this.activityClicked) {
+        this.activityClicked = true;
+        // this.newActivityDate = new Date(this.getDaysOfWeek()[day].year, this.getDaysOfWeek()[day].month, this.getDaysOfWeek()[day].day);
+        this.newActivityDate = `${this.getDaysOfWeek()[day].year}-${(this.getDaysOfWeek()[day].month + 1) < 10 ? '0' + (this.getDaysOfWeek()[day].month + 1) : (this.getDaysOfWeek()[day].month + 1)}-${this.getDaysOfWeek()[day].day}`;
+
+        this.$nextTick(() => {
+          const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
+          const newElement = document.getElementsByClassName('newActivity')[0];
+          newElement.style.left = `${(slotElement.clientWidth / 7) * day}px`;
+          newElement.style.top = `${hour * 6}rem`;
+          newElement.draggable = true;
+
+
+          newElement.addEventListener('dragend', (e) => {
+
+            const element = document.elementsFromPoint(event.clientX, event.clientY)
+            if (element[0].className !== 'calendar-hourSlot') {
+              this.activityClicked = false;
+              this.newActivityName = null;
+              return;
+            }
+
+            for (const dayOfWeek of this.getDaysOfWeek()) {
+              if (dayOfWeek.day === parseInt(element[0].parentElement.id.split('-')[1])) {
+                this.newActivityDate = `${dayOfWeek.year}-${dayOfWeek.month < 9 ? '0' + (dayOfWeek.month + 1) : dayOfWeek.month + 1}-${dayOfWeek.day < 10 ? '0' + dayOfWeek.day : dayOfWeek.day}`;
+                break;
+              }
+            }
+
+            newElement.style.left = `${element[0].offsetLeft}px`;
+            newElement.style.top = `${element[0].offsetTop}px`;
+            const snappedHour = parseInt(element[0].id.split('-')[1]) - 1;
+            const newHeight = newElement.clientHeight;
+            const extraHours = Math.floor(newHeight / 60); // Each 96px corresponds to 1 hour
+            const extraMinutes = Math.round((newHeight % 60) * 60 / 60); // Each px corresponds to a fraction of a minute
+            const endHour = snappedHour + extraHours;
+            const endMinute = extraMinutes === 60 ? 0 : extraMinutes;
+            const adjustedEndHour = extraMinutes === 60 ? endHour + 1 : endHour;
+
+            this.newActivityBegintime = `${snappedHour < 10 ? '0' + snappedHour : snappedHour}:00`;
+            this.newActivityEndTime = `${adjustedEndHour < 10 ? '0' + adjustedEndHour : adjustedEndHour}:${endMinute < 10 ? '0' + endMinute : endMinute}`
+
+
+          });
+
+          slotElement.addEventListener('dragover', (e) => {
+            e.preventDefault();
+          });
+          this.newActivityBegintime = `${hour < 10 ? '0' + hour : hour}:00`;
+          this.newActivityEndTime = `${hour + 1 < 10 ? '0' + (hour + 1) : hour + 1}:00`
+          // werkt op het momement niet
+          // const resize = new ResizeObserver(function (entries) {
+
+          //   const newHeight = newElement.offsetHeight;
+          //   const extraHours = Math.floor(newHeight / 60); // Each 96px corresponds to 1 hour
+          //   const extraMinutes = Math.round((newHeight % 60) * 60 / 60); // Each px corresponds to a fraction of a minute
+          //   const endHour = hour + extraHours;
+          //   const endMinute = extraMinutes === 60 ? 0 : extraMinutes;
+          //   const adjustedEndHour = extraMinutes === 60 ? endHour + 1 : endHour;
+
+          //   this.newActivityEndTime = `${adjustedEndHour < 10 ? '0' + adjustedEndHour : adjustedEndHour}:${endMinute < 10 ? '0' + endMinute : endMinute}`
+
+          // });
+
+          // resize.observe(newElement);
+
+        });
+      }
+
+
+    },
     timeLineStyle() {
       const minutes = this.currentTime.getMinutes()
 
@@ -229,6 +418,7 @@ export default {
 
 .calendar-sidebar {
   border-radius: 8px;
+  width: 30rem;
 }
 
 .calendar-header {
@@ -313,7 +503,7 @@ export default {
 
 .calendar-week {
   width: 100%;
-  margin: 0 4rem;
+  margin-left: 4rem;
   background: rgba(0, 0, 0, 0.037);
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 1rem;
@@ -323,7 +513,6 @@ export default {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   overflow-y: scroll;
-  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
 }
 
 
@@ -358,6 +547,8 @@ export default {
 .calendar-weekBottom {
   width: 100%;
   height: 50vh;
+  border-top: 0.125rem solid rgba(0, 0, 0, 0.2);
+
 }
 
 .calendar-weekBottomList {
@@ -366,6 +557,7 @@ export default {
   list-style: none;
   height: 100%;
   overflow: auto scroll;
+  position: relative;
 }
 
 .calendar-weekBottomList>li:not(:last-child) {
@@ -407,5 +599,150 @@ export default {
   aspect-ratio: 1/1;
   background-color: var(--color-primary);
   border-radius: 50%;
+}
+
+.newActivity {
+  position: absolute;
+  z-index: 1;
+  min-height: 3rem;
+  height: 6rem;
+  background-color: var(--color-secondary);
+  border-radius: 0.5rem;
+  box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, .14), 0px 1px 18px 0px rgba(0, 0, 0, .12), 0px 3px 5px -1px rgba(0, 0, 0, .2);
+  padding: 0.5rem;
+  color: white;
+  overflow: hidden;
+  cursor: grab;
+}
+
+
+.createActivity {
+  min-width: 30rem;
+}
+
+.createActivity>#activityName {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  font-size: 150%;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  padding-bottom: 0.5rem;
+}
+
+.createActivity>#activityName:focus {
+  outline: none;
+  border-bottom: 0.25rem solid var(--color-primary);
+}
+
+.createActivityButton {
+  border: 0.25rem solid var(--color-primary);
+  background: none;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  font-size: 125%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.createActivityButton>span {
+  font-size: 150%;
+  color: var(--color-primary);
+  font-weight: bold;
+  transition: all 0.3s ease;
+
+}
+
+.createActivityButton:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.createActivityButton:hover>span {
+  color: white;
+}
+
+.createActivity>button {
+  background-color: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: 200%;
+  cursor: pointer;
+  margin-top: 2rem;
+  border-radius: 50%;
+}
+
+
+.createActivity>button>i {
+  border-radius: 50%;
+  transition: all 0.3s ease;
+
+}
+
+.createActivity>button:first-of-type {
+  color: var(--color-error);
+  margin-right: 1rem;
+}
+
+
+.createActivity>button:first-of-type>i:hover {
+  background-color: #f56c6c50;
+}
+
+.createActivity>button:last-of-type>i:hover {
+  background-color: #41b88350;
+
+
+}
+
+
+.time {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: space-between;
+}
+
+.time input {
+  border: none;
+  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  padding-bottom: 0.5rem;
+  font-size: 90%;
+}
+
+.time input:focus {
+  outline: none;
+  border-bottom: 0.125rem solid var(--color-primary);
+}
+
+.time>div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .calendar {
+    flex-direction: column;
+    padding: 4rem 0;
+    gap: 2rem;
+  }
+
+  .calendar-week {
+    margin: 0;
+    width: 100%;
+  }
+
+  .calendar-weekTop {
+    margin-right: -1.5rem;
+  }
+
+
 }
 </style>

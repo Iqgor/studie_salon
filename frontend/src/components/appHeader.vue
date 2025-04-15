@@ -78,7 +78,7 @@ export default {
 
 .figTopClick {
   border-bottom-right-radius: 0%;
-  width: 100%;
+  width: 100% !important;
   justify-content: flex-start;
   padding-top: 0;
 }
@@ -152,5 +152,30 @@ export default {
 .icons>i:hover {
   color: var(--color-primary);
   cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+
+  .header {
+    height: 8rem;
+    padding-right: 0;
+  }
+
+  .figTop {
+    height: 8rem;
+    width: 8rem;
+  }
+
+  .headerTitle {
+    font-size: 150%;
+  }
+
+  .topMenu>img {
+    display: none;
+  }
+
+  .icons {
+    height: 8rem;
+  }
 }
 </style>
