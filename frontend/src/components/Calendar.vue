@@ -51,6 +51,7 @@
       </div>
     </aside>
     <div class="createActivity" v-else>
+      <h3>Nieuwe activiteit</h3>
       <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
         @input="newActivityName = $event.target.value" />
       <div class="time">
@@ -531,7 +532,7 @@ export default {
 }
 
 .calendar-weekTop>div:not(:last-child) {
-  border-right: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-right: 0.125rem solid var(--color-text);
 }
 
 .calendar-weekTop>div>span:first-of-type {
@@ -547,7 +548,7 @@ export default {
 .calendar-weekBottom {
   width: 100%;
   height: 50vh;
-  border-top: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-top: 0.125rem solid var(--color-text);
 
 }
 
@@ -561,11 +562,11 @@ export default {
 }
 
 .calendar-weekBottomList>li:not(:last-child) {
-  border-right: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-right: 0.125rem solid var(--color-text);
 }
 
 .calendar-hourSlot {
-  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-bottom: 0.125rem solid var(--color-text);
   width: 100%;
   height: 6rem;
   position: relative;
@@ -606,7 +607,7 @@ export default {
   z-index: 1;
   min-height: 3rem;
   height: 6rem;
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-500);
   border-radius: 0.5rem;
   box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, .14), 0px 1px 18px 0px rgba(0, 0, 0, .12), 0px 3px 5px -1px rgba(0, 0, 0, .2);
   padding: 0.5rem;
@@ -620,24 +621,30 @@ export default {
   min-width: 30rem;
 }
 
+.createActivity>h3 {
+  margin-bottom: 1rem;
+  font-size: 150%;
+}
+
 .createActivity>#activityName {
   width: 100%;
   background-color: transparent;
   border: none;
-  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-bottom: 0.125rem solid var(--color-text);
   font-size: 150%;
   font-weight: bold;
   transition: all 0.3s ease;
   padding-bottom: 0.5rem;
+  color: var(--color-text);
 }
 
 .createActivity>#activityName:focus {
   outline: none;
-  border-bottom: 0.25rem solid var(--color-primary);
+  border-bottom: 0.25rem solid var(--color-primary-500);
 }
 
 .createActivityButton {
-  border: 0.25rem solid var(--color-primary);
+  border: 0.25rem solid var(--color-primary-500);
   background: none;
   border-radius: 0.5rem;
   display: flex;
@@ -649,6 +656,7 @@ export default {
   transition: all 0.3s ease;
   width: 100%;
   margin-bottom: 2rem;
+  color: var(--color-text);
 }
 
 .createActivityButton>span {
@@ -660,7 +668,7 @@ export default {
 }
 
 .createActivityButton:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-500);
   color: white;
 }
 
@@ -671,7 +679,7 @@ export default {
 .createActivity>button {
   background-color: transparent;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-primary-500);
   font-size: 200%;
   cursor: pointer;
   margin-top: 2rem;
@@ -696,7 +704,8 @@ export default {
 }
 
 .createActivity>button:last-of-type>i:hover {
-  background-color: #41b88350;
+  background-color: var(--color-primary-400);
+
 
 
 }
@@ -711,10 +720,12 @@ export default {
 
 .time input {
   border: none;
-  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-bottom: 0.125rem solid var(--color-text);
   transition: all 0.3s ease;
   padding-bottom: 0.5rem;
   font-size: 90%;
+  background: transparent;
+  color: var(--color-text);
 }
 
 .time input:focus {

@@ -68,9 +68,9 @@ export default {
 <style>
 .carousel {
   width: 100%;
-  }
+}
 
-.carousel-container{
+.carousel-container {
   display: flex;
   flex-direction: row;
   gap: 1.2rem;

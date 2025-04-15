@@ -18,6 +18,8 @@
     <div class="icons">
       <i class="fa-solid fa-user"></i>
       <i class="fa-solid fa-language"></i>
+      <i class="fa-solid fa-sun" v-if="currentTheme === 'dark'" @click="switchTheme('light')"></i>
+      <i class="fa-solid fa-moon" v-else @click="switchTheme('dark')"></i>
     </div>
 
   </header>
@@ -26,6 +28,16 @@
 
 export default {
   name: 'appHeader',
+  props: {
+    switchTheme: {
+      type: Function,
+      required: true
+    },
+    currentTheme: {
+      type: String,
+      required: true
+    }
+  },
   methods: {
     changeColor() {
       document.getElementsByClassName('figTop')[0].classList.toggle('figTopClick')
