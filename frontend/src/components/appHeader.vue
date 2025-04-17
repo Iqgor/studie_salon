@@ -3,7 +3,7 @@
     <div @click="changeColor" class="figTop">
       <p class="figTopMenu">menu</p>
       <div class="topMenu">
-        <img src="../../public/logo.png" alt="">
+        <img @click="$router.push('/')" src="../../public/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
             <li><a href="#">About</a></li>

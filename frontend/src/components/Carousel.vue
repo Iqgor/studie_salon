@@ -87,7 +87,7 @@ export default {
 
 .carousel-titel {
   font-size: 3rem;
-  color: #000;
+  color: white;
   padding: 1rem;
   background-color: var(--color-primary-500);
   margin-left: -10rem;

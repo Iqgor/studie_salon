@@ -347,8 +347,65 @@ export default {
         this.setDate.getFullYear() === this.shownDate.getFullYear()
       );
     },
+    async fetchActivities() {
+      const formData = new FormData();
+      formData.append('userId', 1);
+      const daysOfWeek = this.getDaysOfWeek();
+      formData.append('startDate', `${daysOfWeek[0].year}-${daysOfWeek[0].month + 1}-${daysOfWeek[0].day}`);
+      formData.append('endDate', `${daysOfWeek[6].year}-${daysOfWeek[6].month + 1}-${daysOfWeek[6].day}`);
+
+      const response = await fetch('http://localhost/backend/activities', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        console.error('Failed to fetch activities:', response.statusText);
+        return;
+      }
+      const data = await response.json();
+      console.log('Fetched activities:', data);
+      data.activities.forEach(activity => {
+        const dayIndex = this.getDaysOfWeek().findIndex(day =>
+          activity.start_datetime && `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === activity.start_datetime.split(' ')[0]
+        );
+        if (dayIndex !== -1) {
+          const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
+          const activityElement = document.createElement('div');
+          activityElement.className = 'activity';
+          activityElement.style.position = 'absolute';
+          activityElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
+
+          const [startHour, startMinute] = activity.start_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
+          const [endHour, endMinute] = activity.end_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
+
+          const startTimeInMinutes = startHour * 60 + startMinute + (activity.start_datetime.split(' ')[1].split(':')[2] / 60);
+          const endTimeInMinutes = endHour * 60 + endMinute + (activity.end_datetime.split(' ')[1].split(':')[2] / 60);
+
+
+          const topPosition = startTimeInMinutes / 10; // Assuming 6rem per hour (60 minutes)
+          const height = Math.max((endTimeInMinutes - startTimeInMinutes) / 10, 0); // Ensure height is non-negative and accurate for minute differences
+          activityElement.style.top = `${topPosition}rem`;
+          activityElement.style.height = `${height}rem`;
+          activityElement.style.backgroundColor = 'var(--color-secondary-500)';
+          activityElement.style.borderRadius = '0.5rem';
+          if (height > 0.5) {
+            activityElement.style.padding = '0.5rem';
+          }
+          activityElement.style.color = 'white';
+          activityElement.style.overflow = 'hidden';
+          activityElement.innerHTML = `
+            <strong>${activity.title}</strong>
+          `;
+
+          slotElement.appendChild(activityElement);
+        }
+      });
+
+    },
     initializeCalendar() {
       console.log('Calendar initialized with date:', this.shownDate);
+
+      this.fetchActivities();
     },
     getDaysInMonth(date) {
       const year = date.getFullYear();
@@ -395,6 +452,7 @@ export default {
         1
       );
       this.daysInMonth = this.getDaysInMonth(this.shownDate);
+      this.fetchActivities();
 
     },
     selectDate(day, month, year) {
@@ -407,6 +465,8 @@ export default {
       this.daysInMonth = this.getDaysInMonth(this.shownDate);
 
       console.log('Selected date for activities:', this.setDate);
+      this.fetchActivities();
+
     },
   },
 };
@@ -505,8 +565,6 @@ export default {
 .calendar-week {
   width: 100%;
   margin-left: 4rem;
-  background: rgba(0, 0, 0, 0.037);
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 1rem;
 }
 
