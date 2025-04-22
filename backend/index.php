@@ -5,26 +5,26 @@ $conn = getDBConnection();
 
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
-        // Handle GET request (read)
+    // Handle GET request (read)
 
-        
+
     case 'POST':
-    
+
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('/', trim($url, '/'));
         $resource = $urlParts[2] ?? null;
-         switch($resource){
+        switch ($resource) {
             case 'users':
                 $queryParams = $_GET; // Get all query parameters from the URL
                 $stmt = $conn->prepare("SELECT * FROM users");
                 $stmt->execute();
                 $result = $stmt->get_result();
-        
+
                 $users = [];
                 while ($row = $result->fetch_assoc()) {
                     $users[] = $row;
                 }
-        
+
                 jsonResponse(['users' => $users], 200);
                 break;
             case 'activities':
@@ -49,7 +49,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         jsonResponse(['error' => 'Invalid date format. Use YYYY-MM-DD'], 400);
                         exit;
                     }
-                    
+
                     $query .= " AND start_datetime >= ? AND (end_datetime <= ? OR end_datetime IS NULL)";
                     $params[] = $startDate . ' 00:00:00';
                     $params[] = $endDate . ' 23:59:59';
@@ -76,15 +76,62 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 jsonResponse(['activities' => $activities], 200);
                 break;
+
+
+
+
+            case 'login':
+                // JSON input uitlezen
+                $data = json_decode(file_get_contents('php://input'), true);
+                $email = $data['email'] ?? null;
+                $password = $data['password'] ?? null;
+
+                // Validatie van vereiste velden
+                // Hier kun je ook extra validatie toevoegen, zoals e-mailformaat controleren
+                if (!$email || !$password) {
+                    jsonResponse(['error' => 'Email and password are required'], 400);
+                    exit;
+                }
+
+                // Gebruiker zoeken op email
+                $stmt = $conn->prepare("SELECT id, email, password, name FROM users WHERE email = ?");
+                $stmt->bind_param("s", $email);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows === 0) {
+                    jsonResponse(['error' => 'Invalid email or password'], 401);
+                    exit;
+                }
+
+                $user = $result->fetch_assoc();
+
+                // Wachtwoord controleren
+                if (!password_verify($password, $user['password'])) {
+                    jsonResponse(['error' => 'Invalid email or password'], 401);
+                    exit;
+                }
+
+                // token genereren 
+
+                // Succesvolle login, user info teruggeven (zonder wachtwoord!)
+                unset($user['password']); // Verwijder wachtwoord uit response
+                jsonResponse(['message' => 'Login successful', 'user' => $user], 200);
+                break;
+
+
+
+
+
             case null:
                 jsonResponse(['error' => 'Resource not found'], 404);
                 break;
         }
 
         break;
-        
+
     // Add cases for PUT, DELETE, etc.
-        
+
     default:
         jsonResponse(['error' => 'Method not allowed'], 405);
         break;
