@@ -354,7 +354,7 @@ export default {
       formData.append('startDate', `${daysOfWeek[0].year}-${daysOfWeek[0].month + 1}-${daysOfWeek[0].day}`);
       formData.append('endDate', `${daysOfWeek[6].year}-${daysOfWeek[6].month + 1}-${daysOfWeek[6].day}`);
 
-      const response = await fetch('http://localhost/backend/activities', {
+      const response = await fetch('http://localhost/studie_salon/backend/activities', {
         method: 'POST',
         body: formData,
       });
@@ -371,8 +371,7 @@ export default {
         if (dayIndex !== -1) {
           const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
           const activityElement = document.createElement('div');
-          activityElement.className = 'activity';
-          activityElement.style.position = 'absolute';
+          activityElement.className = 'newActivity';
           activityElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
 
           const [startHour, startMinute] = activity.start_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
@@ -386,13 +385,12 @@ export default {
           const height = Math.max((endTimeInMinutes - startTimeInMinutes) / 10, 0); // Ensure height is non-negative and accurate for minute differences
           activityElement.style.top = `${topPosition}rem`;
           activityElement.style.height = `${height}rem`;
-          activityElement.style.backgroundColor = 'var(--color-secondary-500)';
-          activityElement.style.borderRadius = '0.5rem';
           if (height > 0.5) {
             activityElement.style.padding = '0.5rem';
           }
-          activityElement.style.color = 'white';
-          activityElement.style.overflow = 'hidden';
+          activityElement.style.width = `${slotElement.clientWidth / 7 -10}px`;
+          activityElement.style.cursor = 'default';
+
           activityElement.innerHTML = `
             <strong>${activity.title}</strong>
           `;

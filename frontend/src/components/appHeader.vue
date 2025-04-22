@@ -132,7 +132,7 @@ export default {
 }
 
 .topMenuNav>ul a {
-  color: var(--color-background-100);
+  color: white;
   font-size: 120%;
   font-weight: 200;
 

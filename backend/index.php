@@ -12,7 +12,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('/', trim($url, '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
          switch($resource){
             case 'users':
                 $queryParams = $_GET; // Get all query parameters from the URL
