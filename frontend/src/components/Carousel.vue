@@ -90,6 +90,7 @@ export default {
   color: #000;
   padding: 1rem;
   background-color: #83aded;
+  background-color: var(--color-background-500);
   margin-left: -10rem;
   margin-right: -10rem;
   margin-bottom: 1rem;
