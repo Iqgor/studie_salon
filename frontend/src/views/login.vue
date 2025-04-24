@@ -44,16 +44,25 @@
                     <p class="text">Nog geen account? <a href="/register" class="link">Maak er een aan</a></p>
                 </div>
             </form>
+            {{ auth.user }}
 
 
         </section>
     </main>
 </template>
 <script>
+import { auth } from '@/auth';
+import router from '@/router';
+import { sharedFunctie } from '@/sharedFuncties';
+
 
 export default {
     name: 'HomeView',
+    setup() {
+        return { auth, sharedFunctie } // zorg dat je het beschikbaar maakt in je template
+    },
     components: {
+
     },
     data() {
         return {
@@ -66,7 +75,7 @@ export default {
             activeSlide: '',
 
             email: '',
-            password: '',
+            password: 'wachtwoord',
             remember: false,
         };
     },
@@ -77,6 +86,9 @@ export default {
             this.email = Cookieemail
             this.remember = true
         }
+
+        console.log(auth.isLoggedIn);
+        
     },
     methods: {
         getCookie(cookieName) {
@@ -134,20 +146,16 @@ export default {
                     date.setTime(date.getTime() + 30 * 24 * 60 * 60 * 1000)
                     expires = '; expires=' + date.toUTCString()
                     document.cookie = 'email=' + this.email + expires + '; path=/'
-                    console.log('Cookie set: ' + this.email);
 
                 }
             }
         },
 
         async login() {
-            console.log(this.email, this.password, this.remember);
+            let logged = false
             try {
                 const response = await fetch(`http://localhost/studie_salon/backend/login`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({
                         email: this.email,
                         password: this.password
@@ -155,49 +163,33 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
                 
-                // //* als je tokens hebt gekregen
-                // if (incommingdata.value?.data.access_token) {
-                //     //* heeft de user zijn temp_password gebruikt
-                //     if (incommingdata.value?.data.temp_pass_used) {
-                //         emit('update:screen', 3)
-                //         logged.value = false
-                //         auth.set(logged.value, incommingdata.value.data)
-                //     } else {
-                //         logged.value = true
-                //         auth.set(logged.value, incommingdata.value.data)
-                //     }
-                // }
-
-                // //* de user moet de OTP invullen
-                // else if (incommingdata.value?.data.use_otp == 1) {
-                //     emit('update:screen', 2)
-                //     emit('give:username', username.value)
-                //     logged.value = false
-                //     auth.set(logged.value, incommingdata.value.data)
-                // } else if (incommingdata.value?.data.use_otp == 0) {
-                //     logged.value = true
-                //     auth.set(logged.value, incommingdata.value.data)
-                // }
-                // //* errors
-                // else {
-                //     message.value = incommingdata.value.messages
-
-                //     if (message.value[0].includes('No [User]')) {
-                //         addToast('error', 'Gebruikersnaam', 'Uw gebruikersnaam is verkeerd', 4000)
-                //     }
-                //     if (
-                //         message.value[0].includes('Invalid or Missing') ||
-                //         message.value[0].includes('An exception ocurred: String index out of range: 0')
-                //     ) {
-                //         addToast('error', 'Wachtwoord', 'Uw wachtwoord is verkeerd', 4000)
-                //     }
-                // }
+                let logged = false
+                if (incommingdata?.token) {
+                    //* staat de user op inactive, moet hij zijn otp invullen
+                    if (incommingdata?.otp == 1) {
+                        
+                        logged = false
+                    } else {
+                        auth.setAuth(logged, incommingdata.token)
+                        this.checkUser()
+                    }
+                }
+                
             } catch (err) {
-                error.checkError()
+                // error handling hier
             }
 
+        },
+
+        checkUser() {
+            
+            now = new Date()
+            //let tst = sharedFunctie.daysBetween('2025-04-23 13:16:16', '2025-04-23')
+            console.log(now);
+            
+            
+            
         },
 
     }
