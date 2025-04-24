@@ -51,6 +51,7 @@
       </div>
     </aside>
     <div class="createActivity" v-else>
+      <h3>Nieuwe activiteit</h3>
       <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
         @input="newActivityName = $event.target.value" />
       <div class="time">
@@ -346,8 +347,63 @@ export default {
         this.setDate.getFullYear() === this.shownDate.getFullYear()
       );
     },
+    async fetchActivities() {
+      const formData = new FormData();
+      formData.append('userId', 1);
+      const daysOfWeek = this.getDaysOfWeek();
+      formData.append('startDate', `${daysOfWeek[0].year}-${daysOfWeek[0].month + 1}-${daysOfWeek[0].day}`);
+      formData.append('endDate', `${daysOfWeek[6].year}-${daysOfWeek[6].month + 1}-${daysOfWeek[6].day}`);
+
+      const response = await fetch('http://localhost/studie_salon/backend/activities', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        console.error('Failed to fetch activities:', response.statusText);
+        return;
+      }
+      const data = await response.json();
+      console.log('Fetched activities:', data);
+      data.activities.forEach(activity => {
+        const dayIndex = this.getDaysOfWeek().findIndex(day =>
+          activity.start_datetime && `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === activity.start_datetime.split(' ')[0]
+        );
+        if (dayIndex !== -1) {
+          const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
+          const activityElement = document.createElement('div');
+          activityElement.className = 'newActivity';
+          activityElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
+
+          const [startHour, startMinute] = activity.start_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
+          const [endHour, endMinute] = activity.end_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
+
+          const startTimeInMinutes = startHour * 60 + startMinute + (activity.start_datetime.split(' ')[1].split(':')[2] / 60);
+          const endTimeInMinutes = endHour * 60 + endMinute + (activity.end_datetime.split(' ')[1].split(':')[2] / 60);
+
+
+          const topPosition = startTimeInMinutes / 10; // Assuming 6rem per hour (60 minutes)
+          const height = Math.max((endTimeInMinutes - startTimeInMinutes) / 10, 0); // Ensure height is non-negative and accurate for minute differences
+          activityElement.style.top = `${topPosition}rem`;
+          activityElement.style.height = `${height}rem`;
+          if (height > 0.5) {
+            activityElement.style.padding = '0.5rem';
+          }
+          activityElement.style.width = `${slotElement.clientWidth / 7 -10}px`;
+          activityElement.style.cursor = 'default';
+
+          activityElement.innerHTML = `
+            <strong>${activity.title}</strong>
+          `;
+
+          slotElement.appendChild(activityElement);
+        }
+      });
+
+    },
     initializeCalendar() {
       console.log('Calendar initialized with date:', this.shownDate);
+
+      this.fetchActivities();
     },
     getDaysInMonth(date) {
       const year = date.getFullYear();
@@ -394,6 +450,7 @@ export default {
         1
       );
       this.daysInMonth = this.getDaysInMonth(this.shownDate);
+      this.fetchActivities();
 
     },
     selectDate(day, month, year) {
@@ -406,6 +463,8 @@ export default {
       this.daysInMonth = this.getDaysInMonth(this.shownDate);
 
       console.log('Selected date for activities:', this.setDate);
+      this.fetchActivities();
+
     },
   },
 };
@@ -504,8 +563,6 @@ export default {
 .calendar-week {
   width: 100%;
   margin-left: 4rem;
-  background: rgba(0, 0, 0, 0.037);
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   border-radius: 1rem;
 }
 
@@ -531,7 +588,7 @@ export default {
 }
 
 .calendar-weekTop>div:not(:last-child) {
-  border-right: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-right: 0.125rem solid var(--color-text);
 }
 
 .calendar-weekTop>div>span:first-of-type {
@@ -547,7 +604,7 @@ export default {
 .calendar-weekBottom {
   width: 100%;
   height: 50vh;
-  border-top: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-top: 0.125rem solid var(--color-text);
 
 }
 
@@ -561,11 +618,11 @@ export default {
 }
 
 .calendar-weekBottomList>li:not(:last-child) {
-  border-right: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-right: 0.125rem solid var(--color-text);
 }
 
 .calendar-hourSlot {
-  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-bottom: 0.125rem solid var(--color-text);
   width: 100%;
   height: 6rem;
   position: relative;
@@ -606,7 +663,7 @@ export default {
   z-index: 1;
   min-height: 3rem;
   height: 6rem;
-  background-color: var(--color-secondary);
+  background-color: var(--color-secondary-500);
   border-radius: 0.5rem;
   box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, .14), 0px 1px 18px 0px rgba(0, 0, 0, .12), 0px 3px 5px -1px rgba(0, 0, 0, .2);
   padding: 0.5rem;
@@ -620,24 +677,30 @@ export default {
   min-width: 30rem;
 }
 
+.createActivity>h3 {
+  margin-bottom: 1rem;
+  font-size: 150%;
+}
+
 .createActivity>#activityName {
   width: 100%;
   background-color: transparent;
   border: none;
-  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-bottom: 0.125rem solid var(--color-text);
   font-size: 150%;
   font-weight: bold;
   transition: all 0.3s ease;
   padding-bottom: 0.5rem;
+  color: var(--color-text);
 }
 
 .createActivity>#activityName:focus {
   outline: none;
-  border-bottom: 0.25rem solid var(--color-primary);
+  border-bottom: 0.25rem solid var(--color-primary-500);
 }
 
 .createActivityButton {
-  border: 0.25rem solid var(--color-primary);
+  border: 0.25rem solid var(--color-primary-500);
   background: none;
   border-radius: 0.5rem;
   display: flex;
@@ -649,6 +712,7 @@ export default {
   transition: all 0.3s ease;
   width: 100%;
   margin-bottom: 2rem;
+  color: var(--color-text);
 }
 
 .createActivityButton>span {
@@ -660,7 +724,7 @@ export default {
 }
 
 .createActivityButton:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-500);
   color: white;
 }
 
@@ -671,7 +735,7 @@ export default {
 .createActivity>button {
   background-color: transparent;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-primary-500);
   font-size: 200%;
   cursor: pointer;
   margin-top: 2rem;
@@ -696,7 +760,8 @@ export default {
 }
 
 .createActivity>button:last-of-type>i:hover {
-  background-color: #41b88350;
+  background-color: var(--color-primary-400);
+
 
 
 }
@@ -711,10 +776,12 @@ export default {
 
 .time input {
   border: none;
-  border-bottom: 0.125rem solid rgba(0, 0, 0, 0.2);
+  border-bottom: 0.125rem solid var(--color-text);
   transition: all 0.3s ease;
   padding-bottom: 0.5rem;
   font-size: 90%;
+  background: transparent;
+  color: var(--color-text);
 }
 
 .time input:focus {

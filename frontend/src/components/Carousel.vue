@@ -1,7 +1,7 @@
 <template>
   <div class="carousel">
     <div class="carousel-inner">
-      <h2 class="carousel-titel"> Voorbeeldtitel</h2>
+      <h2 class="carousel-titel">Leren hoe te leren</h2>
       <div class="carousel-container">
         <div class="carousel-inhoud">
           <p class="carousel-informatie">
@@ -15,12 +15,12 @@
         </div>
         <div class="carousel-inhoud">
           <p class="carousel-informatie">
-            Actief leren algemeen
+            Actief leren biologie
           </p>
         </div>
         <div class="carousel-inhoud">
           <p class="carousel-informatie">
-            Actief leren algemeen
+            Actief leren duits
           </p>
         </div>
         <div class="carousel-inhoud">
@@ -68,9 +68,9 @@ export default {
 <style>
 .carousel {
   width: 100%;
-  }
+}
 
-.carousel-container{
+.carousel-container {
   display: flex;
   flex-direction: row;
   gap: 1.2rem;
@@ -87,9 +87,8 @@ export default {
 
 .carousel-titel {
   font-size: 3rem;
-  color: #000;
+  color: white;
   padding: 1rem;
-  background-color: #83aded;
   background-color: var(--color-background-500);
   margin-left: -10rem;
   margin-right: -10rem;
@@ -107,7 +106,7 @@ export default {
   height: 13rem;
   width: 23rem;
   font-size: 2rem;
-  background-color: #b8d0f5;
+  background-color: var(--color-primary-300);
   color: #000;
   border-radius: 1.5rem;
   padding: 1rem;

@@ -3,7 +3,7 @@
     <div @click="changeColor" class="figTop">
       <p class="figTopMenu">menu</p>
       <div class="topMenu">
-        <img src="../../public/logo.png" alt="">
+        <img @click="$router.push('/')" src="../../public/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
             <li><a href="#">About</a></li>
@@ -18,6 +18,8 @@
     <div class="icons">
       <i class="fa-solid fa-user"></i>
       <i class="fa-solid fa-language"></i>
+      <i class="fa-solid fa-sun" v-if="currentTheme === 'dark'" @click="switchTheme('light')"></i>
+      <i class="fa-solid fa-moon" v-else @click="switchTheme('dark')"></i>
     </div>
 
   </header>
@@ -26,6 +28,16 @@
 
 export default {
   name: 'appHeader',
+  props: {
+    switchTheme: {
+      type: Function,
+      required: true
+    },
+    currentTheme: {
+      type: String,
+      required: true
+    }
+  },
   methods: {
     changeColor() {
       document.getElementsByClassName('figTop')[0].classList.toggle('figTopClick')
@@ -120,7 +132,7 @@ export default {
 }
 
 .topMenuNav>ul a {
-  color: var(--color-background-100);
+  color: white;
   font-size: 120%;
   font-weight: 200;
 
