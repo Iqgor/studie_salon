@@ -17,7 +17,7 @@
     <h1 class="headerTitle">Study Saloon</h1>
     <div class="icons">
       <i class="fa-solid fa-user"></i>
-      <i class="fa-solid fa-language"></i>
+      <i class="fa-solid fa-flag" @onclick=""></i>
       <i class="fa-solid fa-sun" v-if="currentTheme === 'dark'" @click="switchTheme('light')"></i>
       <i class="fa-solid fa-moon" v-else @click="switchTheme('dark')"></i>
     </div>
@@ -64,7 +64,7 @@ export default {
 
 .figTop {
   position: fixed;
-  z-index: 1;
+  z-index: 3;
   top: 0;
   left: 0;
   width: 10rem;
@@ -148,7 +148,7 @@ export default {
   position: fixed;
   justify-content: space-evenly;
   align-items: center;
-  z-index: 1;
+  z-index: 4;
 
 }
 
@@ -160,6 +160,10 @@ export default {
   color: white;
 }
 
+.iconsClick>i:hover{
+  color: var(--color-secondary-500) !important;
+  cursor: pointer;
+}
 .icons>i:hover {
   color: var(--color-primary-500);
   cursor: pointer;

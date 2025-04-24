@@ -1,7 +1,7 @@
 <template>
   <main class="main">
     <p class="entry">
-      <span class="typewriter" :style="typewriterStyle">{{ typeWriterText }}
+      <span class="typewriter" :style="typewriterStyle">
       </span>
       <span class="quote" :class="quote.quote ? 'quoteSlash' : ''">
         {{ quote.quote }}
@@ -28,13 +28,14 @@ export default {
       textLength: 0,
       typewriterStyle: {},
       typeWriterText: '',
-      quote: {}
+      quote: {},
+      temp: 0
     };
   },
   mounted() {
     this.getDay();
-    this.calculateTextLength();
     this.getQuote();
+    this.getWeer();
   },
   methods: {
     getDay() {
@@ -50,16 +51,60 @@ export default {
     },
     calculateTextLength() {
       this.$nextTick(() => {
+        const img = document.createElement('img');
+        img.src = 'https://openweathermap.org/img/wn/' + this.temp.weather[0].icon + '@2x.png';
+        const typewriter = document.querySelector('.typewriter');
+        typewriter.innerHTML = `${this.typeofDay} Igor ${Math.round(this.temp.main.temp)}°C`;
+        typewriter.appendChild(img);
         // Wait for DOM update with this.typeofDay
-        this.typeWriterText = `${this.typeofDay} Igor ${this.typeofDay === 'Goodmorning' ? '☀️' :
-          this.typeofDay === 'Goodafternoon' ? '🌤️' : '🌙'}`;
+        this.typeWriterText = `${this.typeofDay} Igor ${Math.round(this.temp.main.temp)}°C`;
         this.textLength = this.typeWriterText.length;
 
         // Set CSS variable
         this.typewriterStyle = {
-          '--text-length': this.textLength
+          '--text-length': this.textLength + 1
         };
       });
+    },
+    getWeer(){
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const longitude = position.coords.longitude;
+            const latitude = position.coords.latitude;
+            this.fetchWeather(latitude, longitude);
+          },
+          error => {
+            console.error('Error getting location:', error);
+            // Fallback to default location (Amsterdam)
+            const longitude = 4.8952;
+            const latitude = 52.3702;
+            this.fetchWeather(latitude, longitude);
+          }
+        );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+        // Fallback to default location (Amsterdam)
+        const longitude = 4.8952;
+        const latitude = 52.3702;
+        this.fetchWeather(latitude, longitude);
+      }
+    },
+    fetchWeather(latitude, longitude) {
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=8a490c6651725451fa03123bd0d7b472`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          this.temp = data;
+          this.calculateTextLength();
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
     },
     getQuote() {
       const savedQuote = localStorage.getItem('dailyQuote');
@@ -154,11 +199,13 @@ export default {
 
 .typewriter {
   font-family: 'Courier New', Courier, monospace;
-  display: inline-block;
+  display: inline-flex;
   overflow: hidden;
   white-space: nowrap;
   position: relative;
   font-size: 300%;
+  gap: 1rem;
+  align-items: center;
 
 }
 
@@ -184,6 +231,10 @@ export default {
   width: 0.2rem;
   background: black;
   animation: typewriter 2s steps(var(--text-length)) 0.5s forwards, blinken 700ms steps(var(--text-length)) infinite;
+}
+
+.typewriter > img{
+  height: 7.5rem;
 }
 
 @keyframes blinken {

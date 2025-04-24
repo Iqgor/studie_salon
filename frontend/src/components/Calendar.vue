@@ -54,17 +54,27 @@
       <h3>Nieuwe activiteit</h3>
       <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
         @input="newActivityName = $event.target.value" />
+      <select @change="newVak = $event.target.value" >
+        <option :key="index" :value="vak" v-for="(vak,index) in vakken">{{ vak }}</option>
+      </select>
+      <label for="">Soort maakwerk:</label>
+      <div class="activityRadio">
+        <label for="Huiswerk">Huiswerk</label>
+        <input checked @input="maakWerk = 'Huiswerk'" type="radio" name="maakwerk" id="Huiswerk">
+        <label for="Leren">Leren</label>
+        <input @input="maakWerk = 'Leren'" type="radio" name="maakwerk" id="Leren">
+      </div>
       <div class="time">
-        <input type="date" v-model="newActivityDate">
+        <input type="date" v-model="newActivityDate" @change="handleDateChange">
         <div>
-          <input type="time" v-model="newActivityBegintime">
+          <input  type="time" v-model="newActivityBegintime">
           <span>-</span>
           <input type="time" v-model="newActivityEndTime">
         </div>
       </div>
-      <button @click="activityClicked = false, newActivityName = null"><i
+      <button @click="activityClicked = false, newActivityName = null,newClass = null"><i
           class="fa-regular fa-circle-xmark"></i></button>
-      <button><i class="fa-regular fa-circle-check"></i></button>
+      <button @click="sendActivity"><i class="fa-regular fa-circle-check"></i></button>
     </div>
 
     <div class="calendar-week">
@@ -104,12 +114,17 @@
       </div>
     </div>
   </div>
+  <Toast v-if="loading" type="info" message="Laden..." />
+  <Toast v-if="activityCreated" type="success" message="Activiteit aangemaakt" />
 </template>
 <script>
+import vakken from '../assets/vakken.json'
+import Toast from './Toast.vue'
 export default {
   name: 'Calendar',
   data() {
     return {
+      vakken: vakken,
       shownDate: new Date(), // Used for navigating the calendar
       setDate: null, // Used for selecting a specific day for activities
       daysInMonth: [],
@@ -121,8 +136,15 @@ export default {
       newActivityDate: null,
       newActivityBegintime: null,
       newActivityEndTime: null,
-      newActivityName: null
+      newActivityName: null,
+      newVak: vakken[0],
+      maakWerk: "Huiswerk",
+      loading: true,
+      activityCreated: false,
     };
+  },
+  components: {
+    Toast
   },
   computed: {
     currentWeekDays() {
@@ -213,7 +235,6 @@ export default {
       }
     },
     newActivityDate() {
-
       const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
       const newElement = document.getElementsByClassName('newActivity')[0];
       const dayIndex = this.getDaysOfWeek().findIndex(day =>
@@ -229,13 +250,45 @@ export default {
         );
         newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
       }
-      console.log(this.newActivityDate);
       if (dayIndex !== -1 && slotElement && newElement) {
         newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
       }
     }
   },
   methods: {
+    handleDateChange(){
+      const existingActivities = document.querySelectorAll('.activity');
+      existingActivities.forEach(activity => activity.remove());
+      this.fetchActivities();
+    },
+    sendActivity(){
+      const formData = new FormData();
+      formData.append('userId', 1);
+      formData.append('title', this.newActivityName);
+      formData.append('vakName', this.newVak);
+      formData.append('maakwerk', this.maakWerk);
+      formData.append('startDate', this.newActivityDate + ' ' + this.newActivityBegintime);
+      formData.append('endDate', this.newActivityDate + ' ' + this.newActivityEndTime);
+
+      fetch('http://localhost/studie_salon/backend/create_activity', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          this.activityCreated = true;
+          this.activityClicked = false;
+          this.newActivityName = null;
+          this.newClass = null;
+          this.fetchActivities();
+          setTimeout(() => {
+            this.activityCreated = false;
+          }, 2000);
+        })
+        .catch(error => {
+          console.error('Error creating activity:', error);
+        });
+    },
     makeActivity(day, hour) {
 
       if (!this.activityClicked) {
@@ -257,6 +310,7 @@ export default {
             if (element[0].className !== 'calendar-hourSlot') {
               this.activityClicked = false;
               this.newActivityName = null;
+              this.newClass = null;
               return;
             }
 
@@ -348,6 +402,9 @@ export default {
       );
     },
     async fetchActivities() {
+      this.loading = true;
+      const existingActivities = document.querySelectorAll('.activity');
+      existingActivities.forEach(activity => activity.remove());
       const formData = new FormData();
       formData.append('userId', 1);
       const daysOfWeek = this.getDaysOfWeek();
@@ -362,8 +419,8 @@ export default {
         console.error('Failed to fetch activities:', response.statusText);
         return;
       }
+      this.loading = false;
       const data = await response.json();
-      console.log('Fetched activities:', data);
       data.activities.forEach(activity => {
         const dayIndex = this.getDaysOfWeek().findIndex(day =>
           activity.start_datetime && `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === activity.start_datetime.split(' ')[0]
@@ -371,7 +428,7 @@ export default {
         if (dayIndex !== -1) {
           const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
           const activityElement = document.createElement('div');
-          activityElement.className = 'newActivity';
+          activityElement.className = 'activity';
           activityElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
 
           const [startHour, startMinute] = activity.start_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
@@ -393,8 +450,18 @@ export default {
 
           activityElement.innerHTML = `
             <strong>${activity.title}</strong>
+            <p style="font-size:60%">${activity.vak}</p>
+            <p style="font-size:60%">${activity.maakwerk}</p>
           `;
+          activityElement.addEventListener('mouseenter', () => {
+            if (activityElement.scrollHeight > activityElement.offsetHeight) {
+              activityElement.style.height = 'auto';
+            }
+          });
 
+          activityElement.addEventListener('mouseleave', () => {
+            activityElement.style.height = `${height}rem`;
+          });
           slotElement.appendChild(activityElement);
         }
       });
@@ -454,6 +521,11 @@ export default {
 
     },
     selectDate(day, month, year) {
+      const isInCurrentWeek = this.getDaysOfWeek().some(weekDay =>
+        weekDay.day === day && weekDay.month === month && weekDay.year === year
+      );
+
+
       this.setDate = new Date(
         year,
         month,
@@ -463,13 +535,14 @@ export default {
       this.daysInMonth = this.getDaysInMonth(this.shownDate);
 
       console.log('Selected date for activities:', this.setDate);
-      this.fetchActivities();
-
+      if (!isInCurrentWeek) {
+        this.fetchActivities();
+      }
     },
   },
 };
 </script>
-<style>
+<style >
 .calendar {
   display: flex;
   padding: 2rem 0;
@@ -646,6 +719,7 @@ export default {
   width: 100%;
   height: 2px;
   background-color: var(--color-primary-500);
+  z-index: 2;
 }
 
 .hourLine>figure {
@@ -660,7 +734,7 @@ export default {
 
 .newActivity {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   min-height: 3rem;
   height: 6rem;
   background-color: var(--color-secondary-500);
@@ -671,23 +745,41 @@ export default {
   overflow: hidden;
   cursor: grab;
 }
+.activity {
+  position: absolute;
+  z-index: 1;
+  min-height: 3rem;
+  height: 6rem;
+  background-color: var(--color-secondary-500);
+  border-radius: 0.5rem;
+  box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, .14), 0px 1px 18px 0px rgba(0, 0, 0, .12), 0px 3px 5px -1px rgba(0, 0, 0, .2);
+  padding: 0.5rem;
+  color: white;
+  overflow: hidden;
+}
 
 
 .createActivity {
-  min-width: 30rem;
+  width: 30rem;
+  box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, .14), 0px 1px 18px 0px rgba(0, 0, 0, .12), 0px 3px 5px -1px rgba(0, 0, 0, .2);
+  height: 100%;
+  padding: 1rem;
+  border-radius: 0.25rem;
 }
 
 .createActivity>h3 {
   margin-bottom: 1rem;
   font-size: 150%;
+
 }
 
 .createActivity>#activityName {
+  padding-left: 0.25rem;
   width: 100%;
   background-color: transparent;
   border: none;
   border-bottom: 0.125rem solid var(--color-text);
-  font-size: 150%;
+  font-size: 125%;
   font-weight: bold;
   transition: all 0.3s ease;
   padding-bottom: 0.5rem;
@@ -697,6 +789,18 @@ export default {
 .createActivity>#activityName:focus {
   outline: none;
   border-bottom: 0.25rem solid var(--color-primary-500);
+}
+
+.activityRadio{
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  align-items: center;
+  padding: 0 0.5rem;
+
+}
+.activityRadio>input {
+  margin-right: 0.5rem;
 }
 
 .createActivityButton {
