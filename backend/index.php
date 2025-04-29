@@ -157,12 +157,33 @@ switch ($_SERVER['REQUEST_METHOD']) {
             
             $jwt = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
             
+            
+            //^ kijken of de user laatst 2 weken heeft ingelogd
+            $lastLogin = $user['last_login']; // Haal deze waarde op uit je database
+            $lastLoginTime = new DateTime($lastLogin);
+            $now = new DateTime();
+            $interval = $now->diff($lastLoginTime);
+            
+            if ($interval->days <= 14 && $now > $lastLoginTime) {
+                $user['active'] = 1; // Zet active op 1
+                jsonResponse(['message' => 'User has logged in within the last 2 weeks', 'active'=> $user['active']], 200);
+            } else {
+                $user['active'] = 0; // Zet active op 0
+                jsonResponse(['error' => 'User has not logged in for more than 2 weeks', 'active'=> $user['active']], 403);
+
+            }
+            
+            
+            
             //^ Succesvolle login, user info teruggeven (zonder wachtwoord!)
             unset($user['password']); // Verwijder wachtwoord uit response
+            unset($user['last_login']); // Verwijder active uit response
+            unset($user['created_at']); // Verwijder created_at uit response
             
             jsonResponse([
                 'message' => 'Login successful',
                 'token' => $jwt,
+                'active' => $user['active'],
             ], 200);
         }
 
