@@ -26,6 +26,7 @@ export const auth = reactive({
 
             //* Meld dat je bent ingelogd
             this.isLoggedIn = logged
+            
 
             //* Krijgt je tokens binnen en word het leesbaar
             if (this.isLoggedIn) {

@@ -44,7 +44,6 @@
                     <p class="text">Nog geen account? <a href="/register" class="link">Maak er een aan</a></p>
                 </div>
             </form>
-            {{ auth.user }}
 
 
         </section>
@@ -53,13 +52,14 @@
 <script>
 import { auth } from '@/auth';
 import router from '@/router';
-import { sharedFunctie } from '@/sharedFuncties';
+import { sharedfunctions } from '@/sharedFunctions';
+import { jwtDecode } from 'jwt-decode';
 
 
 export default {
     name: 'HomeView',
     setup() {
-        return { auth, sharedFunctie } // zorg dat je het beschikbaar maakt in je template
+        return { auth } // zorg dat je het beschikbaar maakt in je template
     },
     components: {
 
@@ -86,8 +86,6 @@ export default {
             this.email = Cookieemail
             this.remember = true
         }
-
-        console.log(auth.isLoggedIn);
         
     },
     methods: {
@@ -152,7 +150,6 @@ export default {
         },
 
         async login() {
-            let logged = false
             try {
                 const response = await fetch(`http://localhost/studie_salon/backend/login`, {
                     method: 'POST',
@@ -163,16 +160,21 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                
-                let logged = false
                 if (incommingdata?.token) {
+
+                    const decoded = jwtDecode(incommingdata?.token);
                     //* staat de user op inactive, moet hij zijn otp invullen
-                    if (incommingdata?.otp == 1) {
+                    if (decoded.user.active == 1) {
+                        auth.setAuth(true, incommingdata?.token)
                         
-                        logged = false
+                        router.push('/plans')
                     } else {
-                        auth.setAuth(logged, incommingdata.token)
-                        this.checkUser()
+                        console.log(false, decoded);
+                        // * hier moet je de otp invullen
+                        // er moet een input bij komen
+                        // die input moet weer door deze functie gaan
+                        // maar dan met de otp
+                        // in de backend als de otp klopt moet je de active op 1 zetten
                     }
                 }
                 
@@ -182,15 +184,7 @@ export default {
 
         },
 
-        checkUser() {
-            
-            now = new Date()
-            //let tst = sharedFunctie.daysBetween('2025-04-23 13:16:16', '2025-04-23')
-            console.log(now);
-            
-            
-            
-        },
+
 
     }
 }      

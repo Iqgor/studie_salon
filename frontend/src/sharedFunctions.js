@@ -1,7 +1,6 @@
 import { reactive } from 'vue'
-import { jwtDecode } from 'jwt-decode'
 
-export const sharedFunctie = reactive({
+export const sharedfunctions = reactive({
 
     daysBetween(date1, date2) {
         console.log('date1', date1, 'date2', date2)	;
