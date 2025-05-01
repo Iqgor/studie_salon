@@ -23,4 +23,10 @@ function jsonResponse($data, $status = 200) {
     echo json_encode($data);
     exit;
 }
-?>
+
+//! betaalings service
+// require_once 'vendor/autoload.php';
+
+// $mollie = new \Mollie\Api\MollieApiClient();
+// $mollie->setApiKey('test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'); // gebruik je test/live key
+// $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

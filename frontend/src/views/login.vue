@@ -16,7 +16,7 @@
                 </div>
 
             </div>
-            <form @submit.prevent="validateInput()" class="form">
+            <form @submit.prevent="validateInput()" class="form" v-if="!showOtp">
 
                 <div class="login__header">
                     <h1 class="title">Welkom terug</h1>
@@ -45,8 +45,26 @@
                 </div>
             </form>
 
+            <form @submit.prevent="sendOtp()" class="form" v-else>
+                <div class="login__header">
+                    <h1 class="title">Verificatie</h1>
+                    <span class="text__container">
+                        <p class="text">We hebben je een verificatiecode gestuurd naar je email</p>
+                        <p class="text">Voer de code in om verder te gaan</p>
+                    </span>
+                </div>
+                <div class="input-container">
+                    <input type="text" placeholder="Verificatiecode" class="input" required v-model.trim="otp">
+                </div>
+                <div class="buttons">
+                    <button type="submit" class="btn">Verstuur</button>
+                    <p class="text">Nog geen email ontvangen? <a href="/register" class="link">Stuur opnieuw</a></p>
+                </div>
+            </form>
+
 
         </section>
+
     </main>
 </template>
 <script>
@@ -77,6 +95,8 @@ export default {
             email: '',
             password: 'wachtwoord',
             remember: false,
+            showOtp: false,
+            otp: '',
         };
     },
     mounted() {
@@ -160,6 +180,8 @@ export default {
                 })
 
                 let incommingdata = await response.json()
+                console.log(incommingdata);
+                
                 if (incommingdata?.token) {
 
                     const decoded = jwtDecode(incommingdata?.token);
@@ -177,12 +199,37 @@ export default {
                         // in de backend als de otp klopt moet je de active op 1 zetten
                     }
                 }
+                else if (incommingdata?.otp_required) {
+                    this.showOtp = true
+                    
+                }
                 
             } catch (err) {
                 // error handling hier
             }
 
         },
+        async sendOtp() {
+            try {
+                const response = await fetch(`http://localhost/studie_salon/backend/verify_otp`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: this.email,
+                        otp: this.otp
+                    })
+                })
+
+                let incommingdata = await response.json()
+                console.log(incommingdata);
+                
+                if (incommingdata?.token) {
+                    auth.setAuth(true, incommingdata?.token)
+                    router.push('/plans')
+                }
+            } catch (err) {
+                // error handling hier
+            }
+        }
 
 
 
@@ -194,6 +241,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     height: 100%;
     width: 100%;
 }
