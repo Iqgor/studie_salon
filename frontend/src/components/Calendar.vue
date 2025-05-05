@@ -79,7 +79,7 @@
 
     <div class="calendar-week">
       <div class="calendar-weekTop">
-        <div v-for="days in getDaysOfWeek()" @click="selectDate(days.day, days.month, days.year)"><span
+        <div v-for="(days,i) in getDaysOfWeek()" :key="i" @click="selectDate(days.day, days.month, days.year)"><span
             class="dayNumber"
             :class="{ 'current-day': isCurrentDay(days.day, 0, days.month), 'clicked-day': isClickedDay(days.day, 0, days.month) }">{{
               days.day
@@ -121,6 +121,7 @@
 import vakken from '../assets/vakken.json'
 import Toast from './Toast.vue'
 export default {
+  // eslint-disable-next-line vue/multi-word-component-names
   name: 'Calendar',
   data() {
     return {
@@ -172,7 +173,7 @@ export default {
       }
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.intervalId)
   },
   watch: {
@@ -275,7 +276,7 @@ export default {
         body: formData,
       })
         .then(response => response.json())
-        .then(data => {
+        .then(() => {
           this.activityCreated = true;
           this.activityClicked = false;
           this.newActivityName = null;
@@ -304,7 +305,7 @@ export default {
           newElement.draggable = true;
 
 
-          newElement.addEventListener('dragend', (e) => {
+          newElement.addEventListener('dragend', () => {
 
             const element = document.elementsFromPoint(event.clientX, event.clientY)
             if (element[0].className !== 'calendar-hourSlot') {
@@ -416,6 +417,7 @@ export default {
         body: formData,
       });
       if (!response.ok) {
+        this.loading = false;
         console.error('Failed to fetch activities:', response.statusText);
         return;
       }

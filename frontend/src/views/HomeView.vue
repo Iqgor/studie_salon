@@ -1,13 +1,20 @@
 <template>
   <main class="main">
-    <p class="entry">
-      <span class="typewriter" :style="typewriterStyle">
-      </span>
-      <span class="quote" :class="quote.quote ? 'quoteSlash' : ''">
-        {{ quote.quote }}
-        <strong>{{ quote.author }}</strong>
-      </span>
-    </p>
+    <div class="entry">
+      <p class="typewriter" :style="typewriterStyle">
+      </p>
+      <div class="quote_container">
+      <select v-model="currentLanguageCode" @change="getQuote">
+        <option v-for="(language, code) in languageMap" :key="code" :value="code">
+          {{ language }}
+        </option>
+      </select>
+        <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">
+          {{ quote.quote }}
+          <strong>{{ quote.author }}</strong>
+        </p>
+      </div>
+    </div>
     <Calander />
     <Carousel />
   </main>
@@ -29,7 +36,19 @@ export default {
       typewriterStyle: {},
       typeWriterText: '',
       quote: {},
-      temp: 0
+      temp: 0,
+      languageMap : {
+        'nl-NL': 'Dutch',
+        'en-US': 'English',
+        'fr-FR': 'French',
+        'de-DE': 'German',
+        'es-ES': 'Spanish',
+        'it-IT': 'Italian',
+        'ru-RU': 'Russian',
+        // Add more mappings as needed
+      },
+      currentLanguageCode :navigator.language || navigator.userLanguage
+
     };
   },
   mounted() {
@@ -54,6 +73,7 @@ export default {
         const img = document.createElement('img');
         img.src = 'https://openweathermap.org/img/wn/' + this.temp.weather[0].icon + '@2x.png';
         const typewriter = document.querySelector('.typewriter');
+        // waar igor staat later de username neerzetten die opgehaald wordt uit de api
         typewriter.innerHTML = `${this.typeofDay} Igor ${Math.round(this.temp.main.temp)}°C`;
         typewriter.appendChild(img);
         // Wait for DOM update with this.typeofDay
@@ -107,18 +127,14 @@ export default {
         });
     },
     getQuote() {
-      const savedQuote = localStorage.getItem('dailyQuote');
-      const savedDate = localStorage.getItem('quoteDate');
-      const today = new Date().toISOString().split('T')[0];
+      const currentLanguage = this.languageMap[this.currentLanguageCode] || 'English'; // Default to English if not mapped
+      const formData = new FormData();
+      formData.append('language', currentLanguage);
 
-      if (savedQuote && savedDate === today) {
-        this.quote = JSON.parse(savedQuote);
-      } else {
-        fetch('https://api.api-ninjas.com/v1/quotes', {
-          method: 'GET',
-          headers: {
-            'X-Api-Key': import.meta.env.VITE_APP_API_KEY_QUOTE
-          }
+        fetch('http://localhost/studie_salon/backend/quote', {
+          method: 'POST',
+          body: formData,
+
         })
           .then(response => {
             if (!response.ok) {
@@ -127,16 +143,14 @@ export default {
             return response.json();
           })
           .then(data => {
-            if (data && data.length > 0) {
-              this.quote = data[0];
-              localStorage.setItem('dailyQuote', JSON.stringify(data[0]));
-              localStorage.setItem('quoteDate', today);
+            if (data) {
+              this.quote = data.quote;
+
             }
           })
           .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
           });
-      }
     }
   }
 }
@@ -156,13 +170,21 @@ export default {
   gap: 2rem;
 }
 
+.quote_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  width: 30%;
+}
+
 .quote {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  width: 30%;
+  width: 100%;
   padding: 0 2rem;
-  margin-top: 1rem;
 }
 
 .quoteSlash {

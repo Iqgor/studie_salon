@@ -1,4 +1,13 @@
 <?php
+header("Access-Control-Allow-Origin: *"); // Of specifieker: http://localhost:3000
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 require_once __DIR__ . '/config.php';
 
 $conn = getDBConnection();
@@ -103,6 +112,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
 
                 jsonResponse(['activities' => $activities], 200);
+                break;
+            case 'quote':
+                $language = $_POST['language'] ?? null; // Get language from query parameters
+                $stmt = $conn->prepare("SELECT * FROM quotes WHERE language = ? ORDER BY RAND() LIMIT 1");
+                $stmt->bind_param("s", $language);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $quote = $result->fetch_assoc();
+                if ($quote) {
+                    jsonResponse(['quote' => $quote], 200);
+                } else {
+                    jsonResponse(['error' => 'No quotes found'], 404);
+                }
                 break;
             case null:
                 jsonResponse(['error' => 'Resource not found'], 404);
