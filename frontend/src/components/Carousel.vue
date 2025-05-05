@@ -5,11 +5,11 @@
       <i v-if="isClickedout[i]" @click="changeIsClicked(i)" class="fa-solid fa-arrow-down"></i>
       <i v-else @click="isClickedout[i] = true" class="fa-solid fa-arrow-up"></i>      </h2>
       <div v-if="isClickedout[i]" class="carousel-container">
-        <div v-for="text in info" class="carousel-inhoud">
+        <router-link v-for="text in info" :to="text.url" class="carousel-inhoud">
           <p class="carousel-informatie">
-          {{ text }}
+          {{ text.title }}
           </p>
-        </div>
+        </router-link>
       </div>
     </div>
   </div>

@@ -22,6 +22,16 @@ const router = createRouter({
       component: SubscriptionPlans
     },
     {
+      path: '/:slug',
+      name: 'voor af',
+      component: () => import('@/views/VoorAf.vue')
+    },
+    {
+      path: '/:slug:/:slug',
+      name: 'tekst',
+      component: () => import('@/views/Tekst.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/404.vue')
