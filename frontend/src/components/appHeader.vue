@@ -6,9 +6,9 @@
         <img @click="$router.push('/')" src="../../public/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Functies</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="#">Over ons</a></li>
+            <li><a href="#">Disclaimer</a></li>
+            <li><a href="#">Teksten</a></li>
           </ul>
         </nav>
         <div style="width: 14.2rem; height: 100%;"></div>

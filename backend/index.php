@@ -12,6 +12,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('/', trim($url, '/'));
+        // dit veranderen naar 1 voor server en 2 voor local
         $resource = $urlParts[2] ?? null;
          switch($resource){
             case 'create_activity':

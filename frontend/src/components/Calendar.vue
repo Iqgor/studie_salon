@@ -20,7 +20,7 @@
       </div>
 
       <div class="calendar-grid">
-        <div class="calendar-dayName" v-for="dayName in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']"
+        <div class="calendar-dayName" v-for="dayName in ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']"
           :key="dayName">
           <strong>{{ dayName }}</strong>
         </div>
@@ -270,7 +270,7 @@ export default {
       formData.append('startDate', this.newActivityDate + ' ' + this.newActivityBegintime);
       formData.append('endDate', this.newActivityDate + ' ' + this.newActivityEndTime);
 
-      fetch('http://localhost/studie_salon/backend/create_activity', {
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/create_activity`, {
         method: 'POST',
         body: formData,
       })
@@ -411,7 +411,7 @@ export default {
       formData.append('startDate', `${daysOfWeek[0].year}-${daysOfWeek[0].month + 1}-${daysOfWeek[0].day}`);
       formData.append('endDate', `${daysOfWeek[6].year}-${daysOfWeek[6].month + 1}-${daysOfWeek[6].day}`);
 
-      const response = await fetch('http://localhost/studie_salon/backend/activities', {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/activities`, {
         method: 'POST',
         body: formData,
       });

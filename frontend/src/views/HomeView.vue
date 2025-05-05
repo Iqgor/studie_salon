@@ -42,11 +42,11 @@ export default {
       const date = new Date();
       const hours = date.getHours();
       if (hours >= 5 && hours < 12) {
-        this.typeofDay = 'Goodmorning';
+        this.typeofDay = 'Goede morgen';
       } else if (hours >= 12 && hours < 18) {
-        this.typeofDay = 'Goodafternoon';
+        this.typeofDay = 'Goede middag';
       } else {
-        this.typeofDay = 'Goodevening';
+        this.typeofDay = 'Goede avond';
       }
     },
     calculateTextLength() {
