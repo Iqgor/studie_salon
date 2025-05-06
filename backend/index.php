@@ -288,9 +288,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $to = $user['email'];
                     $subject = 'Jouw logincode';
                     $message = "Je login code is: $otp\nDeze is 5 minuten geldig.";
-                    $headers = "From: no-reply@jouwdomein.nl";
+                    $headers = "From: 33372@ma-web.nl";
                     mail($to, $subject, $message, $headers);
-                    //! mail($to, $subject, $message, $headers);
 
                     // Geef aan frontend aan dat OTP vereist is
                     jsonResponse([

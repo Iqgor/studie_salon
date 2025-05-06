@@ -74,7 +74,10 @@
                     </div>
 
                     <p class="description">{{ plan.description }}</p>
-                    <p><i class="fa-solid fa-euro-sign"></i><span class="price">{{ plan.price }}</span></p>
+                    <p class="price__container">
+                        <span class="price" :class="{ 'price__inactive': plan.sale && plan.sale_type }" ><i class="fa-solid fa-euro-sign"></i> {{ plan.price }}</span>
+                        <span class="price"><i v-if="plan.sale && plan.sale_type" class="fa-solid fa-euro-sign"></i>{{ (plan.price * 0.75).toFixed(2) }}</span>
+                    </p>
                     <hr>
 
 
@@ -113,7 +116,7 @@ export default {
     methods: {
         async fetchPlans() {
             try {
-                const response = await fetch('http://localhost/studie_salon/backend/plans');
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/plans`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -132,7 +135,6 @@ export default {
 
         changePeriod(period) {
             this.selectedperiode = period;
-
         }
     }
 }      
@@ -284,6 +286,31 @@ export default {
     font-size: 2rem;
     font-weight: bold;
     color: var(--color-primary-500);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.price__container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.price__inactive {
+    text-decoration: line-through;
+    color: var(--color-text);
+    text-decoration-color: var(--color-primary-500);
+
+}
+.price__inactive i{
+    text-decoration: line-through;
+    text-decoration-color: var(--color-primary-500);
+    color: var(--color-text);
 }
 
 .getplan {
@@ -368,7 +395,7 @@ export default {
 }
 
 .detail__button:hover {
-    background-color: var(--color-primary-500);
+    background-color: var(--color-primary-300);
     color: var(--color-background-100);
 }
 
