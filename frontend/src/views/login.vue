@@ -41,7 +41,7 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Inloggen</button>
-                    <p class="text">Nog geen account? <a href="/register" class="link">Maak er een aan</a></p>
+                    <p class="text">Nog geen account? <a href="/plans" class="link">Neem eerst een abonnement</a></p>
                 </div>
             </form>
 
@@ -58,7 +58,7 @@
                 </div>
                 <div class="buttons">
                     <button type="submit" class="btn">Verstuur</button>
-                    <p class="text">Nog geen email ontvangen? <a href="/register" class="link">Stuur opnieuw</a></p>
+                    <p class="text">Nog geen email ontvangen? <span @click="login()" class="link">Stuur opnieuw</span></p>
                 </div>
             </form>
 
@@ -210,7 +210,7 @@ export default {
         },
         async sendOtp() {
             try {
-                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}http://localhost/studie_salon/backend/verify_otp`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/verify_otp`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
