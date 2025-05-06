@@ -1,33 +1,86 @@
 <template>
     <main class="main">
         <div class="container">
-            <div class="plans__container">
+
+            <section class="getplan" v-if="selectedPlan.id">
+                <form @submit.prevent="" class="form"></form>
+
+
+                <article class="detail" >
+                    <h1 class="detail__name">{{ selectedPlan.name }}</h1>
+                    <div class="detail__buttons">
+
+                        <button class="detail__button" :class="{ 'detail__button_active': selectedperiode == 'maandelijks' }" @click="changePeriod('maandelijks')">	
+                            <h4 class="detail__button_period">Maandelijks</h4>
+                            <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
+                                }}</h3>
+                            <h5 class="detail__button_description">tekst</h5>
+                        </button>
+
+                        <button :class="{ 'detail__button_active': selectedperiode == 'jaarlijks' }" class="detail__button" @click="changePeriod('jaarlijks')">
+                            <h4 class="detail__button_period">jaarlijks</h4>
+                            <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
+                                * 12 }}</h3>
+                            <h5 class="detail__button_description">tekst</h5>
+                        </button>
+                    </div>
+                    <div class="detail__pricing">
+                        <div class="detail__pricing_wrapper">
+                            <div class="detail__pricing_name">subtotaal</div>
+                            <div class="detail__pricing_price">prijs</div>
+                        </div>
+                        <div class="detail__pricing_wrapper">
+                            <div class="detail__pricing_name">korting?</div>
+                            <div class="detail__pricing_price">-prijs</div>
+                        </div>
+                        <div class="detail__pricing_wrapper">
+                            <div class="detail__pricing_name">totaal</div>
+                            <div class="detail__pricing_price">prijs</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="detail__feature">
+                        <div class="detail__feature_wrapper" v-for="feature in selectedPlan.features"
+                            :key="feature.name">
+                            <div class="detail__feature_icon" v-html="feature.icon"></div>
+                            <div class="detail__feature_name">{{ feature.name }}</div>
+                        </div>
+
+                    </div>
+                </article>
+            </section>
+
+
+
+
+            <section class="plans__container">
                 <div v-for="plan in plans" :key="plan.id" class="plan__card">
                     <div class="card__header">
                         <span>
-                            <i :class="plan.icon"></i>
+                            <i v-html="plan.icon"></i>
                             <h2>{{ plan.name }}</h2>
                         </span>
                         <span class="rank">{{ plan.rank }}</span>
                     </div>
 
                     <p class="description">{{ plan.description }}</p>
-                    <p><i class="fa-solid fa-euro-sign"></i><span class="price">{{ plan.price }}</span>/{{ plan.billing_cycle }}</p>
+                    <p><i class="fa-solid fa-euro-sign"></i><span class="price">{{ plan.price }}</span>/{{
+                        plan.billing_cycle }}</p>
                     <hr>
-                    
-                    
+
+
                     <ul class="card__list">
-                        <li v-for="feature in plan.features" :key="feature.name" >
-                            <div class="feature__icon" v-html="feature.icon"></div> 
+                        <li v-for="feature in plan.features" :key="feature.name">
+                            <div class="feature__icon" v-html="feature.icon"></div>
                             <span>
-                                <p class="card__list-titel">{{ feature.name }}</p> 
+                                <p class="card__list-titel">{{ feature.name }}</p>
                                 <p class="card__list-description">{{ feature.description }}</p>
-                            </span> 
+                            </span>
                         </li>
                     </ul>
-                    <button class="btn">Neem Abonemment</button>
+                    <button class="btn" @click="choosePlan(plan)">Neem Abonemment</button>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
 </template>
@@ -39,184 +92,39 @@ export default {
     },
     data() {
         return {
-            plans: [
-                {
-                    id: 1,
-                    name: 'Basic Plan',
-                    icon: 'fa-solid fa-user',
-                    rank: 'Basic',
-                    description: 'Basic plan for individuals',
-                    price: 10,
-                    currency: 'USD',
-                    features: [
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch"></i>',
-                            name: 'Stop watch',
-                            description: 'Om je tijd bij te houden',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-music"></i>',
-                            name: 'Muziek',
-                            description: 'Om je te helpen studeren',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch-20"></i>',
-                            name: 'Pomodoro',
-                            description: 'Om je te helpen studeren',
-                            active: 0
-                        }
-                    ],
-                    billing_cycle: 'Monthly',
-                    is_active: 1,
-                    trial_period: 7,
-                    created_at: '2023-01-01',
-                    updated_at: '2023-01-01',
-                },
-                {
-                    id: 2,
-                    name: 'premium Plan',
-                    icon: 'fa-solid fa-user',
-                    rank: 'premium',
-                    description: 'premium plan for the elite',
-                    price: 100,
-                    currency: 'euro',
-                    features: [
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch"></i>',
-                            name: 'Stop watch',
-                            description: 'Om je tijd bij te houden',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-music"></i>',
-                            name: 'Muziek',
-                            description: 'Om je te helpen studeren',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch-20"></i>',
-                            name: 'Pomodoro',
-                            description: 'Om je te helpen studeren',
-                            active: 0
-                        }
-                    ],
-                    billing_cycle: 'yearly',
-                    is_active: 1,
-                    trial_period: 7,
-                    created_at: '2023-01-01',
-                    updated_at: '2023-01-01',
-                },
-                {
-                    id: 2,
-                    name: 'premium Plan',
-                    icon: 'fa-solid fa-user',
-                    rank: 'premium',
-                    description: 'premium plan for the elite',
-                    price: 100,
-                    currency: 'euro',
-                    features: [
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch"></i>',
-                            name: 'Stop watch',
-                            description: 'Om je tijd bij te houden',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-music"></i>',
-                            name: 'Muziek',
-                            description: 'Om je te helpen studeren',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch-20"></i>',
-                            name: 'Pomodoro',
-                            description: 'Om je te helpen studeren',
-                            active: 0
-                        }
-                    ],
-                    billing_cycle: 'yearly',
-                    is_active: 1,
-                    trial_period: 7,
-                    created_at: '2023-01-01',
-                    updated_at: '2023-01-01',
-                },
-                {
-                    id: 2,
-                    name: 'premium Plan',
-                    icon: 'fa-solid fa-user',
-                    rank: 'premium',
-                    description: 'premium plan for the elite',
-                    price: 100,
-                    currency: 'euro',
-                    features: [
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch"></i>',
-                            name: 'Stop watch',
-                            description: 'Om je tijd bij te houden',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-music"></i>',
-                            name: 'Muziek',
-                            description: 'Om je te helpen studeren',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch-20"></i>',
-                            name: 'Pomodoro',
-                            description: 'Om je te helpen studeren',
-                            active: 0
-                        }
-                    ],
-                    billing_cycle: 'yearly',
-                    is_active: 1,
-                    trial_period: 7,
-                    created_at: '2023-01-01',
-                    updated_at: '2023-01-01',
-                },
-                {
-                    id: 2,
-                    name: 'premium Plan',
-                    icon: 'fa-solid fa-user',
-                    rank: 'premium',
-                    description: 'premium plan for the elite',
-                    price: 100,
-                    currency: 'euro',
-                    features: [
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch"></i>',
-                            name: 'Stop watch',
-                            description: 'Om je tijd bij te houden',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-music"></i>',
-                            name: 'Muziek',
-                            description: 'Om je te helpen studeren',
-                            active: 1
-                        },
-                        {
-                            icon: '<i class="fa-solid fa-stopwatch-20"></i>',
-                            name: 'Pomodoro',
-                            description: 'Om je te helpen studeren',
-                            active: 0
-                        }
-                    ],
-                    billing_cycle: 'yearly',
-                    is_active: 1,
-                    trial_period: 7,
-                    created_at: '2023-01-01',
-                    updated_at: '2023-01-01',
-                },
-            ],
+            plans: [],
+            selectedPlan: [],
+            selectedperiode: 'maandelijks',
         };
     },
     mounted() {
-        this.showSlides();
+        // Fetch plans from the API
+        this.fetchPlans();
     },
     methods: {
+        async fetchPlans() {
+            try {
+                const response = await fetch('http://localhost/studie_salon/backend/plans');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                this.plans = data.plans
+            } catch (error) {
+                console.error('Error fetching plans:', error);
+            }
+        },
+
+        choosePlan(plan) {
+            console.log(plan);
+            this.selectedPlan = plan;
+            this.changePrice()
+        },
+
+        changePeriod(period) {
+            this.selectedperiode = period;
+            
+        }
     }
 }      
 </script>
@@ -224,10 +132,12 @@ export default {
 .main {
     padding: 2rem;
 }
+
 .container {
     display: flex;
     flex-direction: column;
 }
+
 .plans__container {
     display: flex;
     flex-wrap: wrap;
@@ -254,11 +164,13 @@ export default {
     justify-content: space-between;
     align-items: center;
 }
+
 .card__header span {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
+
 .card__header span h2 {
     font-size: 1.5rem;
     margin: 0;
@@ -285,6 +197,7 @@ export default {
     flex-direction: column;
     gap: 1rem;
 }
+
 .plan__card li {
     display: flex;
     align-items: center;
@@ -292,12 +205,13 @@ export default {
     gap: 2rem;
 
 }
+
 .feature__icon {
     max-width: 2.5rem;
     min-width: 2.5rem;
     max-height: 2rem;
     margin-right: 0.5rem;
-    background: -webkit-linear-gradient(left,var(--color-primary-500), var(--color-secondary-500));
+    background: -webkit-linear-gradient(left, var(--color-primary-500), var(--color-secondary-500));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     overflow: hidden;
@@ -308,6 +222,7 @@ export default {
     font-weight: bold;
     color: var(--color-primary-500);
 }
+
 .card__list-description {
     font-size: 1.2rem;
     color: var(--color-text);
@@ -321,7 +236,7 @@ export default {
     flex-direction: column;
 }
 
-.btn{
+.btn {
     background-color: var(--color-primary-500);
     color: var(--color-background-100);
     padding: 1rem 2rem;
@@ -333,29 +248,177 @@ export default {
     transition: all 0.3s ease-in-out;
     margin-top: auto;
 }
+
 .btn:hover {
     background-color: var(--color-primary-600);
 }
+
 .btn:active {
     background-color: var(--color-primary-700);
 }
 
-
-.fa-euro-sign{
+.fa-euro-sign {
     color: var(--color-primary-500);
     font-size: 1.6rem;
     font-weight: bold;
 }
 
-.description{
+.description {
     font-size: 1.25rem;
 }
 
-.price{
+.price {
     font-size: 2rem;
     font-weight: bold;
     color: var(--color-primary-500);
 }
 
+.getplan {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
 
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+
+    min-width: 5rem;
+    background: blue;
+}
+
+
+
+.detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: max-content;
+    height: 100%;
+    background: var(--color-primary-500);
+    border-radius: 2.5rem;
+    padding: 2rem;
+}
+
+.detail__name {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-text);
+}
+
+.detail__buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.detail__button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+    gap: 1rem;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    background-color: var(--color-background-400);
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    min-width: 15rem;
+}
+
+.detail__button:hover {
+    background-color: var(--color-primary-500);
+    color: var(--color-background-100);
+}
+
+.detail__button:focus {
+    background-color: var(--color-primary-600);
+    border: none;
+    outline: none;
+    color: var(--color-background-500);
+}
+.detail__button_active {
+    background-color: var(--color-primary-700);
+    color: var(--color-background-100);
+}
+
+.detail__button_period {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.detail__button_price {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.detail__button_description {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+
+.detail__pricing {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.detail__pricing_wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.detail__pricing_name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-text);
+}
+
+.detail__pricing_price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-text);
+}
+
+
+.detail__feature {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.detail__feature_wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.detail__feature_icon {
+    font-size: 3.5rem;
+    overflow: hidden;
+}
+
+.detail__feature_name {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-text);
+}
 </style>

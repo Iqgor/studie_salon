@@ -1,9 +1,16 @@
 <?php
 // Database configuration
+//local
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'studie_saloon');
+// server
+// define('DB_HOST', '127.0.0.1');
+// define('DB_USER', 'c7637igor');
+// define('DB_PASS', 'Ballo2711!');
+// define('DB_NAME', 'c7637studie');
+
 
 // Connect to database
 function getDBConnection() {
@@ -23,4 +30,10 @@ function jsonResponse($data, $status = 200) {
     echo json_encode($data);
     exit;
 }
-?>
+
+//! betaalings service
+// require_once 'vendor/autoload.php';
+
+// $mollie = new \Mollie\Api\MollieApiClient();
+// $mollie->setApiKey('test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'); // gebruik je test/live key
+// $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
