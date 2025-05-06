@@ -27,6 +27,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
             plans.description AS plan_description,
             plans.rank AS plan_rank,
             plans.icon AS plan_icon,
+            plans.sale AS plan_sale,
+            plans.sale_type AS plan_sale_type,
             features.id AS feature_id,
             features.name AS feature_name,
             features.description AS feature_description,
@@ -50,6 +52,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                             'description' => $row['plan_description'],
                             'rank' => $row['plan_rank'],
                             'icon' => $row['plan_icon'],
+                            'sale' => $row['plan_sale'],
+                            'sale_type' => $row['plan_sale_type'],
                             'features' => []
                         ];
                     }
@@ -262,6 +266,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $now = new DateTime();
                 $interval = $now->diff($lastLoginTime);
 
+                
+
                 if ($interval->days <= 14 && $now > $lastLoginTime) {
                     $user['active'] = 1; // Zet active op 1
                 } else {
@@ -282,16 +288,14 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $to = $user['email'];
                     $subject = 'Jouw logincode';
                     $message = "Je login code is: $otp\nDeze is 5 minuten geldig.";
-                    $headers = "From: no-reply@jouwdomein.nl";
-
-                    //! mail($to, $subject, $message, $headers);
+                    $headers = "From: 33372@ma-web.nl";
+                    mail($to, $subject, $message, $headers);
 
                     // Geef aan frontend aan dat OTP vereist is
                     jsonResponse([
                         'message' => 'OTP vereist',
                         'otp_required' => true,
                     ], 200);
-                    exit;
                 }
 
 
