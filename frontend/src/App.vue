@@ -1,14 +1,18 @@
 <script>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 import appheader from './components/appHeader.vue'
+<<<<<<< HEAD
 import { onMounted, ref } from 'vue';
 import { auth } from '@/auth';
+=======
+
+
+>>>>>>> c9ce74d1507791a1d1ee142edf8efa62678c07be
 
 export default {
   name: 'App',
   components: {
     appheader,
-    RouterLink,
     RouterView
   },
   data() {
@@ -59,7 +63,8 @@ export default {
 </script>
 
 <template>
-  <appheader :switchTheme="switchTheme" :currentTheme="currentTheme" />
+
+  <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
   <RouterView />
   <footer>
 
