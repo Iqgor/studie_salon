@@ -14,15 +14,74 @@ $conn = getDBConnection();
 
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
-        // Handle GET request (read)
+        $url = $_SERVER['REQUEST_URI'];
+        $urlParts = explode('/', trim($url, '/'));
+        $resource = $urlParts[2] ?? null;
+        switch ($resource) {
+            case 'plans':
+                $stmt = $conn->prepare("
+        SELECT 
+            plans.id AS plan_id,
+            plans.name AS plan_name,
+            plans.price,
+            plans.description AS plan_description,
+            plans.rank AS plan_rank,
+            plans.icon AS plan_icon,
+            features.id AS feature_id,
+            features.name AS feature_name,
+            features.description AS feature_description,
+            features.icon AS feature_icon
+        FROM plans
+        LEFT JOIN features ON plans.id = features.plan_id
+        ORDER BY plans.rank ASC
+    ");
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-        
+                $plans = [];
+                while ($row = $result->fetch_assoc()) {
+                    $planId = $row['plan_id'];
+
+                    if (!isset($plans[$planId])) {
+                        $plans[$planId] = [
+                            'id' => $row['plan_id'],
+                            'name' => $row['plan_name'],
+                            'price' => $row['price'],
+                            'description' => $row['plan_description'],
+                            'rank' => $row['plan_rank'],
+                            'icon' => $row['plan_icon'],
+                            'features' => []
+                        ];
+                    }
+
+                    if ($row['feature_id']) {
+                        $plans[$planId]['features'][] = [
+                            'id' => $row['feature_id'],
+                            'name' => $row['feature_name'],
+                            'description' => $row['feature_description'],
+                            'icon' => $row['feature_icon']
+                        ];
+                    }
+                }
+
+                $formattedPlans = array_values($plans);
+
+                jsonResponse(['plans' => $formattedPlans], 200);
+                break;
+
+            default:
+                jsonResponse(['error' => 'Method not allowed'], 405);
+                break;
+        }
+
+
     case 'POST':
-    
+
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('/', trim($url, '/'));
         // dit veranderen naar 1 voor server en 2 voor local
         $resource = $urlParts[2] ?? null;
+
          switch($resource){
             case 'create_activity':
                 $userId = $_POST['userId'] ?? null; // Get userId from POST data
@@ -51,17 +110,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 $stmt->close();
                 break;
+
             case 'users':
                 $queryParams = $_GET; // Get all query parameters from the URL
                 $stmt = $conn->prepare("SELECT * FROM users");
                 $stmt->execute();
                 $result = $stmt->get_result();
-        
+
                 $users = [];
                 while ($row = $result->fetch_assoc()) {
                     $users[] = $row;
                 }
-        
+
                 jsonResponse(['users' => $users], 200);
                 break;
             case 'activities':
@@ -86,7 +146,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         jsonResponse(['error' => 'Invalid date format. Use YYYY-MM-DD'], 400);
                         exit;
                     }
-                    
+
                     $query .= " AND start_datetime >= ? AND (end_datetime <= ? OR end_datetime IS NULL)";
                     $params[] = $startDate . ' 00:00:00';
                     $params[] = $endDate . ' 23:59:59';
@@ -113,6 +173,203 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 jsonResponse(['activities' => $activities], 200);
                 break;
+
+
+
+
+
+            case 'login':
+                // Assumes $conn is your mysqli connection
+                // jsonResponse is a helper function to send JSON responses
+
+                //^ JSON input uitlezen
+                $data = json_decode(file_get_contents('php://input'), true);
+                $email = $data['email'] ?? null;
+                $password = $data['password'] ?? null;
+
+                //^ Validatie van vereiste velden
+                if (!$email || !$password) {
+                    jsonResponse(['error' => 'Email and password are required'], 400);
+                    exit;
+                }
+
+                //^ Gebruiker zoeken op email
+                $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+                $stmt->bind_param("s", $email);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows === 0) {
+                    jsonResponse(['error' => 'Invalid email or password'], 401);
+                    exit;
+                }
+
+                $user = $result->fetch_assoc();
+                //^ Wachtwoord controleren
+                if (!password_verify($password, $user['password'])) {
+                    jsonResponse(['error' => 'Invalid email or password'], 401);
+                    exit;
+                }
+
+                //^ controleren of gebruiker actief is
+                if ($user['active'] !== 1) {
+                    jsonResponse(['error' => 'User is not active'], 403);
+                    exit;
+                }
+
+                //^ Controleer of gebruiker een abonnement heeft
+                $stmt = $conn->prepare("SELECT * FROM subscriptions WHERE user_id = ? AND end_date > NOW()");
+                $stmt->bind_param("i", $user['id']);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                //jsonResponse(['subscriptions' => $result->fetch_all(MYSQLI_ASSOC)], 200);
+
+                $subscription = $result->fetch_assoc();
+                if ($subscription["status"] !== "active") {
+                    jsonResponse(['error' => 'Subscription is not active'], 403);
+                    exit;
+                }
+
+                //^ Token genereren (JWT)
+                $secret_key = "your_secret_key"; // use a secure one in real apps
+                $issuedAt = time();
+                $expirationTime = $issuedAt + 3600; // valid for 1 hour
+                unset($user['password']); // Verwijder wachtwoord uit response
+
+
+                $payload = [
+                    'iat' => $issuedAt,
+                    'exp' => $expirationTime,
+                    'user' => $user,
+                ];
+
+                //^ Create JWT manually
+                $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+                $payload_json = json_encode($payload);
+
+                $base64UrlHeader = rtrim(strtr(base64_encode($header), '+/', '-_'), '=');
+                $base64UrlPayload = rtrim(strtr(base64_encode($payload_json), '+/', '-_'), '=');
+
+                $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $secret_key, true);
+                $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+
+                $jwt = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+
+
+                //^ kijken of de user laatst 2 weken heeft ingelogd
+                $lastLogin = $user['last_login']; // Haal deze waarde op uit je database
+                $lastLoginTime = new DateTime($lastLogin);
+                $now = new DateTime();
+                $interval = $now->diff($lastLoginTime);
+
+                if ($interval->days <= 14 && $now > $lastLoginTime) {
+                    $user['active'] = 1; // Zet active op 1
+                } else {
+                    $user['active'] = 0; // Zet active op 0
+                }
+
+                //^ otp als active 0 is
+                if ($user['active'] === 0) {
+                    $otp = random_int(100000, 999999);
+
+                    // Sla OTP en vervaldatum tijdelijk op in sessie of database
+                    session_start();
+                    $_SESSION['otp'] = $otp;
+                    $_SESSION['otp_expiry'] = time() + 300; // 5 minuten geldig
+                    $_SESSION['otp_user_id'] = $user['id'];
+
+                    // E-mail sturen
+                    $to = $user['email'];
+                    $subject = 'Jouw logincode';
+                    $message = "Je login code is: $otp\nDeze is 5 minuten geldig.";
+                    $headers = "From: no-reply@jouwdomein.nl";
+
+                    //! mail($to, $subject, $message, $headers);
+
+                    // Geef aan frontend aan dat OTP vereist is
+                    jsonResponse([
+                        'message' => 'OTP vereist',
+                        'otp_required' => true,
+                    ], 200);
+                    exit;
+                }
+
+
+                //^ Succesvolle login, user info teruggeven (zonder wachtwoord!)
+                unset($user['password']); // Verwijder wachtwoord uit response
+                unset($user['last_login']); // Verwijder active uit response
+                unset($user['created_at']); // Verwijder created_at uit response
+
+                jsonResponse([
+                    'message' => 'Login successful',
+                    'token' => $jwt,
+                    'active' => $user['active'],
+                ], 200);
+
+                break;
+            case 'verify_otp':
+                session_start();
+                $data = json_decode(file_get_contents('php://input'), true);
+                $code = $data['code'] ?? null;
+
+                if (!isset($_SESSION['otp'], $_SESSION['otp_expiry'], $_SESSION['otp_user_id'])) {
+                    jsonResponse(['error' => 'Geen actieve OTP sessie'], 400);
+                    exit;
+                }
+
+                if (time() > $_SESSION['otp_expiry']) {
+                    jsonResponse(['error' => 'OTP verlopen'], 401);
+                    exit;
+                }
+
+                if ($code != $_SESSION['otp']) {
+                    jsonResponse(['error' => 'Ongeldige OTP'], 401);
+                    exit;
+                }
+
+                // OTP is geldig – maak token en geef toegang
+                $userId = $_SESSION['otp_user_id'];
+                $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+                $stmt->bind_param("i", $userId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+
+                unset($user['password']); // Security
+                $secret_key = "your_secret_key";
+                $issuedAt = time();
+                $expirationTime = $issuedAt + 3600;
+
+                $payload = [
+                    'iat' => $issuedAt,
+                    'exp' => $expirationTime,
+                    'user' => $user,
+                ];
+
+                $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+                $payload_json = json_encode($payload);
+                $base64UrlHeader = rtrim(strtr(base64_encode($header), '+/', '-_'), '=');
+                $base64UrlPayload = rtrim(strtr(base64_encode($payload_json), '+/', '-_'), '=');
+                $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $secret_key, true);
+                $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+                $jwt = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+
+                // Ruim OTP op
+                unset($_SESSION['otp'], $_SESSION['otp_expiry'], $_SESSION['otp_user_id']);
+
+                jsonResponse([
+                    'message' => 'Login met OTP geslaagd',
+                    'token' => $jwt,
+                    'active' => 1,
+                ], 200);
+                break;
+
+            case 'create-payment':
+                jsonResponse(['error' => 'Method not allowed'], 405);
+             break;
+
+
+
             case 'quote':
                 $language = $_POST['language'] ?? null; // Get language from query parameters
                 $stmt = $conn->prepare("SELECT * FROM quotes WHERE language = ? ORDER BY RAND() LIMIT 1");
@@ -128,13 +385,13 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
             case null:
                 jsonResponse(['error' => 'Resource not found'], 404);
+
                 break;
         }
 
-        break;
-        
+
     // Add cases for PUT, DELETE, etc.
-        
+
     default:
         jsonResponse(['error' => 'Method not allowed'], 405);
         break;
