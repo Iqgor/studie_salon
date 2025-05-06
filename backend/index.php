@@ -293,14 +293,14 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                     try {
                         $mail->isSMTP();
-                        $mail->Host = 'smtp.gmail.com';
+                        $mail->Host = $config['MAIL_HOST'];;
                         $mail->SMTPAuth = true;
-                        $mail->Username = 'bilalelkoudadi526@gmail.com';       // <-- Jouw Gmail-adres
-                        $mail->Password = 'ksjd ymnj rwom pkjx';  // <-- App-wachtwoord van Gmail
+                        $mail->Username = $config['MAIL_USERNAME'];  // <-- Jouw Gmail-adres
+                        $mail->Password = $config['MAIL_PASSWORD'];  // <-- App-wachtwoord van Gmail
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 
-                        $mail->setFrom('bilalelkoudadi526@gmail.com', 'StudieSalon');
+                        $mail->setFrom($config['MAIL_USERNAME'], 'StudieSalon');
                         $mail->addAddress($user['email']);  // Ontvanger
 
                         $mail->isHTML(true);

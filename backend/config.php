@@ -37,3 +37,10 @@ function jsonResponse($data, $status = 200) {
 // $mollie = new \Mollie\Api\MollieApiClient();
 // $mollie->setApiKey('test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'); // gebruik je test/live key
 // $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+
+return [
+    'MAIL_PASSWORD' => 'ksjd ymnj rwom pkjx',
+    'MAIL_USERNAME' => 'bilalelkoudadi526@gmail.com',
+    'MAIL_HOST' => 'smtp.gmail.com',
+];
