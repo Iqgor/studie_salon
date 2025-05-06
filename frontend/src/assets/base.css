@@ -44,7 +44,7 @@
     --color-background-800: #666666;
     --color-background-900: #333333;
 
-    
+
   --color-text: #212529;
 }
 
@@ -104,7 +104,7 @@ input {
 }
 
 body {
-  min-height: 110vh;
+  min-height: 100vh;
   font-size: 1.6rem;
   background: var(--color-background-500);
 
@@ -114,4 +114,21 @@ a {
   color: var(--color-primary-500);
   text-decoration: none;
   transition: color 0.3s;
+}
+
+select{
+background: none;
+color: var(--color-text);
+border: none;
+margin:  1rem 0 ;
+border-bottom:0.125rem solid black ;
+font-size: 100%;
+width: 100%;
+padding-bottom:0.5rem ;
+transition: 0.3s all;
+}
+
+select:focus{
+  outline: none;
+  border-bottom:0.25rem solid var(--color-primary-500);
 }

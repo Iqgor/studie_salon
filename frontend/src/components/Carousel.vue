@@ -1,54 +1,22 @@
 <template>
   <div class="carousel">
-    <div class="carousel-inner">
-      <h2 class="carousel-titel">Leren hoe te leren</h2>
-      <div class="carousel-container">
-        <div class="carousel-inhoud">
+    <div v-for="(info, index,i) in CarouselData" :key="index" class="carousel-inner">
+      <h2 class="carousel-titel">{{ index }}
+      <i v-if="isClickedout[i]" @click="changeIsClicked(i)" class="fa-solid fa-arrow-down"></i>
+      <i v-else @click="isClickedout[i] = true" class="fa-solid fa-arrow-up"></i>      </h2>
+      <div v-if="isClickedout[i]" class="carousel-container">
+        <router-link v-for="text in info" :to="text.url" class="carousel-inhoud">
           <p class="carousel-informatie">
-            Actief leren algemeen
+          {{ text.title }}
           </p>
-        </div>
-        <div class="carousel-inhoud">
-          <p class="carousel-informatie">
-            Actief leren aadrijkskunde
-          </p>
-        </div>
-        <div class="carousel-inhoud">
-          <p class="carousel-informatie">
-            Actief leren biologie
-          </p>
-        </div>
-        <div class="carousel-inhoud">
-          <p class="carousel-informatie">
-            Actief leren duits
-          </p>
-        </div>
-        <div class="carousel-inhoud">
-          <p class="carousel-informatie">
-            Actief leren algemeen
-          </p>
-        </div>
-        <div class="carousel-inhoud">
-          <p class="carousel-informatie">
-            Actief leren algemeen
-          </p>
-        </div>
-        <div class="carousel-inhoud">
-          <p class="carousel-informatie">
-            Actief leren algemeen
-          </p>
-        </div>
-        <div class="carousel-inhoud">
-          <p class="carousel-informatie">
-            Actief leren algemeen
-          </p>
-        </div>
+        </router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import CarouselData from "../assets/carousel.json"
 export default {
   name: "ImageCarousel",
   props: {
@@ -56,24 +24,46 @@ export default {
   },
   data() {
     return {
-
+      CarouselData: CarouselData,
+      isClickedout:[], // Initialize all keys to true
     };
   },
+  mounted(){
+    // Check if isClickedout exists in localStorage
+    const storedIsClickedout = localStorage.getItem('isClickedout');
+    if (storedIsClickedout) {
+      this.isClickedout = JSON.parse(storedIsClickedout);
+    } else {
+      // Initialize isClickedout with default values
+      this.isClickedout = Array(Object.keys(this.CarouselData).length).fill(false);
+    }
+  },
   methods: {
-
+    changeIsClicked(index) {
+      this.isClickedout[index] = !this.isClickedout[index];
+      localStorage.setItem('isClickedout', JSON.stringify(this.isClickedout));
+    },
   },
 };
 </script>
 
-<style>
+<style scoped>
+.fa-solid{
+  font-size: 75%;
+  cursor: pointer;
+}
 .carousel {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap:3rem;
+  padding: 2rem 0;
 }
 
 .carousel-container {
   display: flex;
   flex-direction: row;
-  gap: 1.2rem;
+  gap: 2rem;
   overflow-x: scroll;
   margin-right: -10rem;
   margin-left: -10rem;
