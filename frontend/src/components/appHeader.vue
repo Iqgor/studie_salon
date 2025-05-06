@@ -14,7 +14,7 @@
         <div style="width: 14.2rem; height: 100%;"></div>
       </div>
     </div>
-    <h1 class="headerTitle">Study Saloon</h1>
+    <h1 class="headerTitle"><a href="/">Study Saloon</a></h1>
     <div class="icons">
       <i class="fa-solid fa-user"></i>
       <i class="fa-solid fa-flag" @onclick=""></i>

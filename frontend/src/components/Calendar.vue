@@ -57,12 +57,14 @@
       <select @change="newVak = $event.target.value" >
         <option :key="index" :value="vak" v-for="(vak,index) in vakken">{{ vak }}</option>
       </select>
-      <label for="">Soort maakwerk:</label>
+      <label for="">Soort huiswerk:</label>
       <div class="activityRadio">
-        <label for="Huiswerk">Huiswerk</label>
-        <input checked @input="maakWerk = 'Huiswerk'" type="radio" name="maakwerk" id="Huiswerk">
-        <label for="Leren">Leren</label>
-        <input @input="maakWerk = 'Leren'" type="radio" name="maakwerk" id="Leren">
+        <label for="Huiswerk">Maakwerk</label>
+        <input checked @input="maakWerk = 'Maakwerk'" type="radio" name="maakwerk" id="Maakwerk">
+        <label for="Leren">Leerwerk</label>
+        <input @input="maakWerk = 'Leerwerk'" type="radio" name="maakwerk" id="Leerwerk">
+        <label for="Leren">Te doen</label>
+        <input @input="maakWerk = 'Te doen'" type="radio" name="maakwerk" id="Te-doen">
       </div>
       <div class="time">
         <input type="date" v-model="newActivityDate" @change="handleDateChange">
@@ -802,7 +804,7 @@ export default {
 
 }
 .activityRadio>input {
-  margin-right: 0.5rem;
+  margin-right: 0.2rem;
 }
 
 .createActivityButton {
