@@ -27,6 +27,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
             plans.description AS plan_description,
             plans.rank AS plan_rank,
             plans.icon AS plan_icon,
+            plans.sale AS plan_sale,
+            plans.sale_type AS plan_sale_type,
             features.id AS feature_id,
             features.name AS feature_name,
             features.description AS feature_description,
@@ -50,6 +52,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                             'description' => $row['plan_description'],
                             'rank' => $row['plan_rank'],
                             'icon' => $row['plan_icon'],
+                            'sale' => $row['plan_sale'],
+                            'sale_type' => $row['plan_sale_type'],
                             'features' => []
                         ];
                     }

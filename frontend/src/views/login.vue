@@ -61,10 +61,8 @@
                     <p class="text">Nog geen email ontvangen? <a href="/register" class="link">Stuur opnieuw</a></p>
                 </div>
             </form>
-           
 
         </section>
- {{ auth.user }}
     </main>
 </template>
 <script>
@@ -77,7 +75,7 @@ import { jwtDecode } from 'jwt-decode';
 export default {
     name: 'HomeView',
     setup() {
-        return { auth } // zorg dat je het beschikbaar maakt in je template
+        return { auth } 
     },
     components: {
 

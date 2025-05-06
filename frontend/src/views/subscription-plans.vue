@@ -6,18 +6,22 @@
                 <form @submit.prevent="" class="form"></form>
 
 
-                <article class="detail" >
+                <article class="detail">
+
                     <h1 class="detail__name">{{ selectedPlan.name }}</h1>
                     <div class="detail__buttons">
 
-                        <button class="detail__button" :class="{ 'detail__button_active': selectedperiode == 'maandelijks' }" @click="changePeriod('maandelijks')">	
+                        <button class="detail__button"
+                            :class="{ 'detail__button_active': selectedperiode == 'maandelijks' }"
+                            @click="changePeriod('maandelijks')">
                             <h4 class="detail__button_period">Maandelijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
-                                }}</h3>
+                            }}</h3>
                             <h5 class="detail__button_description">tekst</h5>
                         </button>
 
-                        <button :class="{ 'detail__button_active': selectedperiode == 'jaarlijks' }" class="detail__button" @click="changePeriod('jaarlijks')">
+                        <button :class="{ 'detail__button_active': selectedperiode == 'jaarlijks' }"
+                            class="detail__button" @click="changePeriod('jaarlijks')">
                             <h4 class="detail__button_period">jaarlijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
                                 * 12 }}</h3>
@@ -54,7 +58,13 @@
 
 
             <section class="plans__container">
+
                 <div v-for="plan in plans" :key="plan.id" class="plan__card">
+
+                    <div class="plan__sale" v-if="plan.sale && plan.sale_type">
+                        <p class="plan__sale_p">{{ plan.sale }}{{ plan.sale_type }}</p>
+                    </div>
+
                     <div class="card__header">
                         <span>
                             <i v-html="plan.icon"></i>
@@ -122,7 +132,7 @@ export default {
 
         changePeriod(period) {
             this.selectedperiode = period;
-            
+
         }
     }
 }      
@@ -135,6 +145,7 @@ export default {
 .container {
     display: flex;
     flex-direction: column;
+    gap: 2rem;
 }
 
 .plans__container {
@@ -142,9 +153,10 @@ export default {
     flex-wrap: wrap;
     justify-content: center;
     flex-direction: row;
-    gap: 2rem;
+    gap: 3.5rem;
     width: 100%;
     height: 100%;
+
 }
 
 .plan__card {
@@ -156,6 +168,8 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    max-width: 30rem;
+    position: relative;
 }
 
 .card__header {
@@ -281,6 +295,22 @@ export default {
     margin-bottom: 2rem;
 }
 
+.plan__sale {
+    position: absolute;
+    top: -2rem;
+    right: -2rem;
+    background-color: var(--color-primary-500);
+    color: var(--color-background-100);
+    padding: 1rem;
+    border-radius: 0.4rem;
+}
+.plan__sale_p {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+
+
 .form {
     display: flex;
     flex-direction: column;
@@ -348,6 +378,7 @@ export default {
     outline: none;
     color: var(--color-background-500);
 }
+
 .detail__button_active {
     background-color: var(--color-primary-700);
     color: var(--color-background-100);
