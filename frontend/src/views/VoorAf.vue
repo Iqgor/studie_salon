@@ -6,7 +6,7 @@
           <h3 v-if="link.length !== 0">Teksten voor {{ type.toUpperCase() }}</h3>
           <ul>
             <li v-for="(linkje, index) in link" :key="index">
-              <a :href="linkje">{{ reformatedLinks(linkje) }}</a>
+              <a :href="`${slug}/${linkje.replace(slug,'').replace('-','')}`">{{ reformatedLinks(linkje) }}</a>
             </li>
           </ul>
         </div>

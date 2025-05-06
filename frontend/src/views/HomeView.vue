@@ -131,7 +131,7 @@ export default {
       const formData = new FormData();
       formData.append('language', currentLanguage);
 
-        fetch('http://localhost/studie_salon/backend/quote', {
+        fetch(`${import.meta.env.VITE_APP_API_URL}backend/quote`, {
           method: 'POST',
           body: formData,
 
