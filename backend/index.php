@@ -222,6 +222,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $now = new DateTime();
                 $interval = $now->diff($lastLoginTime);
 
+                
+
                 if ($interval->days <= 14 && $now > $lastLoginTime) {
                     $user['active'] = 1; // Zet active op 1
                 } else {
@@ -243,7 +245,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $subject = 'Jouw logincode';
                     $message = "Je login code is: $otp\nDeze is 5 minuten geldig.";
                     $headers = "From: no-reply@jouwdomein.nl";
-
+                    mail($to, $subject, $message, $headers);
                     //! mail($to, $subject, $message, $headers);
 
                     // Geef aan frontend aan dat OTP vereist is
@@ -251,7 +253,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         'message' => 'OTP vereist',
                         'otp_required' => true,
                     ], 200);
-                    exit;
                 }
 
 

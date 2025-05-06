@@ -61,10 +61,10 @@
                     <p class="text">Nog geen email ontvangen? <a href="/register" class="link">Stuur opnieuw</a></p>
                 </div>
             </form>
-
+           
 
         </section>
-
+ {{ auth.user }}
     </main>
 </template>
 <script>
@@ -106,6 +106,7 @@ export default {
             this.email = Cookieemail
             this.remember = true
         }
+        
         
     },
     methods: {

@@ -64,8 +64,7 @@
                     </div>
 
                     <p class="description">{{ plan.description }}</p>
-                    <p><i class="fa-solid fa-euro-sign"></i><span class="price">{{ plan.price }}</span>/{{
-                        plan.billing_cycle }}</p>
+                    <p><i class="fa-solid fa-euro-sign"></i><span class="price">{{ plan.price }}</span></p>
                     <hr>
 
 
