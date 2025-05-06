@@ -1,8 +1,8 @@
 <script>
 import { RouterView } from 'vue-router'
 import appheader from './components/appHeader.vue'
-
-
+import { onMounted, ref } from 'vue';
+import { auth } from '@/auth';
 
 export default {
   name: 'App',
@@ -21,10 +21,10 @@ export default {
       document.documentElement.className = `theme-${theme}`;
       localStorage.setItem('theme', theme);
       this.currentTheme = theme;
-    }
-  },
-  mounted() {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    },
+
+    checkTheme() {
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       if (localStorage.getItem('theme') === 'dark') {
         this.switchTheme('dark');
         this.currentTheme = 'dark';
@@ -47,6 +47,11 @@ export default {
       this.switchTheme('light');
       this.currentTheme = 'light';
     }
+    }
+  },
+  mounted() {
+    this.checkTheme();
+    auth.check()
   }
 }
 

@@ -62,9 +62,7 @@
                 </div>
             </form>
 
-
         </section>
-
     </main>
 </template>
 <script>
@@ -77,7 +75,7 @@ import { jwtDecode } from 'jwt-decode';
 export default {
     name: 'HomeView',
     setup() {
-        return { auth } // zorg dat je het beschikbaar maakt in je template
+        return { auth } 
     },
     components: {
 
@@ -106,6 +104,7 @@ export default {
             this.email = Cookieemail
             this.remember = true
         }
+        
         
     },
     methods: {
@@ -171,7 +170,7 @@ export default {
 
         async login() {
             try {
-                const response = await fetch(`http://localhost/studie_salon/backend/login`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
@@ -211,7 +210,7 @@ export default {
         },
         async sendOtp() {
             try {
-                const response = await fetch(`http://localhost/studie_salon/backend/verify_otp`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}http://localhost/studie_salon/backend/verify_otp`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
