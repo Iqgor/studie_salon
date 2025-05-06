@@ -12,33 +12,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.not-found {
-  text-align: center;
-  margin-top: 50px;
-  height: 50vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.not-found h1 {
-  font-size: 6rem;
-  color: #ff6b6b;
-}
-
-.not-found p {
-  font-size: 1.5rem;
-  margin: 20px 0;
-}
-
-.not-found a {
-  color: #3498db;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.not-found a:hover {
-  text-decoration: underline;
-}
-</style>

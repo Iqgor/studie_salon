@@ -383,6 +383,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(['error' => 'No quotes found'], 404);
                 }
                 break;
+            case 'getTekstLinks':
+                $tegel = $_POST['slug'] ?? null; 
+                $stmt = $conn->prepare("SELECT slug FROM teksten WHERE tegel = ?");
+                $stmt->bind_param("s", $tegel);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $links = [];
+                while ($row = $result->fetch_assoc()) {
+                    $links[] = $row['slug'];
+                }
+                jsonResponse(['slugs' => $links], 200);
+                break;
             case null:
                 jsonResponse(['error' => 'Resource not found'], 404);
 
