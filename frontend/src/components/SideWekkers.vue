@@ -12,12 +12,12 @@
         <p class="pomodoro-x" @click="togglePomodoro"><i class="fa-solid fa-x"></i></p>
       </div>
       <div class="pomodoro-box">
-        <span class="pomodoro-text">25:00</span>
+        <span class="pomodoro-text">{{ pomodoroLabel }}</span>
       </div>
       <div class="pomodoro-buttons">
-        <button class="pomodoro-button">Timer</button>
-        <button class="pomodoro-button">Korte pauze</button>
-        <button class="pomodoro-button">Lange pauze</button>
+       <button class="pomodoro-button" @click="startWork">Timer</button>
+       <button class="pomodoro-button" @click="startShortBreak">Korte pauze</button>
+       <button class="pomodoro-button" @click="startLongBreak">Lange pauze</button>
       </div>
     </div>
   </div>
@@ -47,12 +47,14 @@
 </template>
 
 <script>
+
 import alarmSoundFile from '@/assets/sounds/alarm-clock-90867.mp3';
 
 export default {
   name: 'SideWekkers',
   data() {
     return {
+      // Wekker
       alarmClicked: false,
       alarmInputTime: '',
       currentTime: '',
@@ -61,16 +63,31 @@ export default {
       alarmRinging: false,
       alarmAudio: null,
       clockInterval: null,
+
+      // Pomodoro
       pomodoroClicked: false,
+      pomodoroTime: 1500, // in seconden (25 min)
+      pomodoroLabel: '25:00',
+      pomodoroRunning: false,
+      pomodoroInterval: null,
     };
   },
   methods: {
+    // Algemene toggles
     toggleAlarm() {
       this.alarmClicked = !this.alarmClicked;
     },
     togglePomodoro() {
       this.pomodoroClicked = !this.pomodoroClicked;
+      if (!this.pomodoroClicked) {
+        clearInterval(this.pomodoroInterval);
+        this.pomodoroRunning = false;
+        this.pomodoroLabel = '25:00';
+        this.pomodoroTime = 1500;
+      }
     },
+
+    // Klok & Wekker
     updateClock() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, '0');
@@ -85,14 +102,13 @@ export default {
     setAlarm() {
       if (this.alarmInputTime) {
         let [hours, minutes] = this.currentTime.split(':');
-        if(this.alarmInputTime === `${hours}:${minutes}`) {
-          console.log('tijd is het zelfde');
-        }else{
+        if (this.alarmInputTime === `${hours}:${minutes}`) {
+          console.log('Tijd is hetzelfde als nu.');
+        } else {
           this.alarmTime = this.alarmInputTime;
           this.alarmSet = true;
-          console.log('Alarm ingesteld voor:', this.currentTime);
+          console.log('Alarm ingesteld voor:', this.alarmTime);
         }
-
       }
     },
     triggerAlarm() {
@@ -111,7 +127,40 @@ export default {
         this.alarmAudio = null;
       }
       this.alarmRinging = false;
-    }
+    },
+
+    // Pomodoro-functies
+    startPomodoro(duration) {
+      clearInterval(this.pomodoroInterval);
+      this.pomodoroTime = duration;
+      this.pomodoroRunning = true;
+      this.updatePomodoroLabel();
+
+      this.pomodoroInterval = setInterval(() => {
+        if (this.pomodoroTime > 0) {
+          this.pomodoroTime--;
+          this.updatePomodoroLabel();
+        } else {
+          clearInterval(this.pomodoroInterval);
+          this.pomodoroRunning = false;
+          this.triggerAlarm();
+        }
+      }, 1000);
+    },
+    updatePomodoroLabel() {
+      const minutes = Math.floor(this.pomodoroTime / 60).toString().padStart(2, '0');
+      const seconds = (this.pomodoroTime % 60).toString().padStart(2, '0');
+      this.pomodoroLabel = `${minutes}:${seconds}`;
+    },
+    startWork() {
+      this.startPomodoro(25 * 60);
+    },
+    startShortBreak() {
+      this.startPomodoro(5 * 60);
+    },
+    startLongBreak() {
+      this.startPomodoro(15 * 60);
+    },
   },
   watch: {
     alarmClicked(newVal) {
@@ -124,8 +173,10 @@ export default {
   },
   beforeUnmount() {
     clearInterval(this.clockInterval);
+    clearInterval(this.pomodoroInterval);
   }
 };
+
 
 </script>
 
@@ -157,14 +208,14 @@ export default {
 }
 
 .fa-solid{
-  color: var(--color-black);
+  color: var(--color-primary-800);
   margin: 10px;
   transition: all 0.3s ease;
 }
 
 .fa-stopwatch:hover, .fa-clock:hover{
   cursor: pointer;
-  color: var(--color-white);
+  color: var(--color-secondary-500);
 }
 
 .fa-clock{
