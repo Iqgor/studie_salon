@@ -319,6 +319,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                     try {
                         $mail->isSMTP();
+                        
                         $mail->Host = $config['MAIL_HOST'];
                         ;
                         $mail->SMTPAuth = true;
@@ -374,12 +375,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
 
                 // Haal gebruiker op met OTP-verificatie in dezelfde query
-                $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND otp_code = ? AND otp_expires_at > NOW()");
-                $stmt->bind_param("ss", $email, $code);
+                $now = date('Y-m-d H:i:s');
+
+                $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND otp_code = ? AND otp_expires_at > ?");
+                $stmt->bind_param("sss", $email, $code, $now);
                 $stmt->execute();
+                
                 $result = $stmt->get_result();
                 $user = $result->fetch_assoc();
-
+                
                 if (!$user) {
                     jsonResponse(['error' => 'Ongeldige of verlopen OTP'], 401);
                     exit;
