@@ -31,7 +31,7 @@
       </div>
           <div class="timer-box">
               <span class="timer-text">{{ currentTime }}</span>
-              <p v-if="alarmSet" class="timer-alarm">Alarm gezet voor {{ alarmTime }}</p>
+              <p v-if="alarmTime.length > 1 && !alarmRinging" class="timer-alarm"> {{ alarmTime }}</p>
               <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
           </div>
         <div class="alarm-setter">
@@ -87,15 +87,15 @@ export default {
       }
     },
 
-    // Klok & Wekker
+    // Wekker
     updateClock() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, '0');
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
-
-      if (this.alarmSet && `${hours}:${minutes}` === this.alarmTime) {
+      console.log('Huidige tijd:', this.currentTime);
+      if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
         this.triggerAlarm();
       }
     },
@@ -103,9 +103,9 @@ export default {
       if (this.alarmInputTime) {
         let [hours, minutes] = this.currentTime.split(':');
         if (this.alarmInputTime === `${hours}:${minutes}`) {
-          console.log('Tijd is hetzelfde als nu.');
+          this.alarmTime = 'Tijd is hetzelfde als nu, kies een andere tijd.';
         } else {
-          this.alarmTime = this.alarmInputTime;
+          this.alarmTime = "Alarm gezet voor " + this.alarmInputTime;
           this.alarmSet = true;
           console.log('Alarm ingesteld voor:', this.alarmTime);
         }
@@ -126,6 +126,8 @@ export default {
         this.alarmAudio.currentTime = 0;
         this.alarmAudio = null;
       }
+      this.alarmSet = false;
+      this.alarmTime = '';
       this.alarmRinging = false;
     },
 
@@ -207,7 +209,7 @@ export default {
   ;
 }
 
-.fa-solid{
+.fa-clock, .fa-stopwatch{
   color: var(--color-primary-800);
   margin: 10px;
   transition: all 0.3s ease;
@@ -217,7 +219,9 @@ export default {
   cursor: pointer;
   color: var(--color-secondary-500);
 }
-
+.fa-x{
+  color: var(--color-text);
+}
 .fa-clock{
   font-size: 30px;
 }
@@ -232,7 +236,7 @@ export default {
   min-width: 60rem;
   border-radius: 5px;
   position: fixed;
-  background: var(--color-white);
+  background: var(--color-background-400);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -241,7 +245,6 @@ export default {
   align-items: center;
   flex-direction: column;
   gap: 2.5rem;
-  box-shadow: 0.4rem 0.4rem 0 0 rgba(0,0,0,0.2);
 }
 
 .alarm-header, .pomodoro-header{
@@ -249,6 +252,10 @@ export default {
     width: 55rem;
     display: flex;
     justify-content: space-between;
+}
+
+.alarm-titel, .pomodoro-titel{
+  color: var(--color-text);
 }
 
 .alarm-x:hover, .pomodoro-x:hover{
@@ -279,7 +286,7 @@ export default {
 .timer-box, .pomodoro-box{
   width: 55rem;
   height: 20rem;
-  background-color: var(--color-white);
+  background-color: var(--color-background-400);
   border: var(--color-black) 1px solid;
   display: flex;
   justify-content: center;
@@ -293,6 +300,7 @@ export default {
 }
 .timer-text, .pomodoro-text{
     font-size: 8rem;
+    color: var(--color-text-500);
 }
 
 .alarm-button{
