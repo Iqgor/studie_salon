@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Login from '@/views/login.vue'
 import SubscriptionPlans from '@/views/subscription-plans.vue'
+import PrivacyVerklaring from '@/views/privacyVerklaring.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: '/plans',
       name: 'subscription plans',
       component: SubscriptionPlans
+    },
+    {
+      path: '/privacy-verklaring',
+      name: 'privacy-verklaring',
+      component: PrivacyVerklaring
     },
     {
       path: '/:slug',
