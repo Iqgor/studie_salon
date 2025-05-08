@@ -252,10 +252,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $result = $stmt->get_result();
 
                 $subscription = $result->fetch_assoc();
-                if ($subscription["status"] !== "active") {
-                    jsonResponse(['error' => 'Subscription is not active'], 403);
-                    exit;
-                }
+                // if ($subscription["status"] !== "active") {
+                //     jsonResponse(['error' => 'Subscription is not active'], 403);
+                //     exit;
+                // }
 
                 //^ Token genereren (JWT)
                 $secret_key = "your_secret_key"; // use a secure one in real apps
