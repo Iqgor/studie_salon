@@ -14,14 +14,15 @@
         <div style="width: 14.2rem; height: 100%;"></div>
       </div>
     </div>
-    <h1 class="headerTitle"><a href="/">Study Saloon</a></h1>
+    <h1 class="headerTitle"><a href="/">Studie Salon</a></h1>
     <div class="icons">
       <i class="fa-solid fa-user"></i>
-      <i class="fa-solid fa-flag" @onclick=""></i>
+      <i class="fa-solid fa-flag" title="Translate page" @click="toggleTranslate = !toggleTranslate">
+        <div v-show="toggleTranslate" id="google_translate_element"></div>
+      </i>
       <i class="fa-solid fa-sun" v-if="currentTheme === 'dark'" @click="switchTheme('light')"></i>
       <i class="fa-solid fa-moon" v-else @click="switchTheme('dark')"></i>
     </div>
-
   </header>
 </template>
 <script>
@@ -37,6 +38,17 @@ export default {
       type: String,
       required: true
     }
+  },
+  data() {
+    return {
+      toggleTranslate: false
+    }
+  },
+  mounted(){
+    const script = document.createElement('script');
+    script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.async = true;
+    document.body.appendChild(script);
   },
   methods: {
     changeColor() {
@@ -167,6 +179,19 @@ export default {
 .icons>i:hover {
   color: var(--color-primary-500);
   cursor: pointer;
+}
+
+.fa-flag{
+  position: relative;
+}
+
+.fa-flag>div{
+  position: absolute;
+  top: 4rem;
+  left: -12rem;
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-1);
 }
 
 @media screen and (max-width: 768px) {
