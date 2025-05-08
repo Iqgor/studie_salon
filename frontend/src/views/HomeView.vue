@@ -17,17 +17,21 @@
         </div>
       </div>
     <Carousel />
+    <SideWekkers />
   </main>
 </template>
 <script>
 import Carousel from '@/components/Carousel.vue';
 import Calander from '../components/Calendar.vue';
+import SideWekkers from '@/components/SideWekkers.vue';
+
 
 export default {
   name: 'HomeView',
   components: {
     Calander,
-    Carousel
+    Carousel,
+    SideWekkers
   },
   data() {
     return {
