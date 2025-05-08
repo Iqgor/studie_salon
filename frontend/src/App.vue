@@ -10,7 +10,7 @@ export default {
   components: {
     appheader,
     RouterView,
-    SideWekkers
+
   },
   data() {
     return {
@@ -63,7 +63,6 @@ export default {
 
   <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
   <RouterView />
-  <SideWekkers />
   <footer>
 
   </footer>
