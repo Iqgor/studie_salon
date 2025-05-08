@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
-require_once __DIR__ . '/config.php';
+$config = require_once __DIR__ . '/config.php';
 
 $conn = getDBConnection();
 
@@ -216,10 +216,28 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 $user = $result->fetch_assoc();
                 //^ Wachtwoord controleren
-                if (!password_verify($password, $user['password'])) {
-                    jsonResponse(['error' => 'Invalid email or password'], 401);
-                    exit;
+                // Controleer of er een temp_password is
+                if (isset($user['temp_password']) && isset($user['temp_password_expires_at'])) {
+                    // Controleer of temp_password geldig is en niet verlopen
+                    if (password_verify($password, $user['temp_password']) && strtotime($user['temp_password_expires_at']) > time()) {
+                        // Temp wachtwoord is geldig
+                        // Optioneel: wis het temp_password na succesvol inloggen
+                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
+                        $stmt->bind_param("i", $user['id']);
+                        $stmt->execute();
+                    } else {
+                        // Temp wachtwoord is ongeldig of verlopen
+                        jsonResponse(['error' => 'Invalid or expired temporary password'], 401);
+                        exit;
+                    }
+                } else {
+                    // Geen temp_password, dus controleer het normale wachtwoord
+                    if (!password_verify($password, $user['password'])) {
+                        jsonResponse(['error' => 'Invalid email or password'], 401);
+                        exit;
+                    }
                 }
+
 
                 //^ controleren of gebruiker actief is
                 if ($user['active'] !== 1) {
@@ -244,6 +262,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $issuedAt = time();
                 $expirationTime = $issuedAt + 3600; // valid for 1 hour
                 unset($user['password']); // Verwijder wachtwoord uit response
+                unset($user['temp_password']); // Verwijder temp wachtwoord uit response
+                unset($user['temp_password_expires_at']); // Verwijder temp wachtwoord uit response
+                unset($user['otp_code']); // Verwijder OTP uit response
+                unset($user['otp_expires_at']); // Verwijder OTP uit response
 
 
                 $payload = [
@@ -272,19 +294,21 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $interval = $now->diff($lastLoginTime);
 
 
-                if ($interval->days <= 14 && $now > $lastLoginTime) {
+                if ($interval->days <= 29 && $now > $lastLoginTime) {
                     $user['active'] = 1; // Zet active op 1
                 } else {
                     $user['active'] = 0; // Zet active op 0
                 }
+
+
 
                 //^ OTP als active 0 is
                 if ($user['active'] === 0) {
                     $otp = random_int(100000, 999999);
                     $expiry = date('Y-m-d H:i:s', time() + 300); // 5 minuten geldig
 
-                    $stmt = $conn->prepare("INSERT INTO otp_codes (user_id, code, expires_at) VALUES (?, ?, ?)");
-                    $stmt->bind_param("iss", $user['id'], $otp, $expiry);
+                    $stmt = $conn->prepare("UPDATE users SET otp_code = ?, otp_expires_at = ? WHERE id = ?");
+                    $stmt->bind_param("ssi", $otp, $expiry, $user['id']);
                     $stmt->execute();
 
 
@@ -293,7 +317,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                     try {
                         $mail->isSMTP();
-                        $mail->Host = $config['MAIL_HOST'];;
+                        $mail->Host = $config['MAIL_HOST'];
+                        ;
                         $mail->SMTPAuth = true;
                         $mail->Username = $config['MAIL_USERNAME'];  // <-- Jouw Gmail-adres
                         $mail->Password = $config['MAIL_PASSWORD'];  // <-- App-wachtwoord van Gmail
@@ -346,7 +371,99 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     exit;
                 }
 
-                // Haal user op op basis van email
+                // Haal gebruiker op met OTP-verificatie in dezelfde query
+                $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND otp_code = ? AND otp_expires_at > NOW()");
+                $stmt->bind_param("ss", $email, $code);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+
+                if (!$user) {
+                    jsonResponse(['error' => 'Ongeldige of verlopen OTP'], 401);
+                    exit;
+                }
+
+                // OTP is geldig – wis de OTP uit de user record
+                $stmt = $conn->prepare("UPDATE users SET otp_code = NULL, otp_expires_at = NULL WHERE id = ?");
+                $stmt->bind_param("i", $user['id']);
+                $stmt->execute();
+
+                // Update last_login naar huidige tijd
+                $current_time = time();
+                $stmt = $conn->prepare("UPDATE users SET last_login = FROM_UNIXTIME(?) WHERE id = ?");
+                $stmt->bind_param("ii", $current_time, $user['id']);
+                $stmt->execute();
+
+                // Verwijder wachtwoord en andere gevoelige data uit de response
+                unset($user['password']);
+                unset($user['otp_code']);
+                unset($user['otp_expires_at']);
+
+                // JWT genereren
+                $secret_key = "your_secret_key"; // Gebruik veilige env variabelen in productie
+                $issuedAt = time();
+                $expirationTime = $issuedAt + 3600;
+
+                $payload = [
+                    'iat' => $issuedAt,
+                    'exp' => $expirationTime,
+                    'user' => $user,
+                ];
+
+                $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+                $payload_json = json_encode($payload);
+
+                $base64UrlHeader = rtrim(strtr(base64_encode($header), '+/', '-_'), '=');
+                $base64UrlPayload = rtrim(strtr(base64_encode($payload_json), '+/', '-_'), '=');
+
+                $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $secret_key, true);
+                $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+
+                $jwt = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+
+                jsonResponse([
+                    'message' => 'Login met OTP geslaagd',
+                    'token' => $jwt,
+                    'active' => 1,
+                ], 200);
+                break;
+
+            case 'register':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $name = $data['name'] ?? null;
+                $email = $data['email'] ?? null;
+                $password = $data['password'] ?? null;
+
+                // Validate required fields
+                if (!$name || !$email || !$password) {
+                    jsonResponse(['error' => 'Name, email, and password are required'], 400);
+                    exit;
+                }
+
+                // Hash password
+                $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+
+                // Insert user into the database
+                $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+                $stmt->bind_param("sss", $name, $email, $hashedPassword);
+
+                if ($stmt->execute()) {
+                    jsonResponse(['message' => 'User created successfully', 'user_id' => $stmt->insert_id], 201);
+                } else {
+                    jsonResponse(['error' => 'Failed to create user'], 500);
+                }
+                break;
+            case 'forgot_password':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $email = $data['email'] ?? null;
+
+                // Validate input
+                if (!$email) {
+                    jsonResponse(['error' => 'Email is required'], 400);
+                    exit;
+                }
+
+                // Check of user bestaat
                 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
                 $stmt->bind_param("s", $email);
                 $stmt->execute();
@@ -354,83 +471,81 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $user = $result->fetch_assoc();
 
                 if (!$user) {
-                    jsonResponse(['error' => 'Gebruiker niet gevonden'], 404);
+                    jsonResponse(['error' => 'Gebruiker met dit e-mailadres bestaat niet'], 404);
                     exit;
                 }
 
-                // Check OTP in de database
-                $stmt = $conn->prepare("SELECT * FROM otp_codes WHERE user_id = ? AND code = ? AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1");
-                $stmt->bind_param("is", $user['id'], $code);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $otpEntry = $result->fetch_assoc();
+                // Genereer tijdelijk wachtwoord
+                $tempPasswordPlain = bin2hex(random_bytes(4)); // 8 tekens, veilig en random
+                $hashedTempPassword = password_hash($tempPasswordPlain, PASSWORD_BCRYPT);
+                $expiry = date('Y-m-d H:i:s', time() + 1800); // 30 minuten geldig
 
-                if (!$otpEntry) {
-                    jsonResponse(['error' => 'Ongeldige of verlopen OTP'], 401);
-                    exit;
+                // Sla op in de database
+                $stmt = $conn->prepare("UPDATE users SET temp_password = ?, temp_password_expires_at = ? WHERE id = ?");
+                $stmt->bind_param("ssi", $hashedTempPassword, $expiry, $user['id']);
+                $stmt->execute();
+
+                $mail = new PHPMailer(true);
+
+                try {
+                    $mail->isSMTP();
+                    $mail->Host = $config['MAIL_HOST'];
+                    ;
+                    $mail->SMTPAuth = true;
+                    $mail->Username = $config['MAIL_USERNAME'];  // <-- Jouw Gmail-adres
+                    $mail->Password = $config['MAIL_PASSWORD'];  // <-- App-wachtwoord van Gmail
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 587;
+
+                    $mail->setFrom($config['MAIL_USERNAME'], 'StudieSalon');
+                    $mail->addAddress($email);  // Ontvanger
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Jouw tijdelijke wachtwoord';
+                    $mail->Body = "De wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+                    $mail->AltBody = "De wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
+
+                    $mail->send();
+
+                    // Geef aan frontend aan dat tijdelijk wachtwoord is verzonden
+                    jsonResponse([
+                        'message' => 'tijdelijk wachtwoord verzonden'
+                    ], 200);
+
+                } catch (Exception $e) {
+                    jsonResponse([
+                        'error' => 'E-mail verzenden mislukt: ' . $mail->ErrorInfo
+                    ], 500);
                 }
-
-                // OTP is geldig – verwijder deze uit de database
-                $stmt = $conn->prepare("DELETE FROM otp_codes WHERE id = ?");
-                $stmt->bind_param("i", $otpEntry['id']);
-                $stmt->execute();
-
-                // Haal volledige gebruikersdata op
-                $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-                $stmt->bind_param("i", $user['id']);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $user = $result->fetch_assoc();
-
-                // Update last_login naar huidige tijd
-                $current_time = time(); // Dit is de huidige tijd in Unix-timestamp
-                $stmt = $conn->prepare("UPDATE users SET last_login = FROM_UNIXTIME(?) WHERE id = ?");
-                $stmt->bind_param("ii", $current_time, $user['id']);
-                $stmt->execute();
-
-                if (!$user) {
-                    jsonResponse(['error' => 'Gebruiker niet gevonden'], 404);
-                    exit;
-                }
-
-                // Verwijder wachtwoord en andere gevoelige data uit de response
-                unset($user['password']); // Verwijder wachtwoord uit response
-
-                // JWT genereren
-                $secret_key = "your_secret_key"; // Gebruik veilige env variabelen in productie
-                $issuedAt = time();
-                $expirationTime = $issuedAt + 3600; // JWT is 1 uur geldig
-
-                // Payload voor JWT
-                $payload = [
-                    'iat' => $issuedAt, // tijdstip van uitgifte
-                    'exp' => $expirationTime, // vervaltijd
-                    'user' => $user, // voeg de user data toe
-                ];
-
-                // JWT Header
-                $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
-                $payload_json = json_encode($payload);
-
-                // Base64 encode header en payload
-                $base64UrlHeader = rtrim(strtr(base64_encode($header), '+/', '-_'), '=');
-                $base64UrlPayload = rtrim(strtr(base64_encode($payload_json), '+/', '-_'), '=');
-
-                // Genereer de handtekening (signature)
-                $signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $secret_key, true);
-                $base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
-
-                // Samengestelde JWT
-                $jwt = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
-
-                // Succesvolle response met token
-                jsonResponse([
-                    'message' => 'Login met OTP geslaagd',
-                    'token' => $jwt,
-                    'active' => 1, // Je kunt hier andere statusinformatie toevoegen indien nodig
-                ], 200);
-
                 break;
+                case 'change_password':
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    $userId = $data['userId'] ?? null;
+                    $newPassword = $data['newPassword'] ?? null;
+
+                    // Validate input
+                    if (!$userId || !$newPassword) {
+                        jsonResponse(['error' => 'User ID and new password are required'], 400);
+                        exit;
+                    }
+
+                    // Hash new password
+                    $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+                    // Update password in the database
+                    $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+                    $stmt->bind_param("si", $hashedNewPassword, $userId);
+                    
+                    if ($stmt->execute()) {
+                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
+                        $stmt->bind_param("i", $userId);
+                        $stmt->execute();
+                        jsonResponse(['message' => 'Password changed successfully'], 200);
+                    } else {
+                        jsonResponse(['error' => 'Failed to change password'], 500);
+                    }
+                    break;
+
 
 
 
