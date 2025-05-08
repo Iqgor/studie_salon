@@ -26,7 +26,7 @@ export default {
     },
 
     checkTheme() {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       if (localStorage.getItem('theme') === 'dark') {
         this.switchTheme('dark');
         this.currentTheme = 'dark';

@@ -2,9 +2,9 @@
     <main v-if="succes" class="main">
       <a class="waterFallLink"  :href="('/')"> < Terug naar Home</a>
 
-      <h2>Alle links naar de teksten voor {{ slug.replaceAll('-',' ') }}</h2>
+      <h2>Alle links naar de teksten voor {{ capitalizeWords(slug.replaceAll('-', ' ')) }}</h2>
       <div class="niveaus">
-        Niveau:<button :class="{'isActive' : clickedNiveau === niveau}" @click="clickedNiveau = niveau" v-for="niveau in niveaus">{{ niveau }}</button>
+        <button :class="{'isActive' : clickedNiveau === niveau}" @click="clickedNiveau = niveau" v-for="niveau in niveaus">{{ niveau }}</button>
       </div>
       <div :key="type" v-for="(link,type) in links" >
         <div v-if="link.length !== 0 && type.toUpperCase() === clickedNiveau" class="links">
@@ -46,6 +46,9 @@ export default{
       this.getTekstLinks()
     },
     methods: {
+      capitalizeWords(str) {
+        return str.replace(/\b\w/g, char => char.toUpperCase());
+      },
       async getTekstLinks(){
         const formData = new FormData();
         formData.append('slug', this.slug);
@@ -125,7 +128,7 @@ export default{
 
 .niveaus{
   display: flex;
-  gap:0.5rem;
+  gap:1rem;
   margin-top: 2rem;
   align-items: center;
 }
@@ -134,9 +137,10 @@ export default{
   background:none;
   border: 1px solid #ccc;
   border-radius: 4px;
-  padding: 0.5rem 1rem;
+  padding:1rem 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  color: var(--color-text);
 }
 
 </style>
