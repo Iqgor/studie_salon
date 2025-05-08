@@ -104,14 +104,12 @@ input {
 }
 
 body {
-  min-height: 100vh;
   font-size: 1.6rem;
   background: var(--color-background-500);
-
 }
 
 a {
-  color: var(--color-primary-500) ;
+  color:var(--color-text) ;
   text-decoration: none;
   transition: color 0.3s;
 }
@@ -164,4 +162,16 @@ select:focus{
 
 .not-found a:hover {
   text-decoration: underline;
+}
+
+.waterFallLink{
+  font-size: 1.5rem;
+  opacity: 0.5;
+  transition: 0.3s all;
+  margin-bottom: 2rem;
+  display: inline-block;
+}
+
+.waterFallLink:hover{
+  opacity: 1;
 }

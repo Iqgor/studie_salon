@@ -103,8 +103,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 // Insert activity into the database
                 $stmt = $conn->prepare("INSERT INTO activities (user_id, vak,maakwerk, title,start_datetime, end_datetime) VALUES (?, ?, ?, ?, ?, ?)");
-                $startDateTime = $startDate . ' 00:00:00';
-                $endDateTime = $endDate ? $endDate . ' 23:59:59' : null;
+                $startDateTime = $startDate .':00';
+                $endDateTime = $endDate ? $endDate . ':00' : null;
+
                 $stmt->bind_param("isssss", $userId, $vakName,$maakWerk, $title, $startDateTime, $endDateTime);
 
                 if ($stmt->execute()) {
@@ -389,15 +390,18 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
             case 'getTekstLinks':
                 $tegel = $_POST['slug'] ?? null; 
-                $stmt = $conn->prepare("SELECT slug FROM teksten WHERE tegel = ?");
+                $stmt = $conn->prepare("SELECT slug, name FROM teksten WHERE tegel = ?");
                 $stmt->bind_param("s", $tegel);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $links = [];
                 while ($row = $result->fetch_assoc()) {
-                    $links[] = $row['slug'];
+                    $links[] = [
+                        'slug' => $row['slug'],
+                        'name' => $row['name']
+                    ];
                 }
-                jsonResponse(['slugs' => $links], 200);
+                jsonResponse($links, 200);
                 break;
             case 'getTekst':
                 $slug = $_POST['slug'] ?? null; // Get slug from POST data

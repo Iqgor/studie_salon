@@ -15,7 +15,7 @@ define('DB_NAME', 'studie_saloon');
 // Connect to database
 function getDBConnection() {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-    
+    $conn->set_charset("utf8mb4"); 
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }

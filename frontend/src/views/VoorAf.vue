@@ -1,12 +1,17 @@
 <template>
     <main v-if="succes" class="main">
+      <a class="waterFallLink"  :href="('/')"> < Terug naar Home</a>
+
       <h2>Alle links naar de teksten voor {{ slug.replaceAll('-',' ') }}</h2>
-      <div class="links">
-        <div :key="type" v-for="(link,type) in links" class="link">
-          <h3 v-if="link.length !== 0">Teksten voor {{ type.toUpperCase() }}</h3>
+      <div class="niveaus">
+        Niveau:<button :class="{'isActive' : clickedNiveau === niveau}" @click="clickedNiveau = niveau" v-for="niveau in niveaus">{{ niveau }}</button>
+      </div>
+      <div :key="type" v-for="(link,type) in links" >
+        <div v-if="link.length !== 0 && type.toUpperCase() === clickedNiveau" class="links">
+          <h3>Teksten voor niveau {{ type.toUpperCase() }}</h3>
           <ul>
-            <li v-for="(linkje, index) in link" :key="index">
-              <a :href="`${slug}/${linkje.replace(slug,'').replace('-','')}`">{{ reformatedLinks(linkje) }}</a>
+            <li v-for="(item, index) in link" :key="index">
+              <a :href="`${slug}/${item.slug.replace(slug,'').replace('-','')}`">{{ item.name }}</a>
             </li>
           </ul>
         </div>
@@ -33,6 +38,8 @@ export default{
             links:[],
             succes: false,
             loading: true,
+            niveaus: ['S', 'M', 'L'],
+            clickedNiveau: 'S',
         };
     },
     mounted(){
@@ -53,28 +60,29 @@ export default{
             return response.json();
           })
           .then(data => {
-            if(data.slugs.length !== 0){
+            if(data.length !== 0){
               this.succes = true;
               this.loading = false;
 
               const categorized = {
                 l: [],
-                s: [],
-                m: []
+                m: [],
+                s: []
+
               };
 
-              data.slugs.forEach(slug => {
-                const parts = slug.split("-");
+              data.forEach(item => {
+                const parts = item.slug.split("-");
                 const lastPart = parts[parts.length - 1];
 
                 // Controleer of laatste onderdeel precies één letter is (s, l, m)
                 if (['l', 's', 'm'].includes(lastPart)) {
-                  categorized[lastPart].push(slug);
+                  categorized[lastPart].push(item);
                 } else {
-                  console.warn(`Slug heeft geen herkenbare categorie: ${slug}`);
+                  console.warn(`Slug heeft geen herkenbare categorie: ${item.slug}`);
                 }
               });
-
+              console.log(categorized);
 
               this.links = categorized;
 
@@ -108,9 +116,27 @@ export default{
 }
 .links ul{
   margin-top: 1rem;
-  padding-left: 4rem;
+  padding-left: 2rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  list-style: none;
 }
+
+.niveaus{
+  display: flex;
+  gap:0.5rem;
+  margin-top: 2rem;
+  align-items: center;
+}
+
+.niveaus > button{
+  background:none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 </style>
