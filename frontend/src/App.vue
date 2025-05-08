@@ -1,6 +1,7 @@
 <script>
 import { RouterView } from 'vue-router'
 import appheader from './components/appHeader.vue'
+import SideWekkers from './components/SideWekkers.vue'
 
 
 
@@ -8,7 +9,8 @@ export default {
   name: 'App',
   components: {
     appheader,
-    RouterView
+    RouterView,
+    SideWekkers
   },
   data() {
     return {
@@ -56,6 +58,7 @@ export default {
 
   <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
   <RouterView />
+  <SideWekkers />
   <footer>
 
   </footer>
