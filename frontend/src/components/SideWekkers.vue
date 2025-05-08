@@ -13,6 +13,7 @@
       </div>
       <div class="pomodoro-box">
         <span class="pomodoro-text">{{ pomodoroLabel }}</span>
+        <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
       </div>
       <div class="pomodoro-buttons">
        <button class="pomodoro-button" @click="startWork">Timer</button>
@@ -94,7 +95,6 @@ export default {
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
-      console.log('Huidige tijd:', this.currentTime);
       if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
         this.triggerAlarm();
       }
@@ -178,8 +178,6 @@ export default {
     clearInterval(this.pomodoroInterval);
   }
 };
-
-
 </script>
 
 <style>
@@ -201,7 +199,7 @@ export default {
   left: 0;
   width:100%;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.797);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .clock-icon{
