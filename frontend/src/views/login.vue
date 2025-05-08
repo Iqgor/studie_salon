@@ -41,7 +41,9 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Inloggen</button>
-                    <p class="text">Nog geen account? <a href="/register" class="link">Maak er een aan</a></p>
+                    <p class="text">Nog geen account? <a href="/plans" class="link">Neem eerst een abonnement</a></p>
+                    <p class="text">Wachtwoord vergeten? <span @click="forgotPassword()" class="link">Krijg een tijdelijke</span></p>
+
                 </div>
             </form>
 
@@ -58,13 +60,12 @@
                 </div>
                 <div class="buttons">
                     <button type="submit" class="btn">Verstuur</button>
-                    <p class="text">Nog geen email ontvangen? <a href="/register" class="link">Stuur opnieuw</a></p>
+                    <p class="text">Nog geen email ontvangen? <span @click="login()" class="link">Stuur opnieuw</span>
+                    </p>
                 </div>
             </form>
 
-
         </section>
-
     </main>
 </template>
 <script>
@@ -77,7 +78,7 @@ import { jwtDecode } from 'jwt-decode';
 export default {
     name: 'HomeView',
     setup() {
-        return { auth } // zorg dat je het beschikbaar maakt in je template
+        return { auth }
     },
     components: {
 
@@ -93,7 +94,7 @@ export default {
             activeSlide: '',
 
             email: '',
-            password: 'wachtwoord',
+            password: '',
             remember: false,
             showOtp: false,
             otp: '',
@@ -106,7 +107,8 @@ export default {
             this.email = Cookieemail
             this.remember = true
         }
-        
+
+
     },
     methods: {
         getCookie(cookieName) {
@@ -171,7 +173,7 @@ export default {
 
         async login() {
             try {
-                const response = await fetch(`http://localhost/studie_salon/backend/login`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
@@ -181,29 +183,16 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
-                
-                if (incommingdata?.token) {
 
-                    const decoded = jwtDecode(incommingdata?.token);
-                    //* staat de user op inactive, moet hij zijn otp invullen
-                    if (decoded.user.active == 1) {
-                        auth.setAuth(true, incommingdata?.token)
-                        
-                        router.push('/plans')
-                    } else {
-                        console.log(false, decoded);
-                        // * hier moet je de otp invullen
-                        // er moet een input bij komen
-                        // die input moet weer door deze functie gaan
-                        // maar dan met de otp
-                        // in de backend als de otp klopt moet je de active op 1 zetten
-                    }
+                if (incommingdata?.token) {
+                    auth.setAuth(true, incommingdata?.token)
+                    router.push('/')
+
                 }
                 else if (incommingdata?.otp_required) {
                     this.showOtp = true
-                    
                 }
-                
+
             } catch (err) {
                 // error handling hier
             }
@@ -211,7 +200,7 @@ export default {
         },
         async sendOtp() {
             try {
-                const response = await fetch(`http://localhost/studie_salon/backend/verify_otp`, {
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/verify_otp`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
@@ -221,14 +210,26 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
-                
+
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)
-                    router.push('/plans')
+                    router.push('/')
                 }
             } catch (err) {
                 // error handling hier
             }
+        },
+        async forgotPassword() {
+            const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/forgot_password`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: this.email,
+                        otp: this.otp
+                    })
+                })
+
+                let incommingdata = await response.json()
+                console.log(incommingdata);
         }
 
 
@@ -466,6 +467,7 @@ export default {
 }
 
 .link {
+    cursor: pointer;
     color: var(--color-secondary-500);
 }
 

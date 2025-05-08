@@ -20,8 +20,7 @@
       </div>
 
       <div class="calendar-grid">
-        <div class="calendar-dayName" v-for="dayName in ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']"
-          :key="dayName">
+        <div class="calendar-dayName" v-for="dayName in ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']" :key="dayName">
           <strong>{{ dayName }}</strong>
         </div>
         <!-- Day numbers -->
@@ -54,8 +53,8 @@
       <h3>Nieuwe activiteit</h3>
       <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
         @input="newActivityName = $event.target.value" />
-      <select @change="newVak = $event.target.value" >
-        <option :key="index" :value="vak" v-for="(vak,index) in vakken">{{ vak }}</option>
+      <select @change="newVak = $event.target.value">
+        <option :key="index" :value="vak" v-for="(vak, index) in vakken">{{ vak }}</option>
       </select>
       <label for="">Soort huiswerk:</label>
       <div class="activityRadio">
@@ -69,19 +68,19 @@
       <div class="time">
         <input type="date" v-model="newActivityDate" @change="handleDateChange">
         <div>
-          <input  type="time" v-model="newActivityBegintime">
+          <input type="time" v-model="newActivityBegintime">
           <span>-</span>
           <input type="time" v-model="newActivityEndTime">
         </div>
       </div>
-      <button @click="activityClicked = false, newActivityName = null,newClass = null"><i
+      <button @click="activityClicked = false, newActivityName = null, newClass = null"><i
           class="fa-regular fa-circle-xmark"></i></button>
       <button @click="sendActivity"><i class="fa-regular fa-circle-check"></i></button>
     </div>
 
     <div class="calendar-week">
       <div class="calendar-weekTop">
-        <div v-for="(days,i) in getDaysOfWeek()" :key="i" @click="selectDate(days.day, days.month, days.year)"><span
+        <div v-for="(days, i) in getDaysOfWeek()" :key="i" @click="selectDate(days.day, days.month, days.year)"><span
             class="dayNumber"
             :class="{ 'current-day': isCurrentDay(days.day, 0, days.month), 'clicked-day': isClickedDay(days.day, 0, days.month) }">{{
               days.day
@@ -239,32 +238,36 @@ export default {
     },
     newActivityDate() {
       const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
-      const newElement = document.getElementsByClassName('newActivity')[0];
-      const dayIndex = this.getDaysOfWeek().findIndex(day =>
-        `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === this.newActivityDate
-      );
-      const [year, month, day] = this.newActivityDate.split('-').map(Number);
-      this.setDate = new Date(year, month - 1, day)
-      if (dayIndex === -1) {
-        this.shownDate = new Date(year, month - 1, day);
-        this.daysInMonth = this.getDaysInMonth(this.shownDate);
+      this.$nextTick(() => {
+        const newElement = document.getElementsByClassName('newActivity')[0];
         const dayIndex = this.getDaysOfWeek().findIndex(day =>
           `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === this.newActivityDate
         );
-        newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
-      }
-      if (dayIndex !== -1 && slotElement && newElement) {
-        newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
-      }
+        const [year, month, day] = this.newActivityDate.split('-').map(Number);
+        this.setDate = new Date(year, month - 1, day)
+        if (dayIndex === -1) {
+          this.shownDate = new Date(year, month - 1, day);
+          console.log(this.shownDate)
+          this.daysInMonth = this.getDaysInMonth(this.shownDate);
+          const dayIndex = this.getDaysOfWeek().findIndex(day =>
+            `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === this.newActivityDate
+          );
+          newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
+        }
+        if (dayIndex !== -1 && slotElement && newElement) {
+          newElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
+        }
+      });
+
     }
   },
   methods: {
-    handleDateChange(){
+    handleDateChange() {
       const existingActivities = document.querySelectorAll('.activity');
       existingActivities.forEach(activity => activity.remove());
       this.fetchActivities();
     },
-    sendActivity(){
+    sendActivity() {
       const formData = new FormData();
       formData.append('userId', 1);
       formData.append('title', this.newActivityName);
@@ -296,9 +299,7 @@ export default {
 
       if (!this.activityClicked) {
         this.activityClicked = true;
-        // this.newActivityDate = new Date(this.getDaysOfWeek()[day].year, this.getDaysOfWeek()[day].month, this.getDaysOfWeek()[day].day);
-        this.newActivityDate = `${this.getDaysOfWeek()[day].year}-${(this.getDaysOfWeek()[day].month + 1) < 10 ? '0' + (this.getDaysOfWeek()[day].month + 1) : (this.getDaysOfWeek()[day].month + 1)}-${this.getDaysOfWeek()[day].day}`;
-
+        this.newActivityDate = `${this.getDaysOfWeek()[day].year}-${(this.getDaysOfWeek()[day].month + 1) < 10 ? '0' + (this.getDaysOfWeek()[day].month + 1) : (this.getDaysOfWeek()[day].month + 1)}-${this.getDaysOfWeek()[day].day > 10 ? this.getDaysOfWeek()[day].day: '0' + this.getDaysOfWeek()[day].day}`;
         this.$nextTick(() => {
           const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
           const newElement = document.getElementsByClassName('newActivity')[0];
@@ -449,7 +450,7 @@ export default {
           if (height > 0.5) {
             activityElement.style.padding = '0.5rem';
           }
-          activityElement.style.width = `${slotElement.clientWidth / 7 -10}px`;
+          activityElement.style.width = `${slotElement.clientWidth / 7 - 10}px`;
           activityElement.style.cursor = 'default';
 
           activityElement.innerHTML = `
@@ -546,7 +547,7 @@ export default {
   },
 };
 </script>
-<style >
+<style>
 .calendar {
   display: flex;
   padding: 2rem 0;
@@ -714,9 +715,7 @@ export default {
   z-index: -1;
 }
 
-.currentlist-day {
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-}
+
 
 .hourLine {
   position: absolute;
@@ -749,6 +748,7 @@ export default {
   overflow: hidden;
   cursor: grab;
 }
+
 .activity {
   position: absolute;
   z-index: 1;
@@ -795,7 +795,7 @@ export default {
   border-bottom: 0.25rem solid var(--color-primary-500);
 }
 
-.activityRadio{
+.activityRadio {
   display: flex;
   gap: 0.5rem;
   margin-top: 1rem;
@@ -803,6 +803,7 @@ export default {
   padding: 0 0.5rem;
 
 }
+
 .activityRadio>input {
   margin-right: 0.2rem;
 }
