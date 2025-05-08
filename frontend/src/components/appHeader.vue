@@ -16,9 +16,11 @@
     </div>
     <h1 class="headerTitle"><a href="/">Studie Salon</a></h1>
     <div class="icons">
+
       <a href="/login"><i class="fa-solid fa-user"></i></a>
 
       <i class="fa-solid fa-flag" title="Translate page" @click="toggleTranslate = !toggleTranslate">
+
         <div v-show="toggleTranslate" id="google_translate_element"></div>
       </i>
 
@@ -210,7 +212,7 @@ export default {
   justify-content: space-evenly;
   align-items: center;
   z-index: 4;
-
+  color: var(--color-text);
 }
 
 .icons>i {
@@ -231,11 +233,12 @@ export default {
   cursor: pointer;
 }
 
-.fa-flag {
+
+.fa-language {
   position: relative;
 }
 
-.fa-flag>div {
+.fa-language>div{
   position: absolute;
   top: 4rem;
   left: -12rem;

@@ -1,11 +1,10 @@
 <template>
   <main class="main">
-    <div class="entry">
-      <p class="typewriter" :style="typewriterStyle">
-      </p>
-    </div>
+    <p class="typewriter" :style="typewriterStyle">
+    </p>
     <Calander />
-    <div v-if="Object.keys(quote).length !== 0" class="quote_container">
+    <div class="apps">
+      <div v-if="Object.keys(quote).length !== 0" class="quote_container">
         <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">
           {{ quote.quote }}
           <strong>{{ quote.author }}</strong>
@@ -16,18 +15,24 @@
           </div>
         </div>
       </div>
+      <input type="text" class="search" placeholder="Zoek een tekst..." />
+    </div>
     <Carousel />
+    <SideWekkers />
   </main>
 </template>
 <script>
 import Carousel from '@/components/Carousel.vue';
 import Calander from '../components/Calendar.vue';
+import SideWekkers from '@/components/SideWekkers.vue';
+
 
 export default {
   name: 'HomeView',
   components: {
     Calander,
-    Carousel
+    Carousel,
+    SideWekkers
   },
   data() {
     return {
@@ -164,12 +169,12 @@ export default {
 
 }
 
-.entry {
-  margin: 2rem 0;
+.apps{
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: end;
   gap: 2rem;
+  width: 100%;
 }
 
 .quote_container {
@@ -178,7 +183,7 @@ export default {
   align-items: center;
   gap: 2rem;
   margin-top: 1rem;
-  width: 30%;
+  width: 40%;
 }
 
 .quote_chooser {
@@ -284,6 +289,22 @@ export default {
   height: 7.5rem;
 }
 
+
+.search {
+  width: 100%;
+  border:none;
+  border-bottom: 0.125rem solid var(--color-text);
+  padding-bottom: 0.25rem;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+}
+
+.search:focus {
+  padding-bottom: 0.5rem;
+  outline: none;
+  border-bottom: 0.25rem solid var(--color-primary-500);
+}
+
 @keyframes blinken {
   to {
     background-color: transparent;
@@ -302,12 +323,6 @@ export default {
     padding: 0 5rem
   }
 
-  .entry {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
   .typewriter {
     font-size: 250%;
   }
@@ -316,13 +331,28 @@ export default {
 
 @media screen and (max-width: 768px) {
   .main {
-    padding: 0 1rem
+    padding: 0;
   }
-
+  .apps{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
   .typewriter {
-    font-size: 200%;
+    font-size: 125%;
+    padding-left: 1rem;
+    width: 100%;
   }
 
+  .typewriter > img{
+    height: 5rem;
+  }
+
+  .quote_container{
+    width: 100%;
+    padding: 0 1rem;
+  }
   .quote {
     width: 100%;
     padding-left: 2rem;

@@ -11,7 +11,7 @@ export default {
   components: {
     appheader,
     RouterView,
-    SideWekkers
+
   },
   data() {
     return {
@@ -21,6 +21,32 @@ export default {
   ,
   methods: {
 
+
+    checkTheme() {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      if (localStorage.getItem('theme') === 'dark') {
+        this.switchTheme('dark');
+        this.currentTheme = 'dark';
+      } else {
+        this.switchTheme('light');
+        this.currentTheme = 'light';
+      }
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      if (localStorage.getItem('theme') === 'light') {
+        this.switchTheme('light');
+        this.currentTheme = 'light';
+      } else {
+        this.switchTheme('dark');
+        this.currentTheme = 'dark';
+      }
+    } else if (localStorage.getItem('theme') === 'dark') {
+      this.switchTheme('dark');
+      this.currentTheme = 'dark';
+    } else {
+      this.switchTheme('light');
+      this.currentTheme = 'light';
+    }
+    }
   },
   mounted() {
     auth.check()
@@ -36,7 +62,6 @@ export default {
 
   <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
   <RouterView />
-  <SideWekkers />
   <footer>
 
   </footer>

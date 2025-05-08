@@ -1,7 +1,7 @@
 <template>
   <div class="calendar">
     <aside v-if="!activityClicked" class="calendar-sidebar">
-      <button @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
+      <button  v-if="!isMobiel" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
         day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
         day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
         day.year === (this.setDate ? this.setDate.getFullYear() : this.shownDate.getFullYear())
@@ -49,7 +49,8 @@
         </div>
       </div>
     </aside>
-    <div class="createActivity" v-else>
+
+    <div class="createActivity" v-else-if="!isMobiel">
       <h3>Nieuwe activiteit</h3>
       <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
         @input="newActivityName = $event.target.value" />
@@ -114,6 +115,39 @@
         </ul>
       </div>
     </div>
+    <button  v-if="isMobiel && !activityClicked" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
+        day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
+        day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
+        day.year === (this.setDate ? this.setDate.getFullYear() : this.shownDate.getFullYear())
+      ), new Date().getHours())" class="createActivityButton"><span>+</span> Maak Activiteit</button>
+    <div class="createActivity" v-else-if="isMobiel && activityClicked">
+      <h3>Nieuwe activiteit</h3>
+      <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
+        @input="newActivityName = $event.target.value" />
+      <select @change="newVak = $event.target.value">
+        <option :key="index" :value="vak" v-for="(vak, index) in vakken">{{ vak }}</option>
+      </select>
+      <label for="">Soort huiswerk:</label>
+      <div class="activityRadio">
+        <label for="Huiswerk">Maakwerk</label>
+        <input checked @input="maakWerk = 'Maakwerk'" type="radio" name="maakwerk" id="Maakwerk">
+        <label for="Leren">Leerwerk</label>
+        <input @input="maakWerk = 'Leerwerk'" type="radio" name="maakwerk" id="Leerwerk">
+        <label for="Leren">Te doen</label>
+        <input @input="maakWerk = 'Te doen'" type="radio" name="maakwerk" id="Te-doen">
+      </div>
+      <div class="time">
+        <input type="date" v-model="newActivityDate" @change="handleDateChange">
+        <div>
+          <input type="time" v-model="newActivityBegintime">
+          <span>-</span>
+          <input type="time" v-model="newActivityEndTime">
+        </div>
+      </div>
+      <button @click="activityClicked = false, newActivityName = null, newClass = null"><i
+          class="fa-regular fa-circle-xmark"></i></button>
+      <button @click="sendActivity"><i class="fa-regular fa-circle-check"></i></button>
+    </div>
   </div>
   <Toast v-if="loading" type="info" message="Laden..." />
   <Toast v-if="activityCreated" type="success" message="Activiteit aangemaakt" />
@@ -143,6 +177,7 @@ export default {
       maakWerk: "Huiswerk",
       loading: true,
       activityCreated: false,
+      isMobiel: false,
     };
   },
   components: {
@@ -159,6 +194,7 @@ export default {
     this.intervalId = setInterval(() => {
       this.currentTime = new Date()
     }, 60000) // Update every minute
+    this.isMobiel = window.innerWidth < 768;
     this.$nextTick(() => {
       const currentHourLine = document.querySelector('.hourLine');
       if (currentHourLine) {
@@ -905,19 +941,32 @@ export default {
 
 @media (max-width: 768px) {
   .calendar {
-    flex-direction: column;
+    flex-direction: column-reverse;
     padding: 4rem 0;
     gap: 2rem;
+    align-items: center;
+  }
+  .calendar-sidebar {
+    width: 100%;
+    padding: 0 1rem;
+  }
+  .createActivityButton{
+    width: 80%;
   }
 
+  .createActivity{
+    width: 90%;
+  }
   .calendar-week {
     margin: 0;
     width: 100%;
   }
 
   .calendar-weekTop {
-    margin-right: -1.5rem;
+    padding:0;
+    overflow-y: hidden;
   }
+
 
 
 }

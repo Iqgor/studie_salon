@@ -606,6 +606,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 jsonResponse(['error' => 'Resource not found'], 404);
 
                 break;
+            default:
+                jsonResponse(['error' => 'Resource not found'], 404);
+                break;
         }
 
 

@@ -4,7 +4,7 @@
       <h2 class="carousel-titel" @click="changeIsClicked(i)">{{ index }}
         <i  @click.stop="changeIsClicked(i)" class="fa-solid fa-arrow-down" :class="!isClickedout[i] ? 'rotate': ''"></i>
       </h2>
-      <div v-if="isClickedout[i]" class="carousel-container">
+      <div :class="{'clickedOut':isClickedout[i]}" class="carousel-container">
         <router-link :key="i" v-for="(text,i) in info" :to="text.url" class="carousel-inhoud">
           <p class="carousel-informatie">
           {{ text.title }}
@@ -71,12 +71,15 @@ export default {
   overflow-x: scroll;
   margin-right: -10rem;
   margin-left: -10rem;
-  padding-left: 10rem;
+  padding-left: 2rem;
 
 }
 
-.carousel-container::-webkit-scrollbar {
-  display: none;
+
+@media (max-width: 768px) {
+  .carousel-container::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .carousel-titel {
@@ -119,5 +122,28 @@ export default {
   cursor: pointer;
   background-color: var(--color-primary-200);
   transition: background-color 0.4s ease;
+}
+
+.clickedOut {
+  overflow: hidden;
+  flex-wrap: wrap;
+  flex-shrink: 1;
+  justify-content: center;
+  padding: 0;
+
+}
+
+@media screen and (max-width: 768px) {
+  .carousel-container {
+    padding-left: 1rem;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  .carousel-titel {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 1rem;
+  }
+
 }
 </style>

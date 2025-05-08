@@ -12,12 +12,13 @@
         <p class="pomodoro-x" @click="togglePomodoro"><i class="fa-solid fa-x"></i></p>
       </div>
       <div class="pomodoro-box">
-        <span class="pomodoro-text">25:00</span>
+        <span class="pomodoro-text">{{ pomodoroLabel }}</span>
+        <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
       </div>
       <div class="pomodoro-buttons">
-        <button class="pomodoro-button">Timer</button>
-        <button class="pomodoro-button">Korte pauze</button>
-        <button class="pomodoro-button">Lange pauze</button>
+       <button class="pomodoro-button" @click="startWork">Timer</button>
+       <button class="pomodoro-button" @click="startShortBreak">Korte pauze</button>
+       <button class="pomodoro-button" @click="startLongBreak">Lange pauze</button>
       </div>
     </div>
   </div>
@@ -31,7 +32,7 @@
       </div>
           <div class="timer-box">
               <span class="timer-text">{{ currentTime }}</span>
-              <p v-if="alarmSet" class="timer-alarm">Alarm gezet voor {{ alarmTime }}</p>
+              <p v-if="alarmTime.length > 1 && !alarmRinging" class="timer-alarm"> {{ alarmTime }}</p>
               <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
           </div>
         <div class="alarm-setter">
@@ -47,12 +48,14 @@
 </template>
 
 <script>
+
 import alarmSoundFile from '@/assets/sounds/alarm-clock-90867.mp3';
 
 export default {
   name: 'SideWekkers',
   data() {
     return {
+      // Wekker
       alarmClicked: false,
       alarmInputTime: '',
       currentTime: '',
@@ -61,38 +64,51 @@ export default {
       alarmRinging: false,
       alarmAudio: null,
       clockInterval: null,
+
+      // Pomodoro
       pomodoroClicked: false,
+      pomodoroTime: 1500, // in seconden (25 min)
+      pomodoroLabel: '25:00',
+      pomodoroRunning: false,
+      pomodoroInterval: null,
     };
   },
   methods: {
+    // Algemene toggles
     toggleAlarm() {
       this.alarmClicked = !this.alarmClicked;
     },
     togglePomodoro() {
       this.pomodoroClicked = !this.pomodoroClicked;
+      if (!this.pomodoroClicked) {
+        clearInterval(this.pomodoroInterval);
+        this.pomodoroRunning = false;
+        this.pomodoroLabel = '25:00';
+        this.pomodoroTime = 1500;
+      }
     },
+
+    // Wekker
     updateClock() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, '0');
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
-
-      if (this.alarmSet && `${hours}:${minutes}` === this.alarmTime) {
+      if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
         this.triggerAlarm();
       }
     },
     setAlarm() {
       if (this.alarmInputTime) {
         let [hours, minutes] = this.currentTime.split(':');
-        if(this.alarmInputTime === `${hours}:${minutes}`) {
-          console.log('tijd is het zelfde');
-        }else{
-          this.alarmTime = this.alarmInputTime;
+        if (this.alarmInputTime === `${hours}:${minutes}`) {
+          this.alarmTime = 'Tijd is hetzelfde als nu, kies een andere tijd.';
+        } else {
+          this.alarmTime = "Alarm gezet voor " + this.alarmInputTime;
           this.alarmSet = true;
-          console.log('Alarm ingesteld voor:', this.currentTime);
+          console.log('Alarm ingesteld voor:', this.alarmTime);
         }
-
       }
     },
     triggerAlarm() {
@@ -110,8 +126,43 @@ export default {
         this.alarmAudio.currentTime = 0;
         this.alarmAudio = null;
       }
+      this.alarmSet = false;
+      this.alarmTime = '';
       this.alarmRinging = false;
-    }
+    },
+
+    // Pomodoro-functies
+    startPomodoro(duration) {
+      clearInterval(this.pomodoroInterval);
+      this.pomodoroTime = duration;
+      this.pomodoroRunning = true;
+      this.updatePomodoroLabel();
+
+      this.pomodoroInterval = setInterval(() => {
+        if (this.pomodoroTime > 0) {
+          this.pomodoroTime--;
+          this.updatePomodoroLabel();
+        } else {
+          clearInterval(this.pomodoroInterval);
+          this.pomodoroRunning = false;
+          this.triggerAlarm();
+        }
+      }, 1000);
+    },
+    updatePomodoroLabel() {
+      const minutes = Math.floor(this.pomodoroTime / 60).toString().padStart(2, '0');
+      const seconds = (this.pomodoroTime % 60).toString().padStart(2, '0');
+      this.pomodoroLabel = `${minutes}:${seconds}`;
+    },
+    startWork() {
+      this.startPomodoro(25 * 60);
+    },
+    startShortBreak() {
+      this.startPomodoro(5 * 60);
+    },
+    startLongBreak() {
+      this.startPomodoro(15 * 60);
+    },
   },
   watch: {
     alarmClicked(newVal) {
@@ -124,12 +175,12 @@ export default {
   },
   beforeUnmount() {
     clearInterval(this.clockInterval);
+    clearInterval(this.pomodoroInterval);
   }
 };
-
 </script>
 
-<style>
+<style scoped>
 .wekkers{
   position: fixed;
   top: 50%;
@@ -148,7 +199,7 @@ export default {
   left: 0;
   width:100%;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.797);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .clock-icon{
@@ -156,17 +207,19 @@ export default {
   ;
 }
 
-.fa-solid{
-  color: var(--color-black);
+.fa-clock, .fa-stopwatch{
+  color: var(--color-primary-800);
   margin: 10px;
   transition: all 0.3s ease;
 }
 
 .fa-stopwatch:hover, .fa-clock:hover{
   cursor: pointer;
-  color: var(--color-white);
+  color: var(--color-secondary-500);
 }
-
+.fa-x{
+  color: var(--color-text);
+}
 .fa-clock{
   font-size: 30px;
 }
@@ -181,7 +234,7 @@ export default {
   min-width: 60rem;
   border-radius: 5px;
   position: fixed;
-  background: var(--color-white);
+  background: var(--color-background-400);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -190,7 +243,6 @@ export default {
   align-items: center;
   flex-direction: column;
   gap: 2.5rem;
-  box-shadow: 0.4rem 0.4rem 0 0 rgba(0,0,0,0.2);
 }
 
 .alarm-header, .pomodoro-header{
@@ -198,6 +250,10 @@ export default {
     width: 55rem;
     display: flex;
     justify-content: space-between;
+}
+
+.alarm-titel, .pomodoro-titel{
+  color: var(--color-text);
 }
 
 .alarm-x:hover, .pomodoro-x:hover{
@@ -228,7 +284,7 @@ export default {
 .timer-box, .pomodoro-box{
   width: 55rem;
   height: 20rem;
-  background-color: var(--color-white);
+  background-color: var(--color-background-400);
   border: var(--color-black) 1px solid;
   display: flex;
   justify-content: center;
@@ -242,6 +298,7 @@ export default {
 }
 .timer-text, .pomodoro-text{
     font-size: 8rem;
+    color: var(--color-text-500);
 }
 
 .alarm-button{
