@@ -557,8 +557,8 @@ export default {
     position: absolute;
     top: -2rem;
     right: -2rem;
-    background-color: var(--color-primary-500);
-    color: var(--color-background-100);
+    background-color: var(--color-secondary-500);
+    color: var(--color-text);
     padding: 1rem;
     border-radius: 0.4rem;
 }
@@ -809,14 +809,14 @@ export default {
     top: -2rem;
     right: -1rem;
     background-color: var(--color-secondary-500);
-    color: var(--color-background-100);
+    color: var(--color-text);
     padding: 1rem;
     border-radius: 0.4rem;
 }
 
 .detail__button:hover {
     background-color: var(--color-primary-300);
-    color: var(--color-background-100);
+    color: var(--color-text);
 }
 
 .detail__button:focus {
