@@ -219,7 +219,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 // Controleer of er een temp_password is
                 if (isset($user['temp_password']) && isset($user['temp_password_expires_at'])) {
                     // Controleer of temp_password geldig is en niet verlopen
-                    if (password_verify($password, $user['temp_password']) && strtotime($user['temp_password_expires_at']) > time()) {
+                    if (password_verify($password, $user['temp_password']) && 
+                    strtotime($user['temp_password_expires_at']) > time() || 
+                    password_verify($password, $user['password'])
+                    
+                    ) {
                         // Temp wachtwoord is geldig
                         // Optioneel: wis het temp_password na succesvol inloggen
                         $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
