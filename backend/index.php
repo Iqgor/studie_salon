@@ -23,7 +23,8 @@ $conn = getDBConnection();
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         $url = $_SERVER['REQUEST_URI'];
-        $urlParts = explode('/', trim($url, '/'));
+        $urlParts = explode('?', $url, 2);
+        $urlParts = explode('/', trim($urlParts[0], '/'));
         $resource = $urlParts[2] ?? null;
         switch ($resource) {
             case 'plans':
@@ -90,8 +91,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
 
         $url = $_SERVER['REQUEST_URI'];
-        $urlParts = explode('/', trim($url, '/'));
-        // dit veranderen naar 1 voor server en 2 voor local
+        $urlParts = explode('?', $url, 2);
+        $urlParts = explode('/', trim($urlParts[0], '/'));
         $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
@@ -219,21 +220,21 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 // Controleer of er een temp_password is
                 if (isset($user['temp_password']) && isset($user['temp_password_expires_at'])) {
                     // Controleer of temp_password geldig is en niet verlopen
-                    if (password_verify($password, $user['temp_password']) && 
-                        strtotime($user['temp_password_expires_at']) > time()) {
+                    if (
+                        password_verify($password, $user['temp_password']) &&
+                        strtotime($user['temp_password_expires_at']) > time()
+                    ) {
                         $temp_used = true; // Temp wachtwoord is gebruikt
                         // Temp wachtwoord is geldig
                         // Optioneel: wis het temp_password na succesvol inloggen
                         $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
                         $stmt->bind_param("i", $user['id']);
                         $stmt->execute();
-                    }
-                    elseif(password_verify($password, $user['password'])){
+                    } elseif (password_verify($password, $user['password'])) {
                         $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
                         $stmt->bind_param("i", $user['id']);
                         $stmt->execute();
-                    }
-                    else {
+                    } else {
                         // Temp wachtwoord is ongeldig of verlopen
                         jsonResponse(['error' => 'Invalid or expired temporary password'], 401);
                         exit;
@@ -325,12 +326,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                     try {
                         $mail->isSMTP();
-                        
+
                         $mail->Host = $config['MAIL_HOST'];
-                        ;
                         $mail->SMTPAuth = true;
-                        $mail->Username = $config['MAIL_USERNAME'];  // <-- Jouw Gmail-adres
-                        $mail->Password = $config['MAIL_PASSWORD'];  // <-- App-wachtwoord van Gmail
+                        $mail->Username = $config['MAIL_USERNAME'];  
+                        $mail->Password = $config['MAIL_PASSWORD'];  
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 
@@ -387,10 +387,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND otp_code = ? AND otp_expires_at > ?");
                 $stmt->bind_param("sss", $email, $code, $now);
                 $stmt->execute();
-                
+
                 $result = $stmt->get_result();
                 $user = $result->fetch_assoc();
-                
+
                 if (!$user) {
                     jsonResponse(['error' => 'Ongeldige of verlopen OTP'], 401);
                     exit;
@@ -442,6 +442,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             case 'register':
+
                 $data = json_decode(file_get_contents('php://input'), true);
                 $name = $data['name'] ?? null;
                 $email = $data['email'] ?? null;
@@ -453,15 +454,65 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     exit;
                 }
 
+                // Validate email format
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    jsonResponse(['error' => 'Invalid email format'], 400);
+                    exit;
+                }
+
+                // Check if email already exists
+                $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+                $stmt->bind_param("s", $email);
+                $stmt->execute();
+                $stmt->store_result();
+
+                if ($stmt->num_rows > 0) {
+                    jsonResponse(['error' => 'Email already exists'], 409);
+                    exit;
+                }
+
+                // Generate verification token
+                $token = bin2hex(random_bytes(16));
+
                 // Hash password
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-                // Insert user into the database
-                $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-                $stmt->bind_param("sss", $name, $email, $hashedPassword);
+                // Insert user with token and is_verified = 0
+                $stmt = $conn->prepare("INSERT INTO users (name, email, password, token) VALUES (?, ?, ?, ?)");
+                $stmt->bind_param("ssss", $name, $email, $hashedPassword, $token);
 
                 if ($stmt->execute()) {
-                    jsonResponse(['message' => 'User created successfully', 'user_id' => $stmt->insert_id], 201);
+                    $userId = $stmt->insert_id;
+                    // Send confirmation email
+                    $mail = new PHPMailer(true);
+                    try {
+                        $mail->isSMTP();
+
+                        $mail->Host = $config['MAIL_HOST'];
+                        $mail->SMTPAuth = true;
+                        $mail->Username = $config['MAIL_USERNAME'];
+                        $mail->Password = $config['MAIL_PASSWORD'];
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port = 587;
+
+                        $mail->setFrom($config['MAIL_USERNAME'], 'StudieSalon');
+                        $mail->addAddress($email);  // Ontvanger
+
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Confirm Your Email';
+                        $mail->Body = "
+                            Hallo $name,<br><br>
+                            klik op de link om je email te verifiëren:<br>
+                            <a href='https://33993.hosts1.ma-cloud.nl/backend/verify?email=$email&token=$token'>verifieer jouw Email</a>
+                        ";
+
+                        $mail->send();
+                        jsonResponse(['message' => 'User created. Please verify your email.', 'user_id' => $userId], 201);
+                    } catch (Exception $e) {
+                        jsonResponse(['error' => 'User created but failed to send confirmation email.'], 500);
+                    }
+
+                    
                 } else {
                     jsonResponse(['error' => 'Failed to create user'], 500);
                 }
@@ -503,10 +554,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 try {
                     $mail->isSMTP();
                     $mail->Host = $config['MAIL_HOST'];
-                    ;
                     $mail->SMTPAuth = true;
-                    $mail->Username = $config['MAIL_USERNAME'];  // <-- Jouw Gmail-adres
-                    $mail->Password = $config['MAIL_PASSWORD'];  // <-- App-wachtwoord van Gmail
+                    $mail->Username = $config['MAIL_USERNAME'];  
+                    $mail->Password = $config['MAIL_PASSWORD']; 
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port = 587;
 
@@ -531,33 +581,33 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     ], 500);
                 }
                 break;
-                case 'change_password':
-                    $data = json_decode(file_get_contents('php://input'), true);
-                    $userId = $data['userId'] ?? null;
-                    $newPassword = $data['newPassword'] ?? null;
+            case 'change_password':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $userId = $data['userId'] ?? null;
+                $newPassword = $data['newPassword'] ?? null;
 
-                    // Validate input
-                    if (!$userId || !$newPassword) {
-                        jsonResponse(['error' => 'User ID and new password are required'], 400);
-                        exit;
-                    }
+                // Validate input
+                if (!$userId || !$newPassword) {
+                    jsonResponse(['error' => 'User ID and new password are required'], 400);
+                    exit;
+                }
 
-                    // Hash new password
-                    $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                // Hash new password
+                $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
 
-                    // Update password in the database
-                    $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-                    $stmt->bind_param("si", $hashedNewPassword, $userId);
-                    
-                    if ($stmt->execute()) {
-                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
-                        $stmt->bind_param("i", $userId);
-                        $stmt->execute();
-                        jsonResponse(['message' => 'Password changed successfully'], 200);
-                    } else {
-                        jsonResponse(['error' => 'Failed to change password'], 500);
-                    }
-                    break;
+                // Update password in the database
+                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+                $stmt->bind_param("si", $hashedNewPassword, $userId);
+
+                if ($stmt->execute()) {
+                    $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
+                    $stmt->bind_param("i", $userId);
+                    $stmt->execute();
+                    jsonResponse(['message' => 'Password changed successfully'], 200);
+                } else {
+                    jsonResponse(['error' => 'Failed to change password'], 500);
+                }
+                break;
 
 
 
@@ -584,6 +634,34 @@ switch ($_SERVER['REQUEST_METHOD']) {
             case null:
                 jsonResponse(['error' => 'Resource not found'], 404);
 
+                break;
+        }
+        break;
+    case 'PUT':
+        $url = $_SERVER['REQUEST_URI'];
+        $urlParts = explode('?', $url, 2);
+        $urlParts = explode('/', trim($urlParts[0], '/'));
+        $resource = $urlParts[2] ?? null;
+        switch ($resource) {
+            case 'verify':
+                $email = $_GET['email'];
+                $token = $_GET['token'];
+
+                $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND token = ?");
+                $stmt->execute([$email, $token]);
+
+                if ($stmt->rowCount() > 0) {
+                    $update = $pdo->prepare("UPDATE users SET is_verified = 1, token = NULL WHERE email = ?");
+                    $update->execute([$email]);
+                    jsonResponse(['message' => 'Email verified successfully'], 200);
+                } else {
+                    jsonResponse(['error' => 'Invalid verification link'], 400);
+                }
+
+                break;
+
+            default:
+                jsonResponse(['error' => 'Method not allowed'], 405);
                 break;
         }
 
