@@ -3,12 +3,14 @@ import { RouterView } from 'vue-router'
 import appheader from './components/appHeader.vue'
 import { onMounted, ref } from 'vue';
 import { auth } from '@/auth';
+import Toast from './components/Toast.vue';
 
 export default {
   name: 'App',
   components: {
     appheader,
-    RouterView
+    RouterView,
+    Toast
   },
   data() {
     return {
@@ -61,6 +63,7 @@ export default {
 
   <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
   <RouterView />
+  <toast/>
   <footer>
 
   </footer>
