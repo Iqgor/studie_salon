@@ -82,7 +82,7 @@
                             class="detail__button" @click="changePeriod('jaarlijks')">
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
-                                <p class="detail__sale_p">{{ selectedPlan.sale * 12}}{{ selectedPlan.sale_type }}</p>
+                                <p class="detail__sale_p">{{ selectedPlan.sale_type == '$' ? selectedPlan.sale * 12 : selectedPlan.sale}}{{ selectedPlan.sale_type }}</p>
                             </div>
                             <h4 class="detail__button_period">jaarlijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
