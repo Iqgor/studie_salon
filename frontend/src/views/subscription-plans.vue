@@ -1,6 +1,6 @@
 <template>
     <main class="main">
-        <button class="btn" @click="sendToasts()"></button>
+        <button class="btn" ></button>
         <div class="container">
 
             <section class="getplan" v-if="selectedPlan.id">
@@ -205,16 +205,9 @@ export default {
     },
     mounted() {
         this.fetchPlans();
-        this.sendToasts();
     },
     methods: {
-        sendToasts() {
-            toastService.addToast( 'testing success','you have done some thing succesfully.', 'success', 8000);
-            toastService.addToast( 'testing message','i am notifying you.', 'message');
-            toastService.addToast( 'testing warning','I am warning you.', 'warning');
-            toastService.addToast( 'testing error','you have done some thing unseccesful.', 'error');
 
-        },
 
         async fetchPlans() {
             try {

@@ -16,9 +16,9 @@ export const toastService = reactive({
     const toastId = id
     id++
 
-    // setTimeout(() => {
-    //   this.removeToast(toastId)
-    // }, time)
+    setTimeout(() => {
+      this.removeToast(toastId)
+    }, time)
     
   },
 
