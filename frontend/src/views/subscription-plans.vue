@@ -23,10 +23,11 @@
                             :required="donthaveAccount" v-model="repeatPassword">
                         <input v-if="showOtp" type="text" placeholder="OTP code" :required="showOtp" v-model="otp">
 
-                        
+
                         <label v-if="donthaveAccount" for="privacy" class="getplan__input_label">
                             <input type="checkbox" name="privacy" id="privacy" v-model="acceptPrivacy" required>
-                            <p>Ik heb de <a href="/privacy-verklaring">privacy verklaring</a> gelezen en ga akkoord met de
+                            <p>Ik heb de <a href="/privacy-verklaring">privacy verklaring</a> gelezen en ga akkoord met
+                                de
                                 voorwaarden</p>
                         </label>
 
@@ -34,13 +35,13 @@
                             <input type="checkbox" name="Policy" id="Policy" v-model="acceptPolicy" required>
                             <p>Ik ga akkoord met de <a href="/gebruikers-voorwaarden">gebruikers voorwaarden</a></p>
                         </label>
-                        
+
                     </div>
 
                     <div class="getplan__subject">
-                        <p>Betaal gegevens</p>
+                        <p>{{ donthaveAccount ? '' : 'Betaal gegevens' }}</p>
                     </div>
-                    <div class="getplan__buttons">
+                    <div class="getplan__buttons" v-if="!donthaveAccount">
                         <button class="getplan__button" type="button" @click="paymentChoice = 'ideal'"
                             :class="{ 'getplan__button_active': paymentChoice == 'ideal' }">
                             <i class="fa-brands fa-ideal"></i>
@@ -55,7 +56,7 @@
 
                     </div>
 
-                    <button class="getplan__send">Betaal</button>
+                    <button class="getplan__send">{{ donthaveAccount ? 'Registreer' : 'Betaal' }}</button>
                 </form>
 
 
@@ -73,7 +74,7 @@
                             </div>
                             <h4 class="detail__button_period">Maandelijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
-                            }}</h3>
+                                }}</h3>
                             <h5 class="detail__button_description"></h5>
                         </button>
 
@@ -81,7 +82,7 @@
                             class="detail__button" @click="changePeriod('jaarlijks')">
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
-                                <p class="detail__sale_p">{{ selectedPlan.sale }}{{ selectedPlan.sale_type }}</p>
+                                <p class="detail__sale_p">{{ selectedPlan.sale * 12}}{{ selectedPlan.sale_type }}</p>
                             </div>
                             <h4 class="detail__button_period">jaarlijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
@@ -97,15 +98,16 @@
                             <div class="detail__pricing_price" v-else>{{ selectedPlan.price * 12 }}</div>
                         </div>
                         <div class="detail__pricing_wrapper">
-                            <div class="detail__pricing_name">korting?</div>
-                            <div class="detail__pricing_price">-{{ selectedPlan.sale }}{{ selectedPlan.sale_type }}</div>
+                            <div class="detail__pricing_name">korting</div>
+                            <div class="detail__pricing_price"> -{{ saleAmount }} {{selectedPlan.sale_type}}</div>
                         </div>
                         <div class="detail__pricing_wrapper">
                             <div class="detail__pricing_name">totaal</div>
-                            <div class="detail__pricing_price" v-if="selectedperiode == 'maandelijks'">{{
-                                (selectedPlan.price * 0.75).toFixed(2) }}</div>
-                            <div class="detail__pricing_price" v-else>{{ (selectedPlan.price * 12 * 0.75).toFixed(2) }}
+
+                            <div class="detail__pricing_price">
+                                {{ finalPrice }}
                             </div>
+
                         </div>
                     </div>
                     <hr>
@@ -143,8 +145,13 @@
                     <p class="price__container">
                         <span class="price" :class="{ 'price__inactive': plan.sale && plan.sale_type }"><i
                                 class="fa-solid fa-euro-sign"></i> {{ plan.price }}</span>
-                        <span class="price"><i v-if="plan.sale && plan.sale_type" class="fa-solid fa-euro-sign"></i>{{
-                            (plan.price * 0.75).toFixed(2) }}</span>
+
+                        <span class="price" v-if="plan.sale && plan.sale_type === '%'"><i
+                                class="fa-solid fa-euro-sign"></i>{{
+                                    (plan.price - (plan.price * plan.sale / 100)).toFixed(2) }}</span>
+
+                        <span class="price" v-else><i class="fa-solid fa-euro-sign"></i>{{
+                            (plan.price - plan.sale).toFixed(2) }}</span>
                     </p>
                     <hr>
 
@@ -322,6 +329,43 @@ export default {
                 // error handling hier
             }
         }
+    },
+    computed: {
+        finalPrice() {
+            let basePrice = this.selectedPlan.price;
+            const sale = this.selectedPlan.sale || 0;
+            const type = this.selectedPlan.sale_type;
+
+            const isMonthly = this.selectedperiode === 'maandelijks';
+
+            if (!isMonthly) {
+                basePrice *= 12;
+            }
+
+            let discount = 0;
+
+            if (type === '%') {
+                discount = basePrice * (sale / 100);
+            } else if (type === '$') {
+                discount = isMonthly ? sale : sale * 12;
+            }
+
+            const finalPrice = basePrice - discount;
+
+            return finalPrice > 0 ? finalPrice.toFixed(2) : '0.00';
+        },
+        saleAmount() {
+            const sale = this.selectedPlan.sale || 0;
+            const type = this.selectedPlan.sale_type;
+            const isMonthly = this.selectedperiode === 'maandelijks';
+
+
+            if (type === '$') {
+                return (isMonthly ? sale : sale * 12)
+            } else {
+                return sale
+            }
+        },
     }
 }      
 </script>
@@ -609,7 +653,7 @@ export default {
     width: 35rem;
 }
 
-.getplan__input_label input{
+.getplan__input_label input {
     max-width: 2rem;
     height: 2rem;
     border-radius: 0.4rem;
@@ -626,6 +670,7 @@ export default {
     outline: none;
     color: var(--color-background-100);
 }
+
 .getplan__input_label input:checked {
     background-color: var(--color-primary-500);
     border: none;
