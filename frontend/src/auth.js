@@ -15,6 +15,8 @@ export const auth = reactive({
     role: [],
     //* om dingen te verstoppen als je niet op localhost bent
     hidden: false,
+    //* om te checken of je je temp was gebruikt
+    temp_used: false,
 
 
 

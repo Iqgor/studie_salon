@@ -42,7 +42,7 @@
                 <div class="buttons">
                     <button type="submit" class="btn">Inloggen</button>
                     <p class="text">Nog geen account? <a href="/plans" class="link">Neem eerst een abonnement</a></p>
-                    <p class="text">Wachtwoord vergeten? <span @click="showForm = 'forgot'" class="link">Krijg een tijdelijke</span></p>
+                    <p class="text">Wachtwoord vergeten? <span @click="showForm = 'forgot'" class="link">Krijg een tijdelijk wachtwoord</span></p>
 
                 </div>
             </form>
@@ -204,6 +204,10 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
+
+                if (incommingdata?.temp_used == true) {
+                    auth.temp_used = true
+                }
 
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)

@@ -213,23 +213,27 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(['error' => 'Invalid email or password'], 401);
                     exit;
                 }
-
+                $temp_used = false; // kijken of temp wachtwoord is gebruikt
                 $user = $result->fetch_assoc();
                 //^ Wachtwoord controleren
                 // Controleer of er een temp_password is
                 if (isset($user['temp_password']) && isset($user['temp_password_expires_at'])) {
                     // Controleer of temp_password geldig is en niet verlopen
                     if (password_verify($password, $user['temp_password']) && 
-                    strtotime($user['temp_password_expires_at']) > time() || 
-                    password_verify($password, $user['password'])
-                    
-                    ) {
+                        strtotime($user['temp_password_expires_at']) > time()) {
+                        $temp_used = true; // Temp wachtwoord is gebruikt
                         // Temp wachtwoord is geldig
                         // Optioneel: wis het temp_password na succesvol inloggen
                         $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
                         $stmt->bind_param("i", $user['id']);
                         $stmt->execute();
-                    } else {
+                    }
+                    elseif(password_verify($password, $user['password'])){
+                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
+                        $stmt->bind_param("i", $user['id']);
+                        $stmt->execute();
+                    }
+                    else {
                         // Temp wachtwoord is ongeldig of verlopen
                         jsonResponse(['error' => 'Invalid or expired temporary password'], 401);
                         exit;
@@ -362,6 +366,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     'message' => 'Login successful',
                     'token' => $jwt,
                     'active' => $user['active'],
+                    'temp_used' => $temp_used, // Add this line
                 ], 200);
 
                 break;
