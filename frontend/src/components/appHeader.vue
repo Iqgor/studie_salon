@@ -3,7 +3,7 @@
     <div @click="changeColor" class="figTop">
       <p class="figTopMenu">menu</p>
       <div class="topMenu">
-        <img @click="$router.push('/')" src="../../public/logo.png" alt="">
+        <img @click="$router.push('/')" src="/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
             <li><a href="#">Abonnementen</a></li>
@@ -19,10 +19,11 @@
 
       <a href="/login"><i class="fa-solid fa-user"></i></a>
 
-      <i class="fa-solid fa-flag" title="Translate page" @click="toggleTranslate = !toggleTranslate">
+      <i class="fa-solid fa-language" title="Translate page" @click="toggleTranslate = !toggleTranslate">
 
         <div v-show="toggleTranslate" id="google_translate_element"></div>
       </i>
+
 
       <!-- <div class="theme-switcher">
     <label for="theme-select"><i class="fa-solid fa-palette"></i></label>
@@ -39,14 +40,14 @@
 
         <div class="dropdown">
           <i class="fa-solid fa-palette"></i>
-
-        </div>
-        <div class="options_wrapper" v-if="isDropdownVisible">
-          <div class="options" v-for="theme in sharedfunctions.themes" :key="theme" @click="switchTheme(theme.value)"
-          :style="themeGradient(theme)">
-            {{ theme.name }}
+          <div class="options_wrapper" v-if="isDropdownVisible">
+            <div class="options" v-for="theme in sharedfunctions.themes" :key="theme" @click="switchTheme(theme.value)"
+            :style="themeGradient(theme)">
+              {{ theme.name }}
+            </div>
           </div>
         </div>
+
       </div>
 
 
@@ -258,13 +259,14 @@ export default {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  position: relative;
   font-size: 2rem;
 }
 
 .options_wrapper {
   position: absolute;
   top: 3rem;
-  left: -100%;
+  left: -6rem;
   background-color: white;
   border-radius: 1rem;
   z-index: 10;

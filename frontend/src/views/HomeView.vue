@@ -3,6 +3,7 @@
     <p class="typewriter" :style="typewriterStyle">
     </p>
     <Calander />
+    <h2 class="appsTitle">Apps</h2>
     <div class="apps">
       <div v-if="Object.keys(quote).length !== 0" class="quote_container">
         <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">
@@ -14,6 +15,9 @@
             <div :class="currentLanguageCode === code ? 'isActive': '' " v-html="language[1]"></div>
           </div>
         </div>
+      </div>
+      <div>
+        <SideWekkers :app="true"/>
       </div>
       <input type="text" class="search" placeholder="Zoek een tekst..." />
     </div>
@@ -53,7 +57,8 @@ export default {
 
         // Add more mappings as needed
       },
-      currentLanguageCode :navigator.language || navigator.userLanguage
+      currentLanguageCode :navigator.language || navigator.userLanguage,
+      loading: true,
 
     };
   },
@@ -133,6 +138,7 @@ export default {
         });
     },
     getQuote() {
+      this.loading = true;
       const currentLanguage = this.languageMap[this.currentLanguageCode][0] || 'English'; // Default to English if not mapped
       const formData = new FormData();
       formData.append('language', currentLanguage);
@@ -149,12 +155,13 @@ export default {
             return response.json();
           })
           .then(data => {
+            this.loading = false;
             if (data) {
               this.quote = data.quote;
-
             }
           })
           .catch(error => {
+            this.loading = false;
             console.error('There was a problem with the fetch operation:', error);
           });
     }
@@ -173,8 +180,19 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: end;
-  gap: 2rem;
   width: 100%;
+}
+
+.appsTitle{
+  font-size: 3rem;
+  color: white;
+  padding: 1rem;
+  background-color: var(--color-primary-500);
+  margin-left: -10rem;
+  margin-right: -10rem;
+  margin-bottom: 1rem;
+  padding-left: 10rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .quote_container {
@@ -188,7 +206,7 @@ export default {
 
 .quote_chooser {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
   width: 100%;
 }
@@ -291,12 +309,14 @@ export default {
 
 
 .search {
-  width: 100%;
+  width: 40%;
   border:none;
   border-bottom: 0.125rem solid var(--color-text);
   padding-bottom: 0.25rem;
   font-size: 2rem;
   transition: all 0.3s ease;
+  background: transparent;
+  color:var(--color-text)
 }
 
 .search:focus {
@@ -356,6 +376,11 @@ export default {
   .quote {
     width: 100%;
     padding-left: 2rem;
+  }
+  .appsTitle {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 1rem;
   }
 
 }

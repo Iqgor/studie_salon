@@ -1,6 +1,6 @@
 <template>
   <div class="calendar">
-    <aside v-if="!activityClicked" class="calendar-sidebar">
+    <aside v-if="!newActivityClicked && !activityClicked" class="calendar-sidebar">
       <button  v-if="!isMobiel" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
         day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
         day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
@@ -18,7 +18,6 @@
           <i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
-
       <div class="calendar-grid">
         <div class="calendar-dayName" v-for="dayName in ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']" :key="dayName">
           <strong>{{ dayName }}</strong>
@@ -29,13 +28,13 @@
           'current-day': isCurrentDay(day.day, -1), 'clicked-day': isClickedDay(day.day, -1),
           'week-day': currentWeekDays.some(weekDay => weekDay.day === day.day && weekDay.month === day.month)
         }" v-for="day in previousMonthDays" :key="'prev-' + day.day" style="opacity: 0.5;"
-          @click="selectDate(day.day, day.month, day.year)">
+          @click="selectDate(day.day, day.month, day.year),unFocusDay()">
           {{ day.day }}
         </div>
         <div class="calendar-day" :class="{
           'current-day': isCurrentDay(day.day), 'clicked-day': isClickedDay(day.day),
           'week-day': currentWeekDays.some(weekDay => weekDay.day === day.day && weekDay.month === day.month)
-        }" v-for="(day, index) in daysInMonth" :key="day.day" @click="selectDate(day.day, day.month, day.year)"
+        }" v-for="(day, index) in daysInMonth" :key="day.day" @click="selectDate(day.day, day.month, day.year),unFocusDay()"
           :style="{ gridColumnStart: index === 0 ? (new Date(shownDate.getFullYear(), shownDate.getMonth(), 1).getDay() || 7) : 'auto' }">
           {{ day.day }}
         </div>
@@ -43,13 +42,19 @@
         <div class="calendar-day" :class="{
           'current-day': isCurrentDay(day.day, 1), 'clicked-day': isClickedDay(day.day, 1),
           'week-day': currentWeekDays.some(weekDay => weekDay.day === day.day && weekDay.month === day.month)
-        }" v-for="day in nextMonthDays" @click="selectDate(day.day, day.month, day.year)" :key="'next-' + day.day"
+        }" v-for="day in nextMonthDays" @click="selectDate(day.day, day.month, day.year),unFocusDay()" :key="'next-' + day.day"
           style="opacity: 0.5;">
           {{ day.day }}
         </div>
       </div>
     </aside>
-
+    <div class="activityInfo" v-else-if="activityClicked && !isMobiel">
+      <h3>{{ this.activityClickedInfo.title }}</h3>
+      <p>Vak: {{ this.activityClickedInfo.vak }}</p>
+      <p>Maakwerk: {{ this.activityClickedInfo.maakwerk }}</p>
+      <p>Tijd: {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}</p>
+      <div ><i class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false" class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
+    </div>
     <div class="createActivity" v-else-if="!isMobiel">
       <h3>Nieuwe activiteit</h3>
       <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
@@ -65,6 +70,9 @@
         <input @input="maakWerk = 'Leerwerk'" type="radio" name="maakwerk" id="Leerwerk">
         <label for="Leren">Te doen</label>
         <input @input="maakWerk = 'Te doen'" type="radio" name="maakwerk" id="Te-doen">
+        <label for="Leren">Anders</label>
+        <input @input="maakWerk = 'Anders'" type="radio" name="maakwerk" id="Anders">
+
       </div>
       <div class="time">
         <input type="date" v-model="newActivityDate" @change="handleDateChange">
@@ -74,22 +82,27 @@
           <input type="time" v-model="newActivityEndTime">
         </div>
       </div>
-      <button @click="activityClicked = false, newActivityName = null, newClass = null"><i
+      <button @click="newActivityClicked = false, newActivityName = null, newClass = null"><i
           class="fa-regular fa-circle-xmark"></i></button>
       <button @click="sendActivity"><i class="fa-regular fa-circle-check"></i></button>
     </div>
 
     <div class="calendar-week">
       <div class="calendar-weekTop">
-        <div v-for="(days, i) in getDaysOfWeek()" :key="i" @click="selectDate(days.day, days.month, days.year)"><span
+        <div v-if="oneDay" class="backTo" @click="unFocusDay()">Terug naar week</div>
+        <div v-for="(days, i) in getDaysOfWeek()" :key="i" @click="selectDate(days.day, days.month, days.year),focusDay()">
+          <span
             class="dayNumber"
             :class="{ 'current-day': isCurrentDay(days.day, 0, days.month), 'clicked-day': isClickedDay(days.day, 0, days.month) }">{{
               days.day
-            }}</span><span>{{ days.name }}</span></div>
+            }}</span>
+
+            <span>{{ days.name }}</span>
+        </div>
       </div>
       <div class="calendar-weekBottom">
         <ul class="calendar-weekBottomList">
-          <div :title="newActivityName || `(afspraaknaam)`" v-if="activityClicked" class="newActivity" ref="newActivity"
+          <div :title="newActivityName || `(afspraaknaam)`" v-if="newActivityClicked" class="newActivity" ref="newActivity"
             @resize="handleResize">
             {{ newActivityName || `(afspraaknaam)` }}
             <p class="activityTime">
@@ -106,7 +119,7 @@
                 v-if="new Date().getHours() === (hour - 1) && isCurrentDay(days.day, 0, days.month)">
                 <figure></figure>
               </figure>
-              <p v-if="i === 0">
+              <p v-if="i === 0 || oneDay">
                 <span class="hourSlot">
                   {{ hour < 10 ? '0' + hour - 1 : hour - 1 }}:00 </span>
               </p>
@@ -115,12 +128,19 @@
         </ul>
       </div>
     </div>
-    <button  v-if="isMobiel && !activityClicked" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
+    <button  v-if="isMobiel && !newActivityClicked" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
         day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
         day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
         day.year === (this.setDate ? this.setDate.getFullYear() : this.shownDate.getFullYear())
       ), new Date().getHours())" class="createActivityButton"><span>+</span> Maak Activiteit</button>
-    <div class="createActivity" v-else-if="isMobiel && activityClicked">
+    <div class="activityInfo" v-else-if="activityClicked && isMobiel">
+      <h3>{{ this.activityClickedInfo.title }}</h3>
+      <p>Vak: {{ this.activityClickedInfo.vak }}</p>
+      <p>Maakwerk: {{ this.activityClickedInfo.maakwerk }}</p>
+      <p>Tijd: {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}</p>
+      <div ><i class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false" class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
+    </div>
+    <div class="createActivity" v-else-if="isMobiel && newActivityClicked">
       <h3>Nieuwe activiteit</h3>
       <input id="activityName" type="text" v-model="newActivityName" placeholder="Titel toevoegen"
         @input="newActivityName = $event.target.value" />
@@ -135,6 +155,8 @@
         <input @input="maakWerk = 'Leerwerk'" type="radio" name="maakwerk" id="Leerwerk">
         <label for="Leren">Te doen</label>
         <input @input="maakWerk = 'Te doen'" type="radio" name="maakwerk" id="Te-doen">
+        <label for="Leren">Anders</label>
+        <input @input="maakWerk = 'Anders'" type="radio" name="maakwerk" id="Anders">
       </div>
       <div class="time">
         <input type="date" v-model="newActivityDate" @change="handleDateChange">
@@ -144,7 +166,7 @@
           <input type="time" v-model="newActivityEndTime">
         </div>
       </div>
-      <button @click="activityClicked = false, newActivityName = null, newClass = null"><i
+      <button @click="newActivityClicked = false, newActivityName = null, newClass = null"><i
           class="fa-regular fa-circle-xmark"></i></button>
       <button @click="sendActivity"><i class="fa-regular fa-circle-check"></i></button>
     </div>
@@ -168,7 +190,9 @@ export default {
       nextMonthDays: [],
       currentTime: new Date(),
       intervalId: null, // Store the interval ID for clearing it later
-      activityClicked: false, // Flag to prevent multiple activity creation
+      newActivityClicked: false, // Flag to prevent multiple activity creation
+      activityClicked: false,
+      activityClickedInfo:[],
       newActivityDate: null,
       newActivityBegintime: null,
       newActivityEndTime: null,
@@ -178,6 +202,7 @@ export default {
       loading: true,
       activityCreated: false,
       isMobiel: false,
+      oneDay: false,
     };
   },
   components: {
@@ -298,6 +323,42 @@ export default {
     }
   },
   methods: {
+    focusDay(){
+      this.oneDay = true;
+      const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
+      const dayIndex = this.getDaysOfWeek().findIndex(day =>
+        day.day === this.setDate.getDate() &&
+        day.month === this.setDate.getMonth() &&
+        day.year === this.setDate.getFullYear()
+      );
+      if (dayIndex !== -1 && slotElement) {
+        const weekTopDays = document.querySelectorAll('.calendar-weekTop > div');
+        weekTopDays.forEach((day, index) => {
+          day.style.display = index === dayIndex ? 'flex' : 'none'; // Show only the current day
+          day.style.gridColumn= '2/8'
+        });
+        slotElement.style.gridTemplateColumns = '1fr'; // Change to one column
+        const listItems = slotElement.querySelectorAll('li');
+        listItems.forEach((item, index) => {
+          item.style.display = index === dayIndex ? 'block' : 'none'; // Show only the current day
+        });
+      }
+    },
+    unFocusDay(){
+      this.oneDay = false;
+      const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
+      const weekTopDays = document.querySelectorAll('.calendar-weekTop > div');
+      weekTopDays.forEach(day => {
+        day.style.display = 'flex'; // Show all days
+        day.style.width = 'auto'; // Reset width
+        day.style.gridColumn = '';
+      });
+      slotElement.style.gridTemplateColumns = 'repeat(7, 1fr)'; // Change back to 7 columns
+      const listItems = slotElement.querySelectorAll('li');
+      listItems.forEach(item => {
+        item.style.display = 'block'; // Show all days
+      });
+    },
     handleDateChange() {
       const existingActivities = document.querySelectorAll('.activity');
       existingActivities.forEach(activity => activity.remove());
@@ -319,7 +380,7 @@ export default {
         .then(response => response.json())
         .then(() => {
           this.activityCreated = true;
-          this.activityClicked = false;
+          this.newActivityClicked = false;
           this.newActivityName = null;
           this.newClass = null;
           this.fetchActivities();
@@ -333,8 +394,8 @@ export default {
     },
     makeActivity(day, hour) {
 
-      if (!this.activityClicked) {
-        this.activityClicked = true;
+      if (!this.newActivityClicked) {
+        this.newActivityClicked = true;
         this.newActivityDate = `${this.getDaysOfWeek()[day].year}-${(this.getDaysOfWeek()[day].month + 1) < 10 ? '0' + (this.getDaysOfWeek()[day].month + 1) : (this.getDaysOfWeek()[day].month + 1)}-${this.getDaysOfWeek()[day].day > 10 ? this.getDaysOfWeek()[day].day: '0' + this.getDaysOfWeek()[day].day}`;
         this.$nextTick(() => {
           const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
@@ -348,7 +409,7 @@ export default {
 
             const element = document.elementsFromPoint(event.clientX, event.clientY)
             if (element[0].className !== 'calendar-hourSlot') {
-              this.activityClicked = false;
+              this.newActivityClicked = false;
               this.newActivityName = null;
               this.newClass = null;
               return;
@@ -470,14 +531,12 @@ export default {
           const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
           const activityElement = document.createElement('div');
           activityElement.className = 'activity';
-          activityElement.style.left = `${(slotElement.clientWidth / 7) * dayIndex}px`;
 
           const [startHour, startMinute] = activity.start_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
           const [endHour, endMinute] = activity.end_datetime.split(' ')[1].split(':').slice(0, 2).map(Number);
 
           const startTimeInMinutes = startHour * 60 + startMinute + (activity.start_datetime.split(' ')[1].split(':')[2] / 60);
           const endTimeInMinutes = endHour * 60 + endMinute + (activity.end_datetime.split(' ')[1].split(':')[2] / 60);
-
 
           const topPosition = startTimeInMinutes / 10; // Assuming 6rem per hour (60 minutes)
           const height = Math.max((endTimeInMinutes - startTimeInMinutes) / 10, 0); // Ensure height is non-negative and accurate for minute differences
@@ -486,8 +545,7 @@ export default {
           if (height > 0.5) {
             activityElement.style.padding = '0.5rem';
           }
-          activityElement.style.width = `${slotElement.clientWidth / 7 - 10}px`;
-          activityElement.style.cursor = 'default';
+
 
           activityElement.innerHTML = `
             <strong>${activity.title}</strong>
@@ -503,7 +561,17 @@ export default {
           activityElement.addEventListener('mouseleave', () => {
             activityElement.style.height = `${height}rem`;
           });
+
+          activityElement.addEventListener('click',()=>{
+            this.activityClicked = true;
+            this.activityClickedInfo = activity;
+            console.log(this.activityClickedInfo)
+          })
           slotElement.appendChild(activityElement);
+          const correspondingLi = slotElement.querySelectorAll('li')[dayIndex];
+          if (correspondingLi) {
+            correspondingLi.appendChild(activityElement);
+          }
         }
       });
 
@@ -684,6 +752,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   overflow-y: scroll;
+  width: 100%;
 }
 
 
@@ -704,8 +773,13 @@ export default {
 .calendar-weekTop>div:not(:last-child) {
   border-right: 0.125rem solid var(--color-text);
 }
+.backTo{
+  grid-column: 1 /   2;
+  justify-content: center;
+  font-weight: bold;
+}
 
-.calendar-weekTop>div>span:first-of-type {
+.dayNumber {
   font-size: 150%;
   font-weight: bold;
   width: max-content;
@@ -734,6 +808,9 @@ export default {
 .calendar-weekBottomList>li:not(:last-child) {
   border-right: 0.125rem solid var(--color-text);
 }
+.calendar-weekBottomList>li {
+  position: relative;
+}
 
 .calendar-hourSlot {
   border-bottom: 0.125rem solid var(--color-text);
@@ -750,8 +827,6 @@ export default {
   font-size: 80%;
   z-index: -1;
 }
-
-
 
 .hourLine {
   position: absolute;
@@ -796,6 +871,9 @@ export default {
   padding: 0.5rem;
   color: white;
   overflow: hidden;
+  cursor: pointer;
+  width: 90%;
+  margin-left:0.5rem;
 }
 
 
@@ -837,7 +915,7 @@ export default {
   margin-top: 1rem;
   align-items: center;
   padding: 0 0.5rem;
-
+  flex-wrap: wrap;
 }
 
 .activityRadio>input {
@@ -877,7 +955,7 @@ export default {
   color: white;
 }
 
-.createActivity>button {
+.createActivity>button ,.activityInfo>button{
   background-color: transparent;
   border: none;
   color: var(--color-primary-500);
@@ -888,27 +966,19 @@ export default {
 }
 
 
-.createActivity>button>i {
+.createActivity>button>i, .activityInfo>button>i{
   border-radius: 50%;
   transition: all 0.3s ease;
 
 }
 
-.createActivity>button:first-of-type {
+.createActivity>button:first-of-type , .activityInfo>button:first-of-type{
   color: var(--color-error);
   margin-right: 1rem;
 }
 
-
-.createActivity>button:first-of-type>i:hover {
-  background-color: #f56c6c50;
-}
-
-.createActivity>button:last-of-type>i:hover {
-  background-color: var(--color-primary-400);
-
-
-
+.createActivity>button>i:hover,.activityInfo>button>i:hover {
+  background-color: #eee;
 }
 
 
@@ -939,6 +1009,41 @@ export default {
   gap: 0.5rem;
 }
 
+.activityInfo{
+  min-width: 30rem;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  box-shadow: 0px 6px 10px 0px rgba(0, 0, 0, .14), 0px 1px 18px 0px rgba(0, 0, 0, .12), 0px 3px 5px -1px rgba(0, 0, 0, .2);
+  padding: 1rem;
+  height: 100%;
+  border-radius: 0.25rem;
+}
+
+.activityInfo>h3{
+  font-size: 150%;
+  margin-bottom: 1rem;
+}
+
+.activityInfo > div{
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  font-size: 150%;
+  margin-top: 2rem;
+}
+
+.activityInfo > div > i{
+  cursor: pointer;
+  color: var(--color-text);
+  transition: all 0.3s ease;
+}
+
+.activityInfo > div > i:hover{
+  color: var(--color-primary-500);
+}
+
 @media (max-width: 768px) {
   .calendar {
     flex-direction: column-reverse;
@@ -955,6 +1060,10 @@ export default {
   }
 
   .createActivity{
+    width: 90%;
+  }
+
+  .activityInfo{
     width: 90%;
   }
   .calendar-week {
