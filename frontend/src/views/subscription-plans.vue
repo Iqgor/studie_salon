@@ -18,23 +18,28 @@
                         <input v-if="donthaveAccount" type="text" placeholder="Naam" :required="donthaveAccount"
                             v-model="name">
                         <input type="email" placeholder="Email" required v-model="email">
-                        <input type="password" placeholder="Wachtwoord" required v-model="password">
-                        <input v-if="donthaveAccount" type="password" placeholder="Herhaal wachtwoord"
-                            :required="donthaveAccount" v-model="repeatPassword">
+                        <input type="password" placeholder="Wachtwoord" required v-model="password" v-if="!donthaveAccount">
                         <input v-if="showOtp" type="text" placeholder="OTP code" :required="showOtp" v-model="otp">
-                        <label for="privacy" class="getplan__input_label">
-                            <input type="checkbox" name="privacy" id="privacy" v-model="acceptTerms">
-                            <p>Ik heb de <a href="/privacyverklaring">privacy verklaring</a> gelezen en ga akkoord met de
+
+
+                        <label v-if="donthaveAccount" for="privacy" class="getplan__input_label">
+                            <input type="checkbox" name="privacy" id="privacy" v-model="acceptPrivacy" required>
+                            <p>Ik heb de <a href="/privacy-verklaring">privacy verklaring</a> gelezen en ga akkoord met
+                                de
                                 voorwaarden</p>
-                            
                         </label>
-                        
+
+                        <label v-if="donthaveAccount" for="Policy" class="getplan__input_label">
+                            <input type="checkbox" name="Policy" id="Policy" v-model="acceptPolicy" required>
+                            <p>Ik ga akkoord met de <a href="/gebruikers-voorwaarden">gebruikers voorwaarden</a></p>
+                        </label>
+
                     </div>
 
                     <div class="getplan__subject">
-                        <p>Betaal gegevens</p>
+                        <p>{{ donthaveAccount ? '' : 'Betaal gegevens' }}</p>
                     </div>
-                    <div class="getplan__buttons">
+                    <div class="getplan__buttons" v-if="!donthaveAccount">
                         <button class="getplan__button" type="button" @click="paymentChoice = 'ideal'"
                             :class="{ 'getplan__button_active': paymentChoice == 'ideal' }">
                             <i class="fa-brands fa-ideal"></i>
@@ -49,7 +54,14 @@
 
                     </div>
 
-                    <button class="getplan__send">Betaal</button>
+                    <div class="small_txt">
+                        <p v-if="donthaveAccount">
+                            Als je een account aanmaakt krijg je een tijdelijk wachtwoord toegestuurd naar je email.
+                            
+                        </p>
+                    </div>
+
+                    <button class="getplan__send">{{ donthaveAccount ? 'Registreer' : 'Betaal' }}</button>
                 </form>
 
 
@@ -67,7 +79,7 @@
                             </div>
                             <h4 class="detail__button_period">Maandelijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
-                            }}</h3>
+                                }}</h3>
                             <h5 class="detail__button_description"></h5>
                         </button>
 
@@ -75,7 +87,7 @@
                             class="detail__button" @click="changePeriod('jaarlijks')">
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
-                                <p class="detail__sale_p">{{ selectedPlan.sale }}{{ selectedPlan.sale_type }}</p>
+                                <p class="detail__sale_p">{{ selectedPlan.sale_type == '$' ? selectedPlan.sale * 12 : selectedPlan.sale}}{{ selectedPlan.sale_type }}</p>
                             </div>
                             <h4 class="detail__button_period">jaarlijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
@@ -91,15 +103,16 @@
                             <div class="detail__pricing_price" v-else>{{ selectedPlan.price * 12 }}</div>
                         </div>
                         <div class="detail__pricing_wrapper">
-                            <div class="detail__pricing_name">korting?</div>
-                            <div class="detail__pricing_price">-{{ selectedPlan.sale }}{{ selectedPlan.sale_type }}</div>
+                            <div class="detail__pricing_name">korting</div>
+                            <div class="detail__pricing_price"> -{{ saleAmount }} {{selectedPlan.sale_type}}</div>
                         </div>
                         <div class="detail__pricing_wrapper">
                             <div class="detail__pricing_name">totaal</div>
-                            <div class="detail__pricing_price" v-if="selectedperiode == 'maandelijks'">{{
-                                (selectedPlan.price * 0.75).toFixed(2) }}</div>
-                            <div class="detail__pricing_price" v-else>{{ (selectedPlan.price * 12 * 0.75).toFixed(2) }}
+
+                            <div class="detail__pricing_price">
+                                {{ finalPrice }}
                             </div>
+
                         </div>
                     </div>
                     <hr>
@@ -137,8 +150,13 @@
                     <p class="price__container">
                         <span class="price" :class="{ 'price__inactive': plan.sale && plan.sale_type }"><i
                                 class="fa-solid fa-euro-sign"></i> {{ plan.price }}</span>
-                        <span class="price"><i v-if="plan.sale && plan.sale_type" class="fa-solid fa-euro-sign"></i>{{
-                            (plan.price * 0.75).toFixed(2) }}</span>
+
+                        <span class="price" v-if="plan.sale && plan.sale_type === '%'"><i
+                                class="fa-solid fa-euro-sign"></i>{{
+                                    (plan.price - (plan.price * plan.sale / 100)).toFixed(2) }}</span>
+
+                        <span class="price" v-else><i class="fa-solid fa-euro-sign"></i>{{
+                            (plan.price - plan.sale).toFixed(2) }}</span>
                     </p>
                     <hr>
 
@@ -158,8 +176,11 @@
         </div>
     </main>
 </template>
+
 <script>
 import { auth } from '@/auth';
+import { sharedfunctions } from '@/sharedFunctions';
+import { toastService } from '@/services/toastService';
 
 export default {
 
@@ -183,14 +204,16 @@ export default {
             showOtp: false,
             otp: '',
             canPay: false,
-            acceptTerms: false,
+            acceptPrivacy: false,
+            acceptPolicy: false,
         };
     },
     mounted() {
-        // Fetch plans from the API
         this.fetchPlans();
     },
     methods: {
+
+
         async fetchPlans() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/plans`);
@@ -214,29 +237,12 @@ export default {
         },
 
         checkForm() {
-            if (this.donthaveAccount) {
-                if (this.password !== this.repeatPassword) {
-                    alert('Wachtwoorden komen niet overeen');
-                    return;
-                }
-                if (this.password.length < 8) {
-                    alert('Wachtwoord moet minimaal 8 karakters lang zijn');
-                    return;
-                }
-
-            }
-            if (!this.email || !this.password) {
-                alert('Vul alle velden in');
-                return;
-            }
 
             if (this.donthaveAccount) {
                 // Handle account creation
                 console.log('Creating account with', {
                     name: this.name,
-                    email: this.email,
-                    password: this.password,
-                    repeatPassword: this.repeatPassword
+                    email: this.email
                 });
                 this.createAccount()
             } else if (this.showOtp) {
@@ -258,6 +264,10 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
+
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
 
                 if (incommingdata?.token) {
 
@@ -290,6 +300,9 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
 
                 if (incommingdata?.token) {
                     this.canPay = true
@@ -304,20 +317,60 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         name: this.name,
-                        email: this.email,
-                        password: this.password
+                        email: this.email
                     })
                 })
 
                 let incommingdata = await response.json()
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
                 console.log(incommingdata);
             } catch (err) {
                 // error handling hier
             }
         }
+    },
+    computed: {
+        finalPrice() {
+            let basePrice = this.selectedPlan.price;
+            const sale = this.selectedPlan.sale || 0;
+            const type = this.selectedPlan.sale_type;
+
+            const isMonthly = this.selectedperiode === 'maandelijks';
+
+            if (!isMonthly) {
+                basePrice *= 12;
+            }
+
+            let discount = 0;
+
+            if (type === '%') {
+                discount = basePrice * (sale / 100);
+            } else if (type === '$') {
+                discount = isMonthly ? sale : sale * 12;
+            }
+
+            const finalPrice = basePrice - discount;
+
+            return finalPrice > 0 ? finalPrice.toFixed(2) : '0.00';
+        },
+        saleAmount() {
+            const sale = this.selectedPlan.sale || 0;
+            const type = this.selectedPlan.sale_type;
+            const isMonthly = this.selectedperiode === 'maandelijks';
+
+
+            if (type === '$') {
+                return (isMonthly ? sale : sale * 12)
+            } else {
+                return sale
+            }
+        },
     }
 }      
 </script>
+
 <style scoped lang="css">
 .main {
     padding: 2rem;
@@ -506,8 +559,8 @@ export default {
     position: absolute;
     top: -2rem;
     right: -2rem;
-    background-color: var(--color-primary-500);
-    color: var(--color-background-100);
+    background-color: var(--color-secondary-500);
+    color: var(--color-text);
     padding: 1rem;
     border-radius: 0.4rem;
 }
@@ -602,8 +655,8 @@ export default {
     width: 35rem;
 }
 
-.getplan__input_label input{
-    width: 2rem;
+.getplan__input_label input {
+    max-width: 2rem;
     height: 2rem;
     border-radius: 0.4rem;
     border: none;
@@ -619,6 +672,7 @@ export default {
     outline: none;
     color: var(--color-background-100);
 }
+
 .getplan__input_label input:checked {
     background-color: var(--color-primary-500);
     border: none;
@@ -779,7 +833,7 @@ export default {
 
 .detail__button:hover {
     background-color: var(--color-primary-300);
-    color: var(--color-background-100);
+    color: var(--color-text);
 }
 
 .detail__button:focus {
@@ -862,6 +916,9 @@ export default {
     color: var(--color-text);
 }
 
+.small_txt {
+    font-size: 0.8rem;
+    color: var(--color-text);
 hr{
     border: 1px solid var(--color-text);
     width: 100%;

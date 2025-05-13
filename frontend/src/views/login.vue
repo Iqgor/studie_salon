@@ -16,7 +16,7 @@
                 </div>
 
             </div>
-            <form @submit.prevent="validateInput()" class="form" v-if="!showOtp">
+            <form @submit.prevent="validateInput()" class="form" v-if="showForm === 'login'">
 
                 <div class="login__header">
                     <h1 class="title">Welkom terug</h1>
@@ -42,12 +42,12 @@
                 <div class="buttons">
                     <button type="submit" class="btn">Inloggen</button>
                     <p class="text">Nog geen account? <a href="/plans" class="link">Neem eerst een abonnement</a></p>
-                    <p class="text">Wachtwoord vergeten? <span @click="forgotPassword()" class="link">Krijg een tijdelijke</span></p>
+                    <p class="text">Wachtwoord vergeten? <span @click="showForm = 'forgot'" class="link">Krijg een tijdelijk wachtwoord</span></p>
 
                 </div>
             </form>
 
-            <form @submit.prevent="sendOtp()" class="form" v-else>
+            <form @submit.prevent="sendOtp()" class="form" v-if="showForm === 'otp'">
                 <div class="login__header">
                     <h1 class="title">Verificatie</h1>
                     <span class="text__container">
@@ -65,12 +65,34 @@
                 </div>
             </form>
 
+            <form @submit.prevent="forgotPassword()" class="form" v-if="showForm === 'forgot'">
+                
+                <div class="login__header">
+                    <h1 class="title">Wachtwoord vergeten?</h1>
+                    <span class="text__container">
+                        <p class="text">Als u uw e-mail invuld krijg je daar in een tijdeljke wachtwoord</p>
+                        <p class="text">Daar mee kan je inloggen</p>
+                    </span>
+                </div>
+
+
+                <div class="input-container">
+                    <input type="email" placeholder="Email" class="input" required v-model.trim="email">
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="btn">Stuur wachtwoord</button>
+                    <p class="text">Nog geen account? <a href="/plans" class="link">Neem eerst een abonnement</a></p>
+                </div>
+            </form>
+
         </section>
     </main>
 </template>
 <script>
 import { auth } from '@/auth';
 import router from '@/router';
+import { toastService } from '@/services/toastService';
 import { sharedfunctions } from '@/sharedFunctions';
 import { jwtDecode } from 'jwt-decode';
 
@@ -96,7 +118,7 @@ export default {
             email: '',
             password: '',
             remember: false,
-            showOtp: false,
+            showForm: 'login',
             otp: '',
         };
     },
@@ -184,13 +206,21 @@ export default {
                 let incommingdata = await response.json()
                 console.log(incommingdata);
 
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
+
+                if (incommingdata?.temp_used == true) {
+                    auth.temp_used = true
+                }
+
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)
                     router.push('/')
 
                 }
                 else if (incommingdata?.otp_required) {
-                    this.showOtp = true
+                    this.showForm = 'otp'
                 }
 
             } catch (err) {
@@ -211,6 +241,10 @@ export default {
                 let incommingdata = await response.json()
                 console.log(incommingdata);
 
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
+
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)
                     router.push('/')
@@ -220,16 +254,26 @@ export default {
             }
         },
         async forgotPassword() {
-            const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/forgot_password`, {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/forgot_password`, {
                     method: 'POST',
                     body: JSON.stringify({
-                        email: this.email,
-                        otp: this.otp
+                        email: this.email
                     })
                 })
 
                 let incommingdata = await response.json()
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
+                
                 console.log(incommingdata);
+                this.showForm = 'login'
+
+            } catch (err) {
+                // error handling hier
+            }
+
         }
 
 
