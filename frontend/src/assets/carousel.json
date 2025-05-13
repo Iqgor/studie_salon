@@ -14,7 +14,6 @@
       {"title": "Actief leren Spaans", "url": "actief-leren-spaans"},
       {"title": "Actief leren Scheikunde", "url": "actief-leren-scheikunde"},
       {"title": "Actief leren Wiskunde", "url": "actief-leren-wiskunde"},
-      {"title": "Passief leren", "url": "passief-leren"},
       {"title": "Spiekbriefjes techniek", "url": "spiekbriefjes-techniek"},
       {"title": "Pomodoro techniek", "url": "pomodoro-techniek"},
       {"title": "Chatbot / Ai - Praktisch gebruik", "url": "chatbot-ai-praktisch-gebruik"},
@@ -71,7 +70,7 @@
       {"title": "Veerkracht", "url": "veerkracht"},
       {"title": "Doelgerichtheid", "url": "doelgerichtheid"}
     ],
-    "Momenten van rust voor jou": [
+    "Jij en rust": [
       {"title": "Rust in je hoofd", "url": "rust-in-je-hoofd"},
       {"title": "Rust voor een toets", "url": "rust-voor-een-toets"},
       {"title": "Vergeven 4 zinnen", "url": "vergeven-4-zinnen"},

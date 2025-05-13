@@ -680,6 +680,21 @@ export default {
     color: var(--color-background-100);
 }
 
+.getplan__input_label p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-text);
+}
+.getplan__input_label a {
+    color: var(--color-secondary-500);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+.getplan__input_label a:hover {
+    color: var(--color-secondary-600);
+}
+
 .getplan__buttons {
     display: flex;
     flex-direction: row;
@@ -904,5 +919,9 @@ export default {
 .small_txt {
     font-size: 0.8rem;
     color: var(--color-text);
+hr{
+    border: 1px solid var(--color-text);
+    width: 100%;
+    margin: 2rem 0;
 }
 </style>

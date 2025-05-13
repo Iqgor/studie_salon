@@ -112,9 +112,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 // Insert activity into the database
                 $stmt = $conn->prepare("INSERT INTO activities (user_id, vak,maakwerk, title,start_datetime, end_datetime) VALUES (?, ?, ?, ?, ?, ?)");
-                $startDateTime = $startDate . ' 00:00:00';
-                $endDateTime = $endDate ? $endDate . ' 23:59:59' : null;
-                $stmt->bind_param("isssss", $userId, $vakName, $maakWerk, $title, $startDateTime, $endDateTime);
+                $startDateTime = $startDate .':00';
+                $endDateTime = $endDate ? $endDate . ':00' : null;
+
+                $stmt->bind_param("isssss", $userId, $vakName,$maakWerk, $title, $startDateTime, $endDateTime);
+
 
                 if ($stmt->execute()) {
                     jsonResponse(['message' => 'Activity created successfully', 'activity_id' => $stmt->insert_id], 201);
@@ -621,9 +623,40 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(['error' => 'No quotes found'], 404);
                 }
                 break;
+            case 'getTekstLinks':
+                $tegel = $_POST['slug'] ?? null; 
+                $stmt = $conn->prepare("SELECT slug, name FROM teksten WHERE tegel = ?");
+                $stmt->bind_param("s", $tegel);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $links = [];
+                while ($row = $result->fetch_assoc()) {
+                    $links[] = [
+                        'slug' => $row['slug'],
+                        'name' => $row['name']
+                    ];
+                }
+                jsonResponse($links, 200);
+                break;
+            case 'getTekst':
+                $slug = $_POST['slug'] ?? null; // Get slug from POST data
+                $stmt = $conn->prepare("SELECT tekst FROM teksten WHERE slug = ?");
+                $stmt->bind_param("s", $slug);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $tekst = $result->fetch_assoc();
+                if ($tekst) {
+                    jsonResponse(['tekst' => $tekst['tekst']], 200);
+                } else {
+                    jsonResponse(['error' => 'No text found'], 404);
+                }
+                break;
             case null:
                 jsonResponse(['error' => 'Resource not found'], 404);
 
+                break;
+            default:
+                jsonResponse(['error' => 'Resource not found'], 404);
                 break;
         }
         break;
