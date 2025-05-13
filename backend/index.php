@@ -23,7 +23,8 @@ $conn = getDBConnection();
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         $url = $_SERVER['REQUEST_URI'];
-        $urlParts = explode('/', trim($url, '/'));
+        $urlParts = explode('?', $url, 2);
+        $urlParts = explode('/', trim($urlParts[0], '/'));
         $resource = $urlParts[2] ?? null;
         switch ($resource) {
             case 'plans':
@@ -90,8 +91,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
 
         $url = $_SERVER['REQUEST_URI'];
-        $urlParts = explode('/', trim($url, '/'));
-        // dit veranderen naar 1 voor server en 2 voor local
+        $urlParts = explode('?', $url, 2);
+        $urlParts = explode('/', trim($urlParts[0], '/'));
         $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
@@ -111,10 +112,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 // Insert activity into the database
                 $stmt = $conn->prepare("INSERT INTO activities (user_id, vak,maakwerk, title,start_datetime, end_datetime) VALUES (?, ?, ?, ?, ?, ?)");
-                $startDateTime = $startDate .':00';
+                $startDateTime = $startDate . ':00';
                 $endDateTime = $endDate ? $endDate . ':00' : null;
 
-                $stmt->bind_param("isssss", $userId, $vakName,$maakWerk, $title, $startDateTime, $endDateTime);
+                $stmt->bind_param("isssss", $userId, $vakName, $maakWerk, $title, $startDateTime, $endDateTime);
 
 
                 if ($stmt->execute()) {
@@ -201,7 +202,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 //^ Validatie van vereiste velden
                 if (!$email || !$password) {
-                    jsonResponse(['error' => 'Email and password are required'], 400);
+                    jsonResponse(['title' => 'Gegevens onderbreken', 'message' => 'Email en wachtwoord zijn nodig', 'type' => 'error'], 400);
                     exit;
                 }
 
@@ -211,41 +212,51 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt->execute();
                 $result = $stmt->get_result();
 
+
+
+
                 if ($result->num_rows === 0) {
-                    jsonResponse(['error' => 'Invalid email or password'], 401);
+                    jsonResponse(['title' => 'niet gevonden', 'message' => 'Geen gebruiker gevonden met: ' . $email, 'type' => 'error'], 401);
+
                     exit;
                 }
-
+                $temp_used = false; // kijken of temp wachtwoord is gebruikt
                 $user = $result->fetch_assoc();
+                //^ als de gebruiker zijn email niet geverifieerd is
+
+
                 //^ Wachtwoord controleren
                 // Controleer of er een temp_password is
                 if (isset($user['temp_password']) && isset($user['temp_password_expires_at'])) {
                     // Controleer of temp_password geldig is en niet verlopen
-                    if (password_verify($password, $user['temp_password']) && strtotime($user['temp_password_expires_at']) > time()) {
+                    if (
+                        password_verify($password, $user['temp_password']) &&
+                        strtotime($user['temp_password_expires_at']) > time()
+                    ) {
+                        $temp_used = true; // Temp wachtwoord is gebruikt
                         // Temp wachtwoord is geldig
-                        // Optioneel: wis het temp_password na succesvol inloggen
+                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
+                        $stmt->bind_param("i", $user['id']);
+                        $stmt->execute();
+
+                    } elseif (password_verify($password, $user['password'])) {
+                        // Normaal wachtwoord is geldig
                         $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
                         $stmt->bind_param("i", $user['id']);
                         $stmt->execute();
                     } else {
                         // Temp wachtwoord is ongeldig of verlopen
-                        jsonResponse(['error' => 'Invalid or expired temporary password'], 401);
+                        jsonResponse(['title' => 'tijdelijk wachtwoord', 'message' => 'tijdelijk wachtwoord klopt niet of is vergaan', 'type' => 'error'], 401);
                         exit;
                     }
                 } else {
                     // Geen temp_password, dus controleer het normale wachtwoord
                     if (!password_verify($password, $user['password'])) {
-                        jsonResponse(['error' => 'Invalid email or password'], 401);
+                        jsonResponse(['title' => 'verkeerd wachtwoord', 'message' => 'wachtwoord is verkeerd', 'type' => 'error'], 401);
                         exit;
                     }
                 }
 
-
-                //^ controleren of gebruiker actief is
-                if ($user['active'] !== 1) {
-                    jsonResponse(['error' => 'User is not active'], 403);
-                    exit;
-                }
 
                 //^ Controleer of gebruiker een abonnement heeft
                 $stmt = $conn->prepare("SELECT * FROM subscriptions WHERE user_id = ? AND end_date > NOW()");
@@ -254,10 +265,10 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $result = $stmt->get_result();
 
                 $subscription = $result->fetch_assoc();
-                if ($subscription["status"] !== "active") {
-                    jsonResponse(['error' => 'Subscription is not active'], 403);
-                    exit;
-                }
+                // if ($subscription["status"] !== "active") {
+                // jsonResponse(['title' => 'Geen actiev abonnement','message' => 'Neem een abonnement om in te loggen', 'type' => 'error'], 401);
+                // exit;
+                // }
 
                 //^ Token genereren (JWT)
                 $secret_key = "your_secret_key"; // use a secure one in real apps
@@ -319,12 +330,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                     try {
                         $mail->isSMTP();
-                        
+
                         $mail->Host = $config['MAIL_HOST'];
-                        ;
                         $mail->SMTPAuth = true;
-                        $mail->Username = $config['MAIL_USERNAME'];  // <-- Jouw Gmail-adres
-                        $mail->Password = $config['MAIL_PASSWORD'];  // <-- App-wachtwoord van Gmail
+                        $mail->Username = $config['MAIL_USERNAME'];
+                        $mail->Password = $config['MAIL_PASSWORD'];
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 
@@ -339,15 +349,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         $mail->send();
 
                         // Geef aan frontend aan dat OTP vereist is
-                        jsonResponse([
-                            'message' => 'OTP vereist',
-                            'otp_required' => true,
-                        ], 200);
+                        jsonResponse(['title' => 'OTP nodig', 'message' => 'Email verstuurd met een tijdelijke code', 'type' => 'message', 'otp_required' => true], 200);
 
                     } catch (Exception $e) {
-                        jsonResponse([
-                            'error' => 'E-mail verzenden mislukt: ' . $mail->ErrorInfo
-                        ], 500);
+
+                        jsonResponse(['title' => 'verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
                     }
                 }
 
@@ -360,6 +366,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     'message' => 'Login successful',
                     'token' => $jwt,
                     'active' => $user['active'],
+                    'temp_used' => $temp_used, // Add this line
                 ], 200);
 
                 break;
@@ -371,6 +378,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 if (!$code || !$email) {
                     jsonResponse(['error' => 'Code en email zijn verplicht'], 400);
+                    jsonResponse(['title' => 'Gegevens missen', 'message' => 'Geef de code in uw mail en uw email', 'type' => 'error'], 400);
                     exit;
                 }
 
@@ -380,12 +388,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND otp_code = ? AND otp_expires_at > ?");
                 $stmt->bind_param("sss", $email, $code, $now);
                 $stmt->execute();
-                
+
                 $result = $stmt->get_result();
                 $user = $result->fetch_assoc();
-                
+
                 if (!$user) {
-                    jsonResponse(['error' => 'Ongeldige of verlopen OTP'], 401);
+                    jsonResponse(['title' => 'Code verlopen', 'message' => 'vraag een nieuwe code aan', 'type' => 'error'], 401);
                     exit;
                 }
 
@@ -435,28 +443,78 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             case 'register':
+
                 $data = json_decode(file_get_contents('php://input'), true);
                 $name = $data['name'] ?? null;
                 $email = $data['email'] ?? null;
-                $password = $data['password'] ?? null;
 
                 // Validate required fields
-                if (!$name || !$email || !$password) {
-                    jsonResponse(['error' => 'Name, email, and password are required'], 400);
+                if (!$name || !$email) {
+                    jsonResponse(['title' => 'niet gevonden', 'message' => 'Email en/of wachtwoord zijn verkeerd', 'type' => 'error'], 400);
                     exit;
                 }
 
-                // Hash password
-                $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+                // Validate email format
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    jsonResponse(['title' => 'ongeldig e-mailformaat', 'message' => 'Wij supporten deze email niet', 'type' => 'error'], 400);
+                    exit;
+                }
 
-                // Insert user into the database
-                $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-                $stmt->bind_param("sss", $name, $email, $hashedPassword);
+                // Check if email already exists
+                $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+                $stmt->bind_param("s", $email);
+                $stmt->execute();
+                $stmt->store_result();
 
-                if ($stmt->execute()) {
-                    jsonResponse(['message' => 'User created successfully', 'user_id' => $stmt->insert_id], 201);
-                } else {
-                    jsonResponse(['error' => 'Failed to create user'], 500);
+                if ($stmt->num_rows > 0) {
+                    jsonResponse(['title' => 'Email bestaat al', 'message' => 'Gebruik een ander email', 'type' => 'error'], 409);
+                    exit;
+                }
+
+
+                // Genereer tijdelijk wachtwoord
+                $tempPasswordPlain = bin2hex(random_bytes(4)); // 8 tekens, veilig en random
+                $hashedTempPassword = password_hash($tempPasswordPlain, PASSWORD_BCRYPT);
+                $expiry = date('Y-m-d H:i:s', time() + 1800); // 30 minuten geldig
+
+                // Sla op in de database
+                $currentTime = date('Y-m-d H:i:s'); // huidige timestamp
+
+                // Sla op in de database
+                $stmt = $conn->prepare("INSERT INTO users (name, email, temp_password, temp_password_expires_at, created_at, updated_at, last_login) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssssss", $name, $email, $hashedTempPassword, $expiry, $current_time, $current_time, $current_time  );
+                $stmt->execute();
+
+
+
+
+
+                $mail = new PHPMailer(true);
+
+                try {
+                    $mail->isSMTP();
+                    $mail->Host = $config['MAIL_HOST'];
+                    $mail->SMTPAuth = true;
+                    $mail->Username = $config['MAIL_USERNAME'];
+                    $mail->Password = $config['MAIL_PASSWORD'];
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 587;
+
+                    $mail->setFrom($config['MAIL_USERNAME'], 'StudieSalon');
+                    $mail->addAddress($email);  // Ontvanger
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Jouw tijdelijke wachtwoord';
+                    $mail->Body = "De wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+                    $mail->AltBody = "De wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
+
+                    $mail->send();
+
+                    // Geef aan frontend aan dat tijdelijk wachtwoord is verzonden
+                    jsonResponse(['title' => 'Email verzonden', 'message' => 'U heeft een tijdelijk wachtwoord gekregen', 'type' => 'message'], 200);
+
+                } catch (Exception $e) {
+                    jsonResponse(['title' => 'Verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
                 }
                 break;
             case 'forgot_password':
@@ -465,7 +523,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 // Validate input
                 if (!$email) {
-                    jsonResponse(['error' => 'Email is required'], 400);
+                    jsonResponse(['title' => 'Email in nodig', 'message' => 'Geef uw email op', 'type' => 'error'], 400);
                     exit;
                 }
 
@@ -477,7 +535,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $user = $result->fetch_assoc();
 
                 if (!$user) {
-                    jsonResponse(['error' => 'Gebruiker met dit e-mailadres bestaat niet'], 404);
+                    jsonResponse(['title' => 'Geen gebruiker gevonden', 'message' => 'Gebruiker bestaat niet', 'type' => 'error'], 404);
                     exit;
                 }
 
@@ -496,10 +554,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 try {
                     $mail->isSMTP();
                     $mail->Host = $config['MAIL_HOST'];
-                    ;
                     $mail->SMTPAuth = true;
-                    $mail->Username = $config['MAIL_USERNAME'];  // <-- Jouw Gmail-adres
-                    $mail->Password = $config['MAIL_PASSWORD'];  // <-- App-wachtwoord van Gmail
+                    $mail->Username = $config['MAIL_USERNAME'];
+                    $mail->Password = $config['MAIL_PASSWORD'];
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port = 587;
 
@@ -514,43 +571,39 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $mail->send();
 
                     // Geef aan frontend aan dat tijdelijk wachtwoord is verzonden
-                    jsonResponse([
-                        'message' => 'tijdelijk wachtwoord verzonden'
-                    ], 200);
+                    jsonResponse(['title' => 'Email verzonden', 'message' => 'U heeft een tijdelijk wachtwoord gekregen', 'type' => 'success'], 200);
 
                 } catch (Exception $e) {
-                    jsonResponse([
-                        'error' => 'E-mail verzenden mislukt: ' . $mail->ErrorInfo
-                    ], 500);
+                    jsonResponse(['title' => 'Verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
                 }
                 break;
-                case 'change_password':
-                    $data = json_decode(file_get_contents('php://input'), true);
-                    $userId = $data['userId'] ?? null;
-                    $newPassword = $data['newPassword'] ?? null;
+            case 'change_password':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $userId = $data['userId'] ?? null;
+                $newPassword = $data['newPassword'] ?? null;
 
-                    // Validate input
-                    if (!$userId || !$newPassword) {
-                        jsonResponse(['error' => 'User ID and new password are required'], 400);
-                        exit;
-                    }
+                // Validate input
+                if (!$userId || !$newPassword) {
+                    jsonResponse(['title' => 'Gegevens missen', 'message' => 'Geef uw wachtwoord op', 'type' => 'error'], 400);
+                    exit;
+                }
 
-                    // Hash new password
-                    $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                // Hash new password
+                $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
 
-                    // Update password in the database
-                    $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-                    $stmt->bind_param("si", $hashedNewPassword, $userId);
-                    
-                    if ($stmt->execute()) {
-                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
-                        $stmt->bind_param("i", $userId);
-                        $stmt->execute();
-                        jsonResponse(['message' => 'Password changed successfully'], 200);
-                    } else {
-                        jsonResponse(['error' => 'Failed to change password'], 500);
-                    }
-                    break;
+                // Update password in the database
+                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+                $stmt->bind_param("si", $hashedNewPassword, $userId);
+
+                if ($stmt->execute()) {
+                    $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
+                    $stmt->bind_param("i", $userId);
+                    $stmt->execute();
+                    jsonResponse(['title' => 'Wachtwoord veranderd', 'message' => 'Uw wachtwoord is veranderd', 'type' => 'success'], 200);
+                } else {
+                    jsonResponse(['title' => 'Veranderen gevaald', 'message' => 'wachtwoord veranderen gevaald', 'type' => 'error'], 500);
+                }
+                break;
 
 
 
@@ -575,7 +628,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 break;
             case 'getTekstLinks':
-                $tegel = $_POST['slug'] ?? null; 
+                $tegel = $_POST['slug'] ?? null;
                 $stmt = $conn->prepare("SELECT slug, name FROM teksten WHERE tegel = ?");
                 $stmt->bind_param("s", $tegel);
                 $stmt->execute();
@@ -609,6 +662,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
             default:
                 jsonResponse(['error' => 'Resource not found'], 404);
                 break;
+        }
+        break;
+    case 'PUT':
+        $url = $_SERVER['REQUEST_URI'];
+        $urlParts = explode('?', $url, 2);
+        $urlParts = explode('/', trim($urlParts[0], '/'));
+        $resource = $urlParts[2] ?? null;
+        switch ($resource) {
+
         }
 
 

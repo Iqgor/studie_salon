@@ -4,6 +4,7 @@ import appheader from './components/appHeader.vue'
 import SideWekkers from './components/SideWekkers.vue'
 import { onMounted, ref } from 'vue';
 import { auth } from '@/auth';
+import Toast from './components/Toast.vue';
 import { sharedfunctions } from './sharedFunctions';
 
 export default {
@@ -11,7 +12,7 @@ export default {
   components: {
     appheader,
     RouterView,
-
+    Toast
   },
   data() {
     return {
@@ -62,6 +63,7 @@ export default {
 
   <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
   <RouterView />
+  <toast/>
   <footer>
 
   </footer>

@@ -218,6 +218,9 @@ input {
 body {
   font-size: 1.6rem;
   background: var(--color-background-500);
+  max-width: 100vw;
+  overflow-x: hidden;
+
 }
 
 a {
