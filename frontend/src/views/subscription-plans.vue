@@ -919,6 +919,7 @@ export default {
 .small_txt {
     font-size: 0.8rem;
     color: var(--color-text);
+}
 hr{
     border: 1px solid var(--color-text);
     width: 100%;
