@@ -237,10 +237,6 @@ export default {
         },
 
         checkForm() {
-            if (!this.email || !this.name) {
-                alert('Vul alle velden in');
-                return;
-            }
 
             if (this.donthaveAccount) {
                 // Handle account creation
@@ -268,6 +264,10 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
+
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
 
                 if (incommingdata?.token) {
 
@@ -300,6 +300,9 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
 
                 if (incommingdata?.token) {
                     this.canPay = true
@@ -319,6 +322,9 @@ export default {
                 })
 
                 let incommingdata = await response.json()
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
                 console.log(incommingdata);
             } catch (err) {
                 // error handling hier

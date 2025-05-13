@@ -92,6 +92,7 @@
 <script>
 import { auth } from '@/auth';
 import router from '@/router';
+import { toastService } from '@/services/toastService';
 import { sharedfunctions } from '@/sharedFunctions';
 import { jwtDecode } from 'jwt-decode';
 
@@ -205,6 +206,10 @@ export default {
                 let incommingdata = await response.json()
                 console.log(incommingdata);
 
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
+
                 if (incommingdata?.temp_used == true) {
                     auth.temp_used = true
                 }
@@ -236,6 +241,10 @@ export default {
                 let incommingdata = await response.json()
                 console.log(incommingdata);
 
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
+
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)
                     router.push('/')
@@ -254,6 +263,10 @@ export default {
                 })
 
                 let incommingdata = await response.json()
+                if (incommingdata?.title && incommingdata?.message) {
+                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                }
+                
                 console.log(incommingdata);
                 this.showForm = 'login'
 

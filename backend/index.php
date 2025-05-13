@@ -347,7 +347,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         $mail->send();
 
                         // Geef aan frontend aan dat OTP vereist is
-                        jsonResponse(['title' => 'niet gevonden','message' => 'Email en/of wachtwoord zijn verkeerd', 'type' => 'error', 'otp_required' => true], 200);
+                        jsonResponse(['title' => 'OTP nodig','message' => 'Email verstuurd met een tijdelijke code', 'type' => 'message', 'otp_required' => true], 200);
 
                     } catch (Exception $e) {
 
@@ -505,7 +505,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $mail->send();
 
                     // Geef aan frontend aan dat tijdelijk wachtwoord is verzonden
-                    jsonResponse(['title' => 'Email verzonden','message' => 'U heeft een tijdelijk wachtwoord gekregen', 'type' => 'success'], 200);
+                    jsonResponse(['title' => 'Email verzonden','message' => 'U heeft een tijdelijk wachtwoord gekregen', 'type' => 'message'], 200);
 
                 } catch (Exception $e) {
                     jsonResponse(['title' => 'Verzenden mislukt','message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
