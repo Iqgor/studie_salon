@@ -1,6 +1,5 @@
 <template>
     <main class="main">
-        <button class="btn" ></button>
         <div class="container">
 
             <section class="getplan" v-if="selectedPlan.id">
@@ -19,9 +18,7 @@
                         <input v-if="donthaveAccount" type="text" placeholder="Naam" :required="donthaveAccount"
                             v-model="name">
                         <input type="email" placeholder="Email" required v-model="email">
-                        <input type="password" placeholder="Wachtwoord" required v-model="password">
-                        <input v-if="donthaveAccount" type="password" placeholder="Herhaal wachtwoord"
-                            :required="donthaveAccount" v-model="repeatPassword">
+                        <input type="password" placeholder="Wachtwoord" required v-model="password" v-if="!donthaveAccount">
                         <input v-if="showOtp" type="text" placeholder="OTP code" :required="showOtp" v-model="otp">
 
 
@@ -55,6 +52,13 @@
                         </button>
 
 
+                    </div>
+
+                    <div class="small_txt">
+                        <p v-if="donthaveAccount">
+                            Als je een account aanmaakt krijg je een tijdelijk wachtwoord toegestuurd naar je email.
+                            
+                        </p>
                     </div>
 
                     <button class="getplan__send">{{ donthaveAccount ? 'Registreer' : 'Betaal' }}</button>
@@ -172,6 +176,7 @@
         </div>
     </main>
 </template>
+
 <script>
 import { auth } from '@/auth';
 import { sharedfunctions } from '@/sharedFunctions';
@@ -232,18 +237,7 @@ export default {
         },
 
         checkForm() {
-            if (this.donthaveAccount) {
-                if (this.password !== this.repeatPassword) {
-                    alert('Wachtwoorden komen niet overeen');
-                    return;
-                }
-                if (this.password.length < 8) {
-                    alert('Wachtwoord moet minimaal 8 karakters lang zijn');
-                    return;
-                }
-
-            }
-            if (!this.email || !this.password) {
+            if (!this.email || !this.name) {
                 alert('Vul alle velden in');
                 return;
             }
@@ -252,9 +246,7 @@ export default {
                 // Handle account creation
                 console.log('Creating account with', {
                     name: this.name,
-                    email: this.email,
-                    password: this.password,
-                    repeatPassword: this.repeatPassword
+                    email: this.email
                 });
                 this.createAccount()
             } else if (this.showOtp) {
@@ -322,8 +314,7 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         name: this.name,
-                        email: this.email,
-                        password: this.password
+                        email: this.email
                     })
                 })
 
@@ -373,6 +364,7 @@ export default {
     }
 }      
 </script>
+
 <style scoped lang="css">
 .main {
     padding: 2rem;
@@ -900,6 +892,11 @@ export default {
 .detail__feature_name {
     font-size: 2rem;
     font-weight: bold;
+    color: var(--color-text);
+}
+
+.small_txt {
+    font-size: 0.8rem;
     color: var(--color-text);
 }
 </style>

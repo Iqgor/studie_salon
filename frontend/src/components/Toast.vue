@@ -258,7 +258,6 @@ export default {
     bottom: initial;
     top: 0rem;
     flex-direction: column-reverse;
-    background: red;
   }
   .toast__type{
     display: none;
