@@ -1,8 +1,12 @@
 <template>
-  <div class="wekkers">
+  <div v-if="!app" class="wekkers">
     <div class="clock-icon" @click="togglePomodoro"><i class="fa-solid fa-stopwatch "></i></div>
     <div class="alarm-icon" @click="toggleAlarm"><i class="fa-solid fa-clock"></i></div>
   </div >
+  <div v-else class="wekkers-app">
+    <div class="clock-icon" @click="togglePomodoro"><i class="fa-solid fa-stopwatch "></i></div>
+    <div class="alarm-icon" @click="toggleAlarm"><i class="fa-solid fa-clock"></i></div>
+  </div>
 
   <!-- pomodoro -->
   <div class="achtergrondblur" v-if="pomodoroClicked">
@@ -53,6 +57,12 @@ import alarmSoundFile from '@/assets/sounds/alarm-clock-90867.mp3';
 
 export default {
   name: 'SideWekkers',
+  props:{
+    app:{
+      type:Boolean,
+      default:false
+    }
+  },
   data() {
     return {
       // Wekker
@@ -192,6 +202,12 @@ export default {
   padding: 0.5rem;
 }
 
+.wekkers-app{
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .achtergrondblur{
   position: fixed;
   z-index: 99;
@@ -202,15 +218,26 @@ export default {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
-.clock-icon{
+.wekkers > .clock-icon{
   border-bottom: var(--color-secondary-500) 2px solid;
   ;
 }
 
-.fa-clock, .fa-stopwatch{
+
+.wekkers .fa-clock, .wekkers .fa-stopwatch{
   color: var(--color-primary-800);
   margin: 10px;
   transition: all 0.3s ease;
+}
+
+.wekkers-app .fa-stopwatch , .wekkers-app .fa-clock{
+  color: var(--color-primary-400);
+  transition: all 0.3s ease;
+
+}
+
+.wekkers-app .fa-clock{
+  margin-top: 0.25rem;
 }
 
 .fa-stopwatch:hover, .fa-clock:hover{
