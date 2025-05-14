@@ -24,7 +24,6 @@
         <div v-show="toggleTranslate" id="google_translate_element"></div>
       </i>
 
-
       <!-- <div class="theme-switcher">
     <label for="theme-select"><i class="fa-solid fa-palette"></i></label>
     <select id="theme-select" class="theme-select" v-model="selectedTheme" @change="switchTheme(selectedTheme)">
@@ -36,7 +35,7 @@
   </div> -->
 
 
-      <div class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
+      <div v-if="auth.isLoggedIn" class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
 
         <div class="dropdown">
           <i class="fa-solid fa-palette"></i>
@@ -50,24 +49,15 @@
 
       </div>
 
-
-
-
-
-
-
-
-
-
-
     </div>
   </header>
 </template>
 <script>
 import { sharedfunctions } from '../sharedFunctions';
+import { auth } from '@/auth';
 export default {
   setup() {
-    return { sharedfunctions }
+    return { sharedfunctions, auth }
   },
 
   name: 'appHeader',

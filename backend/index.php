@@ -125,7 +125,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 $stmt->close();
                 break;
-
+            case 'addText':
+                $slug = $_POST['slug'] ?? null; // Get slug from POST data
+                $text = $_POST['tekst'] ?? null; // Get text from POST data
+                // Remove inline styling from the text
+                $text = preg_replace('/style="[^"]*"/i', '', $text);
+                if(!$slug || !$text) {
+                    jsonResponse(['error' => 'slug and text are required'], 400);
+                    exit;
+                }
+                $stmt = $conn->prepare("UPDATE teksten SET tekst = ? WHERE slug = ?");
+                $stmt->bind_param("ss", $text, $slug);
+                if ($stmt->execute()) {
+                    jsonResponse(['message' => 'Text added successfully'], 201);
+                } else {
+                    jsonResponse(['error' => 'Failed to add text'], 500);
+                }
+                break;
             case 'users':
                 $queryParams = $_GET; // Get all query parameters from the URL
                 $stmt = $conn->prepare("SELECT * FROM users");
