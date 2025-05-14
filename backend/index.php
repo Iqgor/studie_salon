@@ -27,59 +27,64 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $urlParts = explode('/', trim($urlParts[0], '/'));
         $resource = $urlParts[1] ?? null;
         switch ($resource) {
-            case 'plans':
+            case 'subscriptions':
                 $stmt = $conn->prepare("
-        SELECT 
-            plans.id AS plan_id,
-            plans.name AS plan_name,
-            plans.price,
-            plans.description AS plan_description,
-            plans.rank AS plan_rank,
-            plans.icon AS plan_icon,
-            plans.sale AS plan_sale,
-            plans.sale_type AS plan_sale_type,
-            features.id AS feature_id,
-            features.name AS feature_name,
-            features.description AS feature_description,
-            features.icon AS feature_icon
-        FROM plans
-        LEFT JOIN features ON plans.id = features.plan_id
-        ORDER BY plans.rank ASC
-    ");
+                SELECT 
+                    s.id AS subscription_id,
+                    s.name AS subscription_name,
+                    s.price,
+                    s.description AS subscription_description,
+                    s.rank AS subscription_rank,
+                    s.icon AS subscription_icon,
+                    s.sale AS subscription_sale,
+                    s.sale_type AS subscription_sale_type,
+                    s.is_trial AS subscription_is_trial,
+                    f.id AS feature_id,
+                    f.name AS feature_name,
+                    f.description AS feature_description,
+                    f.icon AS feature_icon,
+                    f.display AS feature_display
+                FROM subscriptions s
+                LEFT JOIN subscription_features sf ON s.id = sf.subscription_id
+                LEFT JOIN features f ON sf.feature_id = f.id
+                ORDER BY s.rank ASC
+            ");
                 $stmt->execute();
                 $result = $stmt->get_result();
 
-                $plans = [];
+                $subscriptions = [];
                 while ($row = $result->fetch_assoc()) {
-                    $planId = $row['plan_id'];
+                    $subscriptionId = $row['subscription_id'];
 
-                    if (!isset($plans[$planId])) {
-                        $plans[$planId] = [
-                            'id' => $row['plan_id'],
-                            'name' => $row['plan_name'],
+                    if (!isset($subscriptions[$subscriptionId])) {
+                        $subscriptions[$subscriptionId] = [
+                            'id' => $row['subscription_id'],
+                            'name' => $row['subscription_name'],
                             'price' => $row['price'],
-                            'description' => $row['plan_description'],
-                            'rank' => $row['plan_rank'],
-                            'icon' => $row['plan_icon'],
-                            'sale' => $row['plan_sale'],
-                            'sale_type' => $row['plan_sale_type'],
+                            'description' => $row['subscription_description'],
+                            'rank' => $row['subscription_rank'],
+                            'icon' => $row['subscription_icon'],
+                            'sale' => $row['subscription_sale'],
+                            'sale_type' => $row['subscription_sale_type'],
+                            'is_trial' => $row['subscription_is_trial'],
                             'features' => []
                         ];
                     }
 
                     if ($row['feature_id']) {
-                        $plans[$planId]['features'][] = [
+                        $subscriptions[$subscriptionId]['features'][] = [
                             'id' => $row['feature_id'],
                             'name' => $row['feature_name'],
                             'description' => $row['feature_description'],
-                            'icon' => $row['feature_icon']
+                            'icon' => $row['feature_icon'],
+                            'display' => $row['feature_display']
                         ];
                     }
                 }
 
-                $formattedPlans = array_values($plans);
+                $formattedSubscriptions = array_values($subscriptions);
 
-                jsonResponse(['plans' => $formattedPlans], 200);
+                jsonResponse(['subscriptions' => $formattedSubscriptions], 200);
                 break;
 
             default:
@@ -275,7 +280,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
                 //^ Controleer of gebruiker een abonnement heeft
-                $stmt = $conn->prepare("SELECT * FROM subscriptions WHERE user_id = ? AND end_date > NOW()");
+                $stmt = $conn->prepare("SELECT * FROM users_subscriptions WHERE user_id = ? AND end_date > NOW()");
                 $stmt->bind_param("i", $user['id']);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -498,7 +503,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 // Sla op in de database
                 $stmt = $conn->prepare("INSERT INTO users (name, email, temp_password, temp_password_expires_at, created_at, updated_at, last_login) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("sssssss", $name, $email, $hashedTempPassword, $expiry, $currentTime, $currentTime, $currentTime  );
+
+                $stmt->bind_param("sssssss", $name, $email, $hashedTempPassword, $expiry, $currentTime, $currentTime, $currentTime);
+
                 $stmt->execute();
 
 
@@ -624,8 +631,63 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
 
-            case 'create-payment':
-                jsonResponse(['error' => 'Method not allowed'], 405);
+            case 'subscribeTrial':
+                $data = json_decode(file_get_contents('php://input'), true);
+
+                if (!isset($data['user_id']) || !isset($data['plan_id'])) {
+                    jsonResponse(["title" => 'Gegevens missen', 'message' => 'U moet ingelogd zijn en een abonnement keizen', 'type' => 'error'], 400);
+                    break;
+                }
+
+                $userId = $data['user_id'];
+                $subscriptionId = $data['plan_id'];
+
+                // Step 1: Check if the user has already used the trial
+                $stmt = $conn->prepare("SELECT id FROM invoices WHERE user_id = ? AND subscription_id = ? AND is_trial = 1 LIMIT 1");
+                $stmt->bind_param("ii", $userId, $subscriptionId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+                    jsonResponse(['title'=>'Proefversie verlopen','message' => 'Je hebt deze proefversie al gebruikt.', 'type'=>'warning'], 403);
+                    break;
+                }
+
+                // Step 2: Check if user already has an active subscription
+                $today = date('Y-m-d');
+                $stmt = $conn->prepare("SELECT id FROM users_subscriptions WHERE user_id = ? AND end_date > ?");
+                $stmt->bind_param("is", $userId, $today);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+                    jsonResponse(['title'=>'Wijziging geblokkeerd','message' => 'Je hebt al een actief abonnement.', 'type'=>'warning'], 403);
+                    break;
+                }
+
+                // Step 3: Create a new invoice with is_trial = 1
+                $createdAt = date('Y-m-d H:i:s');
+                $stmt = $conn->prepare("INSERT INTO invoices (user_id, subscription_id, amount, is_trial, created_at) VALUES (?, ?, 0, 1, ?)");
+                $stmt->bind_param("iis", $userId, $subscriptionId, $createdAt);
+                $stmt->execute();
+
+                if ($stmt->affected_rows === 0) {
+                    jsonResponse(['title'=>'factuur probleem','message' => 'Kon factuur niet aanmaken.', 'type'=>'error'], 500);
+                    break;
+                }
+
+                // Step 4: Insert into users_subscriptions with 3-day expiry
+                $expiryDate = date('Y-m-d', strtotime('+3 days'));
+                $stmt = $conn->prepare("INSERT INTO users_subscriptions (user_id, subscription_id, start_date, end_date) VALUES (?, ?, ?, ?)");
+                $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
+                $stmt->execute();
+
+                if ($stmt->affected_rows === 0) {
+                    jsonResponse(['title'=>'iets verkeerd gegaan', 'message' => 'Kon abonnement niet activeren.', 'type'=> 'error'], 500);
+                    break;
+                }
+
+                jsonResponse([ 'title'=>'Proef versie genomen', 'message' => 'Proefabonnement succesvol geactiveerd.', 'type'=>'success'], 200);
                 break;
 
 
@@ -675,6 +737,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 jsonResponse(['error' => 'Resource not found'], 404);
 
                 break;
+
             default:
                 jsonResponse(['error' => 'Resource not found'], 404);
                 break;
