@@ -4,7 +4,7 @@
       <h2 class="carousel-titel" @click="changeIsClicked(i)">{{ index }}
         <i  @click.stop="changeIsClicked(i)" class="fa-solid fa-arrow-down" :class="!isClickedout[i] ? 'rotate': ''"></i>
       </h2>
-      <div :class="{'clickedOut':isClickedout[i]}" class="carousel-container">
+      <div :class="{'clickedOut':isClickedout[i]}" :id="`carousel-${i}`"  class="carousel-container">
         <router-link :key="i" v-for="(text,i) in info" :to="text.url" class="carousel-inhoud">
           <p class="carousel-informatie">
           {{ text.title }}
@@ -37,10 +37,24 @@ export default {
       // Initialize isClickedout with default values
       this.isClickedout = Array(Object.keys(this.CarouselData).length).fill(false);
     }
+    this.checkOverflowing()
   },
   methods: {
+    checkOverflowing() {
+      const carouselContainers = document.getElementsByClassName(`carousel-container`);
+      Array.from(carouselContainers).forEach((carouselContainer) => {
+        if (carouselContainer.scrollWidth > carouselContainer.clientWidth) {
+          carouselContainer.classList.add('showScroll');
+        } else {
+          carouselContainer.classList.remove('showScroll');
+        }
+      });
+    },
     changeIsClicked(index) {
       this.isClickedout[index] = !this.isClickedout[index];
+      this.$nextTick(() => {
+        this.checkOverflowing();
+      });
       localStorage.setItem('isClickedout', JSON.stringify(this.isClickedout));
     },
   },
@@ -68,11 +82,14 @@ export default {
   display: flex;
   flex-direction: row;
   gap: 2rem;
-  overflow-x: scroll;
   margin-right: -10rem;
   margin-left: -10rem;
   padding-left: 2rem;
 
+}
+
+.showScroll {
+  overflow-x: scroll;
 }
 
 
@@ -114,7 +131,7 @@ export default {
   background-color: var(--color-primary-300);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   margin-bottom: 1rem;
-  color: #000;
+  color: var(--color-text);
   border-radius: 1.5rem;
   padding: 1rem;
 }

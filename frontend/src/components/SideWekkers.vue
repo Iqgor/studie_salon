@@ -1,15 +1,23 @@
 <template>
-  <div class="wekkers">
-    <div class="clock-icon" @click="togglePomodoro"><i class="fa-solid fa-stopwatch "></i></div>
+
+  <div v-if="!app" class="wekkers">
+    <div class="clock-icon" @click="togglePomodoro"><p class="tomaat">🍅</p></div>
     <div class="alarm-icon" @click="toggleAlarm"><i class="fa-solid fa-clock"></i></div>
   </div >
+  <div v-else class="wekkers-app">
+    <div class="clock-icon" @click="togglePomodoro"><i class="fa-solid fa-stopwatch "></i></div>
+    <div class="alarm-icon" @click="toggleAlarm"><i class="fa-solid fa-clock"></i></div>
+  </div>
 
   <!-- pomodoro -->
   <div class="achtergrondblur" v-if="pomodoroClicked">
     <div class="pomodoro">
       <div class="pomodoro-header">
         <p class="pomodoro-titel">Pomodoro timer</p>
-        <p class="pomodoro-x" @click="togglePomodoro"><i class="fa-solid fa-x"></i></p>
+        <div class="pomodoro-header-icons">
+          <p class="pomodoro-settingsIcon"><i class="fa-solid fa-gear"></i></p>
+          <p class="pomodoro-x" @click="togglePomodoro"><i class="fa-solid fa-x"></i></p>
+        </div>
       </div>
       <div class="pomodoro-box">
         <span class="pomodoro-text">{{ pomodoroLabel }}</span>
@@ -53,6 +61,12 @@ import alarmSoundFile from '@/assets/sounds/alarm-clock-90867.mp3';
 
 export default {
   name: 'SideWekkers',
+  props:{
+    app:{
+      type:Boolean,
+      default:false
+    }
+  },
   data() {
     return {
       // Wekker
@@ -95,6 +109,7 @@ export default {
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
+      console.log('Huidige tijd:', this.currentTime);
       if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
         this.triggerAlarm();
       }
@@ -178,6 +193,8 @@ export default {
     clearInterval(this.pomodoroInterval);
   }
 };
+
+
 </script>
 
 <style scoped>
@@ -192,6 +209,12 @@ export default {
   padding: 0.5rem;
 }
 
+.wekkers-app{
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .achtergrondblur{
   position: fixed;
   z-index: 99;
@@ -202,15 +225,26 @@ export default {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
-.clock-icon{
+.wekkers > .clock-icon{
   border-bottom: var(--color-secondary-500) 2px solid;
   ;
 }
 
-.fa-clock, .fa-stopwatch{
+
+.wekkers .fa-clock, .wekkers .fa-stopwatch{
   color: var(--color-primary-800);
   margin: 10px;
   transition: all 0.3s ease;
+}
+
+.wekkers-app .fa-stopwatch , .wekkers-app .fa-clock{
+  color: var(--color-primary-400);
+  transition: all 0.3s ease;
+
+}
+
+.wekkers-app .fa-clock{
+  margin-top: 0.25rem;
 }
 
 .fa-stopwatch:hover, .fa-clock:hover{
@@ -223,8 +257,13 @@ export default {
 .fa-clock{
   font-size: 30px;
 }
-.fa-stopwatch{
+.tomaat{
   font-size: 35px;
+  margin-bottom: 10px;
+}
+
+.tomaat:hover{
+  cursor: pointer;
 }
 
 .alarm, .pomodoro{
@@ -254,6 +293,20 @@ export default {
 
 .alarm-titel, .pomodoro-titel{
   color: var(--color-text);
+}
+
+.pomodoro-header-icons{
+  display: flex;
+  gap: 2rem;
+  flex-direction: row;
+}
+
+.pomodoro-settingsIcon{
+  color: var(--color-text);
+}
+
+.pomodoro-settingsIcon:hover{
+  cursor: pointer;
 }
 
 .alarm-x:hover, .pomodoro-x:hover{

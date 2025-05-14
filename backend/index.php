@@ -25,7 +25,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
         switch ($resource) {
             case 'subscriptions':
                 $stmt = $conn->prepare("
@@ -98,7 +98,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
 
         switch ($resource) {
             case 'create_activity':
@@ -130,7 +130,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 $stmt->close();
                 break;
-
+            case 'addText':
+                $slug = $_POST['slug'] ?? null; // Get slug from POST data
+                $text = $_POST['tekst'] ?? null; // Get text from POST data
+                // Remove inline styling from the text
+                $text = preg_replace('/style="[^"]*"/i', '', $text);
+                if(!$slug || !$text) {
+                    jsonResponse(['error' => 'slug and text are required'], 400);
+                    exit;
+                }
+                $stmt = $conn->prepare("UPDATE teksten SET tekst = ? WHERE slug = ?");
+                $stmt->bind_param("ss", $text, $slug);
+                if ($stmt->execute()) {
+                    jsonResponse(['message' => 'Text added successfully'], 201);
+                } else {
+                    jsonResponse(['error' => 'Failed to add text'], 500);
+                }
+                break;
             case 'users':
                 $queryParams = $_GET; // Get all query parameters from the URL
                 $stmt = $conn->prepare("SELECT * FROM users");
@@ -487,7 +503,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 // Sla op in de database
                 $stmt = $conn->prepare("INSERT INTO users (name, email, temp_password, temp_password_expires_at, created_at, updated_at, last_login) VALUES (?, ?, ?, ?, ?, ?, ?)");
+
                 $stmt->bind_param("sssssss", $name, $email, $hashedTempPassword, $expiry, $currentTime, $currentTime, $currentTime);
+
                 $stmt->execute();
 
 
@@ -729,7 +747,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
         switch ($resource) {
 
         }

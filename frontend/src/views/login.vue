@@ -2,7 +2,7 @@
     <main class="main">
         <section class="card">
             <div class="slideshow-container">
-                <img src="/public/logo.png" alt="logo" class="logo">
+                <img src="/logo.png" alt="logo" class="logo">
 
                 <div class="slideshow">
                     <div class="mySlides ">
@@ -279,7 +279,7 @@ export default {
 
 
     }
-}      
+}
 </script>
 <style scoped lang="css">
 .main {
@@ -315,7 +315,7 @@ export default {
     align-items: start;
     padding: 1rem;
     flex-direction: column;
-    background-image: url("public/Placeholder.svg");
+    background-image: url("/Placeholder.svg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

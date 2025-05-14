@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import Login from '@/views/login.vue'
 import SubscriptionPlans from '@/views/subscription-plans.vue'
 import PrivacyVerklaring from '@/views/privacyVerklaring.vue'
+import Landingspage from '@/views/Landingspage.vue'
 import GebruikersVoorwaarden from '@/views/gebruikersVoorwaarden.vue'
 
 const router = createRouter({
@@ -12,6 +13,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+    },
+    {
+      path: '/index',
+      name: 'index',
+      component: Landingspage,
     },
     {
       path: '/login',
