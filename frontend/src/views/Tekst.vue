@@ -1,7 +1,7 @@
 <template>
   <main v-if="succes" class="main">
     <div>
-      <a class="waterFallLink" :href="('/'+slug.split('/')[0])">< Terug naar {{slug.split('/')[0]  }}</a>
+      <a class="waterFallLink" :href="('/'+firstSlug)">< Terug naar {{firstSlug  }}</a>
       <!-- <button @click="playTekst">Speel teksts af</button>
       <button @click="stopSpeech">Stop</button>
       <button @click="changeSpeed(0.5)">0.5x</button>
@@ -12,31 +12,42 @@
       <button @click="skipForward">>></button> -->
     </div>
     <div class="containerTekst" v-html="tekst"></div>
-    <a class="waterFallLink" :href="('/'+slug.split('/')[0])">< Terug naar {{slug.split('/')[0]  }}</a>
+    <a class="waterFallLink" :href="('/'+firstSlug)">< Terug naar {{firstSlug  }}</a>
+  </main>
+  <main class="main" v-else-if="!isAdmin && !loading">
+    <div class="adminText">
+      <h2>Geen tekst gevonden</h2>
+      <p>Je kan deze tekst aanmaken door tekst toe te voegen via dit tekst veld en op de knop er onder te klikken</p>
+      <jodit-editor class="textEditor" v-model="content" />
+      <button @click="addTekst">Voeg tekst toe</button>
+    </div>
   </main>
   <div v-else-if="!loading && !succes" class="not-found">
       <h1>404</h1>
       <p>Oops! The page you are looking for does not exist.</p>
       <router-link to="/">Go back to Home</router-link>
     </div>
-    <Toast v-if="loading" type="info" message="Laden..." />
 </template>
 <script>
-import Toast from '../components/Toast.vue'
-
+import { toastService } from '@/services/toastService';
+import 'jodit/build/jodit.min.css'
+import { JoditEditor } from 'jodit-vue'
 export default{
   name: "TekstView",
   components: {
-    Toast
+    JoditEditor
+
   },
   data() {
     return {
-      slug: window.location.href.replace(window.location.origin, '').replace('/',''),
+      slug: this.$route.params.slug,
+      firstSlug: window.location.pathname.split('/')[1],
       tekst: '',
       succes: false,
       loading: true,
       isSpeaking: false,
       utterance: null,
+      content: '',
     };
   },
   mounted() {
@@ -44,6 +55,27 @@ export default{
   },
 
   methods: {
+    addTekst(){
+      const formData = new FormData();
+      formData.append('slug', this.slug.replace('/','-'));
+      formData.append('tekst', this.content);
+      if(this.content.length === 0){
+        toastService.addToast('Geen tekst toegevoegd', 'Vul eers tekst in om te verzenden', 'error');
+        return;
+      }
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/addText`, {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(() => {
+          this.getTekst();
+          this.loading = false;
+        })
+        .catch(error => {
+          console.error('Error sending text', error);
+        });
+    },
     stopSpeech(){
       console.log('stopSpeech');
       window.speechSynthesis.cancel();
@@ -109,9 +141,6 @@ export default{
           if (data.tekst.length !== 0) {
             this.succes = true;
             this.loading = false;
-
-
-
             this.tekst = data.tekst;
           } else {
             this.succes = false;
@@ -158,6 +187,7 @@ export default{
   font-size: 2rem;
   line-height: 1.5;
   margin: 0.5rem 0 ;
+  font-weight: normal;
 }
 .containerTekst ul{
   list-style: none;
@@ -185,5 +215,38 @@ export default{
   border: 1px solid #ccc;
   padding: 0.5rem;
   text-align: left;
+}
+
+.adminText{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.adminText h2{
+  font-size: 200%;
+  margin-bottom: 1rem;
+}
+.adminText > button{
+  width: max-content;
+  background: var(--color-primary-500);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 1rem 2rem;
+  font-size: 120%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.adminText > button:hover{
+  background: var(--color-primary-400);
+}
+.adminText > button:active{
+  transform: translateY(2px);
+}
+
+.jodit-workplace{
+  height: 40vh !important;
 }
 </style>
