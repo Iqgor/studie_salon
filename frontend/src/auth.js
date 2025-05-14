@@ -7,12 +7,15 @@ import { jwtDecode } from 'jwt-decode'
 export const auth = reactive({
     //* is user logged in
     isLoggedIn: false,
-    //* data van user (id, organisatie, project)
+    //* data van user (id, email, etc)
     user: {},
+    //* de abonnement van de user
+    subscriptionId: null,
+    subscriptionName: null,
+    subscriptionFeatures: [],
+
     //* tokens die je binnenkrijgt
     token: null,
-    //* alleen de rollen
-    role: [],
     //* om dingen te verstoppen als je niet op localhost bent
     hidden: false,
     //* om te checken of je je temp was gebruikt
@@ -23,12 +26,15 @@ export const auth = reactive({
 
     //? zodra je wilt inloggen, krijg je binnen of je bent ingelogged en krijg je de token
     setAuth(logged, token) {
+        console.log('dsfsdafwesf');
         
+
+
         if (logged === true) {
 
             //* Meld dat je bent ingelogd
             this.isLoggedIn = logged
-            
+
 
             //* Krijgt je tokens binnen en word het leesbaar
             if (this.isLoggedIn) {
@@ -36,7 +42,7 @@ export const auth = reactive({
                 localStorage.setItem('token', token)
                 this.check()
             }
-        } else if(token) {
+        } else if (token) {
             this.token = token
             this.check()
         }
@@ -55,16 +61,20 @@ export const auth = reactive({
             localStorage.setItem('token', this.token)
             let data = jwtDecode(storageToken)
             this.user = data.user
+            console.log(data);
+            
+            this.getSubscription()
+
+
         }
-        
-        
+
+
     },
 
     reset() {
         (this.isLoggedIn = false),
             (this.user = {}),
-            (this.token = null),
-            (this.role = [])
+            (this.token = null)
     },
 
 
@@ -72,7 +82,6 @@ export const auth = reactive({
         this.isLoggedIn = false
         this.user = {}
         this.token = null
-        this.role = []
         localStorage.removeItem('token')
     },
     isLocalHost() {
@@ -80,5 +89,38 @@ export const auth = reactive({
         if (currentUrl.includes('localhost')) {
             this.hidden = true
         }
+    },
+    async getSubscription() {
+
+        try {
+            const url = new URL(`${import.meta.env.VITE_APP_API_URL}backend/activeSubscription`);
+            url.searchParams.append('user_id', this.user.id);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //Authorization: `Bearer ${this.token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            const json = await response.json();
+            console.log(json);
+            this.subscriptionId = json.id
+            this.subscriptionName = json.name
+            this.subscriptionFeatures = json.features
+
+            
+        } catch (error) {
+            console.error(error.message);
+        }
+    },
+    hasFeature(feature) {
+        
+        return this.subscriptionFeatures.includes(feature)
     }
 })

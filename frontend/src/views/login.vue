@@ -215,6 +215,7 @@ export default {
                 }
 
                 if (incommingdata?.token) {
+                    
                     auth.setAuth(true, incommingdata?.token)
                     router.push('/')
 
@@ -224,7 +225,7 @@ export default {
                 }
 
             } catch (err) {
-                // error handling hier
+                console.error(err);
             }
 
         },
