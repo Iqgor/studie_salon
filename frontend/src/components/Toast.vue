@@ -96,9 +96,9 @@ export default {
   }
 
 .toast__container {
-  position: absolute;
+  position: fixed;
   right: 0rem;
-  bottom: 3rem;
+  bottom: 1rem;
   z-index: 1000000;
   display: flex;
   flex-direction: column;
