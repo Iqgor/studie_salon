@@ -1,15 +1,15 @@
 <?php
 // Database configuration
 //local
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'studie_saloon');
+// define('DB_HOST', 'localhost');
+// define('DB_USER', 'root');
+// define('DB_PASS', '');
+// define('DB_NAME', 'studie_saloon');
 // server
-// define('DB_HOST', '127.0.0.1');
-// define('DB_USER', 'c7637igor');
-// define('DB_PASS', 'Ballo2711!');
-// define('DB_NAME', 'c7637studie');
+define('DB_HOST', '127.0.0.1');
+define('DB_USER', 'c7637igor');
+define('DB_PASS', 'Ballo2711!');
+define('DB_NAME', 'c7637studie');
 
 
 // Connect to database
@@ -30,6 +30,12 @@ function jsonResponse($data, $status = 200) {
     echo json_encode($data);
     exit;
 }
+
+return [
+    'MAIL_PASSWORD' => 'ksjd ymnj rwom pkjx',
+    'MAIL_USERNAME' => 'bilalelkoudadi526@gmail.com',
+    'MAIL_HOST' => 'smtp.gmail.com',
+];
 
 //! betaalings service
 // require_once 'vendor/autoload.php';

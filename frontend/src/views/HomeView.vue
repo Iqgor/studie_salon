@@ -1,11 +1,11 @@
 <template>
   <main class="main">
-    <div class="entry">
-      <p class="typewriter" :style="typewriterStyle">
-      </p>
-    </div>
+    <p class="typewriter" :style="typewriterStyle">
+    </p>
     <Calander />
-    <div v-if="Object.keys(quote).length !== 0" class="quote_container">
+    <h2 class="appsTitle">Apps</h2>
+    <div class="apps">
+      <div v-if="Object.keys(quote).length !== 0" class="quote_container">
         <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">
           {{ quote.quote }}
           <strong>{{ quote.author }}</strong>
@@ -16,6 +16,11 @@
           </div>
         </div>
       </div>
+      <div>
+        <SideWekkers :app="true"/>
+      </div>
+      <input type="text" class="search" placeholder="Zoek een tekst..." />
+    </div>
     <Carousel />
     <SideWekkers />
   </main>
@@ -52,7 +57,8 @@ export default {
 
         // Add more mappings as needed
       },
-      currentLanguageCode :navigator.language || navigator.userLanguage
+      currentLanguageCode :navigator.language || navigator.userLanguage,
+      loading: true,
 
     };
   },
@@ -132,6 +138,7 @@ export default {
         });
     },
     getQuote() {
+      this.loading = true;
       const currentLanguage = this.languageMap[this.currentLanguageCode][0] || 'English'; // Default to English if not mapped
       const formData = new FormData();
       formData.append('language', currentLanguage);
@@ -148,12 +155,13 @@ export default {
             return response.json();
           })
           .then(data => {
+            this.loading = false;
             if (data) {
               this.quote = data.quote;
-
             }
           })
           .catch(error => {
+            this.loading = false;
             console.error('There was a problem with the fetch operation:', error);
           });
     }
@@ -168,12 +176,23 @@ export default {
 
 }
 
-.entry {
-  margin: 2rem 0;
+.apps{
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
+  align-items: end;
+  width: 100%;
+}
+
+.appsTitle{
+  font-size: 3rem;
+  color: white;
+  padding: 1rem;
+  background-color: var(--color-primary-500);
+  margin-left: -10rem;
+  margin-right: -10rem;
+  margin-bottom: 1rem;
+  padding-left: 10rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .quote_container {
@@ -182,12 +201,12 @@ export default {
   align-items: center;
   gap: 2rem;
   margin-top: 1rem;
-  width: 30%;
+  width: 40%;
 }
 
 .quote_chooser {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
   width: 100%;
 }
@@ -288,6 +307,24 @@ export default {
   height: 7.5rem;
 }
 
+
+.search {
+  width: 40%;
+  border:none;
+  border-bottom: 0.125rem solid var(--color-text);
+  padding-bottom: 0.25rem;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+  background: transparent;
+  color:var(--color-text)
+}
+
+.search:focus {
+  padding-bottom: 0.5rem;
+  outline: none;
+  border-bottom: 0.25rem solid var(--color-primary-500);
+}
+
 @keyframes blinken {
   to {
     background-color: transparent;
@@ -306,12 +343,6 @@ export default {
     padding: 0 5rem
   }
 
-  .entry {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
   .typewriter {
     font-size: 250%;
   }
@@ -320,16 +351,36 @@ export default {
 
 @media screen and (max-width: 768px) {
   .main {
-    padding: 0 1rem
+    padding: 0;
   }
-
+  .apps{
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
   .typewriter {
-    font-size: 200%;
+    font-size: 125%;
+    padding-left: 1rem;
+    width: 100%;
   }
 
+  .typewriter > img{
+    height: 5rem;
+  }
+
+  .quote_container{
+    width: 100%;
+    padding: 0 1rem;
+  }
   .quote {
     width: 100%;
     padding-left: 2rem;
+  }
+  .appsTitle {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 1rem;
   }
 
 }

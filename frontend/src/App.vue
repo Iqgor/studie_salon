@@ -4,13 +4,15 @@ import appheader from './components/appHeader.vue'
 import SideWekkers from './components/SideWekkers.vue'
 import { onMounted, ref } from 'vue';
 import { auth } from '@/auth';
+import Toast from './components/Toast.vue';
+import { sharedfunctions } from './sharedFunctions';
 
 export default {
   name: 'App',
   components: {
     appheader,
     RouterView,
-
+    Toast
   },
   data() {
     return {
@@ -19,14 +21,10 @@ export default {
   }
   ,
   methods: {
-    switchTheme(theme) {
-      document.documentElement.className = `theme-${theme}`;
-      localStorage.setItem('theme', theme);
-      this.currentTheme = theme;
-    },
+
 
     checkTheme() {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       if (localStorage.getItem('theme') === 'dark') {
         this.switchTheme('dark');
         this.currentTheme = 'dark';
@@ -52,8 +50,10 @@ export default {
     }
   },
   mounted() {
-    this.checkTheme();
     auth.check()
+    
+    const savedTheme = localStorage.getItem('theme') || 'light'
+    sharedfunctions.switchTheme(savedTheme)
   }
 }
 
@@ -63,6 +63,7 @@ export default {
 
   <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
   <RouterView />
+  <toast/>
   <footer>
 
   </footer>
