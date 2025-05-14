@@ -1,6 +1,7 @@
 <template>
+
   <div v-if="!app" class="wekkers">
-    <div class="clock-icon" @click="togglePomodoro"><i class="fa-solid fa-stopwatch "></i></div>
+    <div class="clock-icon" @click="togglePomodoro"><p class="tomaat">🍅</p></div>
     <div class="alarm-icon" @click="toggleAlarm"><i class="fa-solid fa-clock"></i></div>
   </div >
   <div v-else class="wekkers-app">
@@ -13,7 +14,10 @@
     <div class="pomodoro">
       <div class="pomodoro-header">
         <p class="pomodoro-titel">Pomodoro timer</p>
-        <p class="pomodoro-x" @click="togglePomodoro"><i class="fa-solid fa-x"></i></p>
+        <div class="pomodoro-header-icons">
+          <p class="pomodoro-settingsIcon"><i class="fa-solid fa-gear"></i></p>
+          <p class="pomodoro-x" @click="togglePomodoro"><i class="fa-solid fa-x"></i></p>
+        </div>
       </div>
       <div class="pomodoro-box">
         <span class="pomodoro-text">{{ pomodoroLabel }}</span>
@@ -105,6 +109,7 @@ export default {
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
+      console.log('Huidige tijd:', this.currentTime);
       if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
         this.triggerAlarm();
       }
@@ -188,6 +193,8 @@ export default {
     clearInterval(this.pomodoroInterval);
   }
 };
+
+
 </script>
 
 <style scoped>
@@ -250,8 +257,13 @@ export default {
 .fa-clock{
   font-size: 30px;
 }
-.fa-stopwatch{
+.tomaat{
   font-size: 35px;
+  margin-bottom: 10px;
+}
+
+.tomaat:hover{
+  cursor: pointer;
 }
 
 .alarm, .pomodoro{
@@ -281,6 +293,20 @@ export default {
 
 .alarm-titel, .pomodoro-titel{
   color: var(--color-text);
+}
+
+.pomodoro-header-icons{
+  display: flex;
+  gap: 2rem;
+  flex-direction: row;
+}
+
+.pomodoro-settingsIcon{
+  color: var(--color-text);
+}
+
+.pomodoro-settingsIcon:hover{
+  cursor: pointer;
 }
 
 .alarm-x:hover, .pomodoro-x:hover{
