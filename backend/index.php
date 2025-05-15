@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // PHPMailer importeren
@@ -847,7 +847,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 // 2. Controleer of het ingevoerde oude wachtwoord overeenkomt met het huidige wachtwoord of tijdelijke wachtwoord
                 $passwordMatches = password_verify($oldPassword, $user['password']);
-                $tempPasswordMatches = $user['temp_password'] ? $oldPassword === $user['temp_password'] : false;
+                $tempPasswordMatches = $user['temp_password'] ? password_verify($oldPassword, $user['temp_password']) : false;
 
                 if (!$passwordMatches && !$tempPasswordMatches) {
                     jsonResponse([

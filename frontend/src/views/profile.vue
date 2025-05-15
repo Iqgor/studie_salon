@@ -4,12 +4,12 @@
 
             <!--lijst met profile options-->
 
-                <ul class="profiel_list">
-                    <li class="profiel_list_item" :class="{ profiel_list_item_active: activeName == option.name }"
-                        v-for="option in options" :key="option.id" @click="changeActive(option)">
-                        {{ option.name }}
-                    </li>
-                </ul>
+            <ul class="profiel_list">
+                <li class="profiel_list_item" :class="{ profiel_list_item_active: activeName == option.name }"
+                    v-for="option in options" :key="option.id" @click="changeActive(option)">
+                    {{ option.name }}
+                </li>
+            </ul>
 
             <section class="profiel_content">
                 <component :is="active"></component>
@@ -20,47 +20,66 @@
 
 <script>
 import Changepassword from '@/components/profile/changepassword.vue';
+import router from '@/router';
 
 export default {
     name: "profile",
-    components: {
-    },
+    props: ['slug'],
     data() {
         return {
             options: [
-                { name: 'Profiel', component: 'profiel' },
-                { name: 'Kleuren wijzigen', component: '' },
-                { name: 'Wachtwoord wijzigen', component: Changepassword },
-                { name: 'Profiel verwijderen', component: 'profielVerwijderen' },
-                
+                { name: 'Profiel', slug: 'profiel', component: 'profiel' },
+                { name: 'Kleuren wijzigen', slug: 'kleur-wijzigen', component: '' },
+                { name: 'Wachtwoord wijzigen', slug: 'wachtwoord-wijzigen', component: Changepassword },
+                { name: 'Profiel verwijderen', slug: 'profiel-verwijderen', component: '' },
             ],
-            active: Changepassword,
-            activeName: 'Wachtwoord wijzigen',
+            active: '',
+            activeName: '',
             dialog: false,
-        };
-
-    },
-    mounted() { },
-    methods: {
-        changeActive(option) {
-            this.active = option.component
-            this.activeName = option.name
-            console.log(option.component, option.name);
-            
         }
     },
+    mounted() {
+        this.setActiveOption()
+    },
+    watch: {
+        slug() {
+            this.setActiveOption()
+        }
+    },
+    methods: {
+        setActiveOption() {
+            const slugLower = (this.slug || '').toLowerCase()
 
-};
+            // kijk of slug overeenkomt met een van de opties
+            const matched = this.options.find(opt => opt.slug === slugLower)
+
+            if (matched) {
+                this.active = matched.component
+                this.activeName = matched.name
+                document.title = `Profiel - ${matched.name}`;
+            } else {
+                // slug matched niet, zet default option
+                const defaultOption = this.options[0]
+                this.active = defaultOption.component
+                this.activeName = defaultOption.name
+                document.title = `Profiel - ${defaultOption.name}`;
+            }
+        },
+        changeActive(option) {
+            router.push(`/profiel/${option.slug}`)
+        }
+    },
+}
 </script>
 
 <style scoped>
-
 .main {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 2rem;
 }
+
 .profiel {
     border: var(--color-primary-500) solid 0.3rem;
     width: 100%;
@@ -89,7 +108,7 @@ export default {
     flex-direction: row;
     flex-direction: column;
     max-width: 20rem;
-        border-right: var(--color-primary-500) solid 0.1rem;
+    border-right: var(--color-primary-500) solid 0.1rem;
 }
 
 .profiel_list_item {
@@ -111,6 +130,7 @@ export default {
     color: var(--color-background-500);
     background: var(--color-primary-500);
 }
+
 .profiel_list_item_active {
     background: var(--color-secondary-500);
     font-weight: bold;

@@ -3,7 +3,9 @@
         <form @submit.prevent="validateInput()">
             <div class="form_div">
                 <div class="form_eyecontainer">
-                    <label class="form_label" for="current-password">Uw huidige wachtwoord</label>
+                    <label class="form_label" for="current-password">
+                        <p>Uw huidige wachtwoord/</p><small>tijdelijke wachtwoord</small>
+                    </label>
                     <input :class="{ form_input_error: invalidCurrentPassword == true }" class="form_input"
                         id="current-password" name="current-password" type="password" v-model.trim="currentPassword" />
                     <i @click="toggleInput('current-password')" class="fa-solid fa-eye"></i>
@@ -77,6 +79,7 @@
     </div>
 </template>
 <script>
+import { auth } from '@/auth';
 import { toastService } from '@/services/toastService';
 
 
@@ -142,15 +145,18 @@ export default {
             // is alles ingevuld
             this.newPasswordInvalid = false;
             this.invalidCurrentPassword = false;
+            console.log('alles ingevuld');
+
             this.changePass();
         },
         async changePass() {
             try {
-                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
-                    method: 'POST',
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/change_password`, {
+                    method: 'PUT',
                     body: JSON.stringify({
-                        email: this.email,
-                        password: this.password
+                        userId: auth.user.id,
+                        newPassword: this.newPassword,
+                        oldPassword: this.currentPassword,
                     })
                 })
 
@@ -160,20 +166,10 @@ export default {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 }
 
-                if (incommingdata?.temp_used == true) {
-                    auth.temp_used = true
+                if (incommingdata?.type == 'success') {
+                    localStorage.removeItem('temp_used')
+                    auth.temp_used = false
                 }
-
-                if (incommingdata?.token) {
-                    
-                    auth.setAuth(true, incommingdata?.token)
-                    router.push('/')
-
-                }
-                else if (incommingdata?.otp_required) {
-                    this.showForm = 'otp'
-                }
-
             } catch (err) {
                 console.error(err);
             }

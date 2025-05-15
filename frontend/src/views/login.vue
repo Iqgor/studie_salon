@@ -211,6 +211,7 @@ export default {
 
                 if (incommingdata?.temp_used == true) {
                     auth.temp_used = true
+                    localStorage.setItem('temp_used', true)
                 }
 
                 if (incommingdata?.token) {

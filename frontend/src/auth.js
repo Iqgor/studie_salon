@@ -14,7 +14,7 @@ export const auth = reactive({
     subscriptionName: null,
     subscriptionFeatures: [],
 
-    //* tokens die je binnenkrijgt
+    //* token die je binnenkrijgt
     token: null,
     //* om dingen te verstoppen als je niet op localhost bent
     hidden: false,
@@ -57,6 +57,7 @@ export const auth = reactive({
             localStorage.setItem('token', this.token)
             let data = jwtDecode(storageToken)
             this.user = data.user
+            this.temp_used = localStorage.getItem('temp_used') || false
             
             this.getSubscription()
 

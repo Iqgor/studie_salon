@@ -17,8 +17,7 @@
     <h1 class="headerTitle"><a href="/">Studie Salon</a></h1>
     <div class="icons">
 
-      <a v-if="!auth.isLoggedIn" href="/login"><i class="fa-solid fa-user"></i></a>
-      <a href="/profiel"><i class="fa-solid fa-user"></i></a>
+      <a :href="auth.isLoggedIn ? '/profiel' :'/login'"><i class="fa-solid fa-user"></i></a>
 
       <i class="fa-solid fa-language" title="Translate page" @click="toggleTranslate = !toggleTranslate">
 
