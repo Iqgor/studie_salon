@@ -25,7 +25,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
         //jsonResponse(['resource' => $resource], 200);
         switch ($resource) {
             case 'subscriptions':
@@ -146,7 +146,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
 
         switch ($resource) {
             case 'create_activity':
@@ -261,7 +261,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
             case 'login':
-
+                
                 //^ JSON input uitlezen
                 $data = json_decode(file_get_contents('php://input'), true);
                 $email = $data['email'] ?? null;
@@ -328,7 +328,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $subscription = $result->fetch_assoc();
 
                 // stap 2: wijgeren als er geen abonnement is
-                if (!$subscription && $gettingSub == null) {
+                if (!$subscription && !$gettingSub) {
                     jsonResponse([
                         'title' => 'Geen actief abonnement',
                         'message' => 'Neem een abonnement om in te loggen.',
@@ -336,10 +336,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     ], 401);
                     exit;
                 }
+                
 
                 //^ active abonnement ophalen
 
-                $stmt = $conn->prepare("
+if(!$gettingSub){                $stmt = $conn->prepare("
                     SELECT s.id
                     FROM users_subscriptions us
                     JOIN subscriptions s ON us.subscription_id = s.id
@@ -362,7 +363,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         'message' => 'Neem een abonnement om in te loggen.',
                         'type' => 'error'
                     ], 401);
-                }
+                }}
+                //jsonResponse(['message' => 'Login endpoint'], 200);
 
                 //^ Token genereren (JWT)
                 $secret_key = "your_secret_key"; // moet veilig zijn in productie
@@ -713,6 +715,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(["title" => 'Gegevens missen', 'message' => 'U moet ingelogd zijn en een abonnement keizen', 'type' => 'error'], 400);
                     break;
                 }
+                
 
                 $userId = $data['user_id'];
                 $subscriptionId = $data['plan_id'];
@@ -727,35 +730,41 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(['title' => 'Proefversie verlopen', 'message' => 'Je hebt deze proefversie al gebruikt.', 'type' => 'warning'], 403);
                     break;
                 }
-
+                
                 // stap 2: controleer of de gebruiker al een actief abonnement heeft
                 $today = date('Y-m-d');
                 $stmt = $conn->prepare("SELECT id FROM users_subscriptions WHERE user_id = ? AND end_date > ?");
                 $stmt->bind_param("is", $userId, $today);
                 $stmt->execute();
                 $result = $stmt->get_result();
+                
 
                 if ($result->num_rows > 0) {
                     jsonResponse(['title' => 'Wijziging geblokkeerd', 'message' => 'Je hebt al een actief abonnement.', 'type' => 'warning'], 403);
                     break;
                 }
+                
+                
 
                 // stap 3: maak een factuur aan met is_trial = 1
                 $createdAt = date('Y-m-d H:i:s');
                 $stmt = $conn->prepare("INSERT INTO invoices (user_id, subscription_id, amount, is_trial, created_at) VALUES (?, ?, 0, 1, ?)");
                 $stmt->bind_param("iis", $userId, $subscriptionId, $createdAt);
                 $stmt->execute();
+                
 
                 if ($stmt->affected_rows === 0) {
                     jsonResponse(['title' => 'factuur probleem', 'message' => 'Kon factuur niet aanmaken.', 'type' => 'error'], 500);
                     break;
                 }
+                
 
                 // stap 4: zet de nieuwe actieve abonnement in de users_subscriptions tabel
                 $expiryDate = date('Y-m-d', strtotime('+3 days'));
                 $stmt = $conn->prepare("INSERT INTO users_subscriptions (user_id, subscription_id, start_date, end_date) VALUES (?, ?, ?, ?)");
                 $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
                 $stmt->execute();
+                
 
                 if ($stmt->affected_rows === 0) {
                     jsonResponse(['title' => 'iets verkeerd gegaan', 'message' => 'Kon abonnement niet activeren.', 'type' => 'error'], 500);
@@ -822,7 +831,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
         switch ($resource) {
 
         }
