@@ -180,7 +180,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $text = $_POST['tekst'] ?? null; // Get text from POST data
                 // Remove inline styling from the text
                 $text = preg_replace('/style="[^"]*"/i', '', $text);
-                if(!$slug || !$text) {
+                if (!$slug || !$text) {
                     jsonResponse(['error' => 'slug and text are required'], 400);
                     exit;
                 }
@@ -377,7 +377,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $user['otp_expires_at']
                 );
 
-                
+
 
                 $payload = [
                     'iat' => $issuedAt,
@@ -398,7 +398,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
                 //^ kijken of de user laatst 2 weken heeft ingelogd
-                $lastLogin = $user['last_login']; 
+                $lastLogin = $user['last_login'];
                 $lastLoginTime = new DateTime($lastLogin);
                 $now = new DateTime();
                 $interval = $now->diff($lastLoginTime);
@@ -455,15 +455,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
 
                 //^ Succesvolle login, user info teruggeven (zonder wachtwoord!)
-                unset($user['password']); 
-                unset($user['last_login']); 
-                unset($user['created_at']); 
+                unset($user['password']);
+                unset($user['last_login']);
+                unset($user['created_at']);
 
                 jsonResponse([
                     'message' => 'Login successful',
                     'token' => $jwt,
                     'active' => $user['active'],
-                    'temp_used' => $temp_used, 
+                    'temp_used' => $temp_used,
                 ], 200);
 
                 break;

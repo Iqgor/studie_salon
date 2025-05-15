@@ -51,7 +51,6 @@ export const auth = reactive({
             this.token = null
         }
     },
-
     check() {
         //* haal data uit je token van de local als die er is
         const storageToken = this.token || localStorage.getItem('token')
@@ -70,14 +69,11 @@ export const auth = reactive({
 
 
     },
-
     reset() {
         (this.isLoggedIn = false),
             (this.user = {}),
             (this.token = null)
     },
-
-
     logout() {
         this.isLoggedIn = false
         this.user = {}
@@ -120,7 +116,6 @@ export const auth = reactive({
         }
     },
     hasFeature(feature) {
-        
         return this.subscriptionFeatures.includes(feature)
     }
 })
