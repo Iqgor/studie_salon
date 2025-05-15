@@ -11,14 +11,14 @@
     <section class="landingspage-sectie">
       <div class="container-landingspage-box">
         <div class="landingspage-box">
-          <div class="icon">✔️</div>
+          <div class="icon">✅</div>
           <h2>Waarom ons?</h2>
           <p>Wij bieden praktische leerstrategieën die werken: meer resultaat in minder tijd. Persoonlijk, efficiënt en gericht op meer zelfvertrouwen. Zo wordt leren makkelijker en succesvoller.</p>
         </div>
         <div class="landingspage-box">
           <div class="icon">💡</div>
           <h2>Onze methode</h2>
-          <p>Leer actief en effectief met onze methoden: besteed 20% van de tijd om 80% van het resultaat te behalen. Geen tijdverspilling, maar efficiënt leren voor betere resultaten, minder stress en meer zelfvertrouwen.</p>
+          <p>onze methoden: besteed 20% van de tijd om 80% van het resultaat te behalen. Geen tijdverspilling, maar efficiënt leren voor betere resultaten, minder stress en meer zelfvertrouwen.</p>
         </div>
         <div class="landingspage-box">
           <div class="icon">⚡</div>
