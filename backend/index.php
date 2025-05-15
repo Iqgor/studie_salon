@@ -266,6 +266,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $data = json_decode(file_get_contents('php://input'), true);
                 $email = $data['email'] ?? null;
                 $password = $data['password'] ?? null;
+                $gettingSub = $data['gettingSub'] ?? null;
 
                 //^ Validatie van vereiste velden
                 if (!$email || !$password) {
@@ -298,10 +299,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         strtotime($user['temp_password_expires_at']) > time()
                     ) {
                         $temp_used = true; // Temp wachtwoord is gebruikt
-                        // Temp wachtwoord is geldig
-                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
-                        $stmt->bind_param("i", $user['id']);
-                        $stmt->execute();
 
                     } elseif (password_verify($password, $user['password'])) {
                         // Normaal wachtwoord is geldig
@@ -331,7 +328,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $subscription = $result->fetch_assoc();
 
                 // stap 2: wijgeren als er geen abonnement is
-                if (!$subscription) {
+                if (!$subscription && $gettingSub == null) {
                     jsonResponse([
                         'title' => 'Geen actief abonnement',
                         'message' => 'Neem een abonnement om in te loggen.',

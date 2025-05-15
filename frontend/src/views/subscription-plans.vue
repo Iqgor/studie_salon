@@ -258,7 +258,8 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
-                        password: this.password
+                        password: this.password,
+                        gettingSub: true
                     })
                 })
 
