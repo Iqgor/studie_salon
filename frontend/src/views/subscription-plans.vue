@@ -26,7 +26,7 @@
 
                         <label v-if="donthaveAccount" for="terms" class="getplan__input_label">
                             <input type="checkbox" name="terms" id="terms" v-model="acceptTerms" required>
-                            <p>Ik ga akkoord met de <a href="/privacy-verklaring">privacy verklaring</a> en <a href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
+                            <p>Ik ga akkoord met de <a href="/privacy-verklaring" target="_blank">privacy verklaring</a> en <a target="_blank" href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
                         </label>
 
                     </div>
@@ -343,6 +343,9 @@ export default {
 
                 let incommingdata = await response.json();
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                if (incommingdata?.type == 'success') {
+                    this.$router.push('/')
+                }
             } catch (err) {
                 console.error('Error subscribing to trial:', err);
             }

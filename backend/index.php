@@ -136,7 +136,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             default:
-                jsonResponse(['error' => 'Method not allowed'], 405);
+                jsonResponse(['error' => 'No GET request found'], 405);
                 break;
         }
 
@@ -618,8 +618,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Jouw tijdelijke wachtwoord';
-                    $mail->Body = "De wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
-                    $mail->AltBody = "De wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
+                    $mail->Body = "Het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+                    $mail->AltBody = "Het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
 
                     $mail->send();
 
@@ -678,8 +678,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Jouw tijdelijke wachtwoord';
-                    $mail->Body = "De wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
-                    $mail->AltBody = "De wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
+                    $mail->Body = "het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+                    $mail->AltBody = "het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
 
                     $mail->send();
 
@@ -690,35 +690,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(['title' => 'Verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
                 }
                 break;
-            case 'change_password':
-                $data = json_decode(file_get_contents('php://input'), true);
-                $userId = $data['userId'] ?? null;
-                $newPassword = $data['newPassword'] ?? null;
-
-                // Validate input
-                if (!$userId || !$newPassword) {
-                    jsonResponse(['title' => 'Gegevens missen', 'message' => 'Geef uw wachtwoord op', 'type' => 'error'], 400);
-                    exit;
-                }
-
-                // Hash new password
-                $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-
-                // Update password in the database
-                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-                $stmt->bind_param("si", $hashedNewPassword, $userId);
-
-                if ($stmt->execute()) {
-                    $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
-                    $stmt->bind_param("i", $userId);
-                    $stmt->execute();
-                    jsonResponse(['title' => 'Wachtwoord veranderd', 'message' => 'Uw wachtwoord is veranderd', 'type' => 'success'], 200);
-                } else {
-                    jsonResponse(['title' => 'Veranderen gevaald', 'message' => 'wachtwoord veranderen gevaald', 'type' => 'error'], 500);
-                }
-                break;
-
-
 
 
             case 'subscribeTrial':
@@ -836,7 +807,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             default:
-                jsonResponse(['error' => 'Resource not found'], 404);
+                jsonResponse(['error' => 'No POST request found'], 405);
                 break;
         }
         break;
@@ -846,7 +817,80 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $urlParts = explode('/', trim($urlParts[0], '/'));
         $resource = $urlParts[2] ?? null;
         switch ($resource) {
+            case 'change_password':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $userId = $data['userId'] ?? null;
+                $newPassword = $data['newPassword'] ?? null;
+                $oldPassword = $data['oldPassword'] ?? null;
 
+                if (!$userId || !$newPassword || !$oldPassword) {
+                    jsonResponse([
+                        'title' => 'Gegevens missen',
+                        'message' => 'Gebruikers-ID, oud wachtwoord en nieuw wachtwoord zijn vereist.',
+                        'type' => 'error'
+                    ], 400);
+                    exit;
+                }
+
+                // 1. Haal de gebruiker op uit de database
+                $stmt = $conn->prepare("SELECT password, temp_password FROM users WHERE id = ?");
+                $stmt->bind_param("i", $userId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows === 0) {
+                    jsonResponse(['title' => 'Gebruiker niet gevonden', 'message' => 'Ongeldig gebruikers-ID.', 'type' => 'error'], 404);
+                    exit;
+                }
+
+                $user = $result->fetch_assoc();
+
+                // 2. Controleer of het ingevoerde oude wachtwoord overeenkomt met het huidige wachtwoord of tijdelijke wachtwoord
+                $passwordMatches = password_verify($oldPassword, $user['password']);
+                $tempPasswordMatches = $user['temp_password'] ? $oldPassword === $user['temp_password'] : false;
+
+                if (!$passwordMatches && !$tempPasswordMatches) {
+                    jsonResponse([
+                        'title' => 'Oud wachtwoord ongeldig',
+                        'message' => 'Het ingevoerde oude wachtwoord is onjuist.',
+                        'type' => 'error'
+                    ], 401);
+                    exit;
+                }
+
+                // 3. Update wachtwoord
+                $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+                $updateStmt = $conn->prepare("
+                    UPDATE users 
+                    SET 
+                        password = ?, 
+                        temp_password = NULL, 
+                        temp_password_expires_at = NULL, 
+                        updated_at = NOW() 
+                    WHERE id = ?
+                ");
+
+                $updateStmt->bind_param("si", $hashedNewPassword, $userId);
+
+                if ($updateStmt->execute()) {
+                    jsonResponse([
+                        'title' => 'Wachtwoord veranderd',
+                        'message' => 'Uw wachtwoord is succesvol aangepast.',
+                        'type' => 'success'
+                    ], 200);
+                } else {
+                    jsonResponse([
+                        'title' => 'Fout bij wijzigen',
+                        'message' => 'Er is een fout opgetreden bij het wijzigen van het wachtwoord.',
+                        'type' => 'error'
+                    ], 500);
+                }
+
+                break;
+            default:
+                jsonResponse(['error' => 'No PUT request found'], 405);
+                break;
         }
 
 
