@@ -247,21 +247,23 @@ export default {
             }
         },
         async checkAccount() {
+
             try {
                 const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
-                        password: this.password
+                        password: this.password,
+                        gettingSub: true
                     })
                 })
 
                 let incommingdata = await response.json()
-
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 }
-
+                
+                
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)
                     this.checkhowToSub()
@@ -317,6 +319,7 @@ export default {
             }
         },
         checkhowToSub() {
+            
             if (this.selectedPlan.is_trial) {
                 this.subscribeToTrial()
             } else {

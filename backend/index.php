@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // Of specifieker: http://localhost:3000
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
@@ -25,7 +25,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
+        //jsonResponse(['resource' => $resource], 200);
         switch ($resource) {
             case 'subscriptions':
                 $stmt = $conn->prepare("
@@ -51,6 +52,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
             ");
                 $stmt->execute();
                 $result = $stmt->get_result();
+
+
 
                 $subscriptions = [];
                 while ($row = $result->fetch_assoc()) {
@@ -143,7 +146,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
             case 'create_activity':
@@ -180,7 +183,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $text = $_POST['tekst'] ?? null; // Get text from POST data
                 // Remove inline styling from the text
                 $text = preg_replace('/style="[^"]*"/i', '', $text);
-                if(!$slug || !$text) {
+                if (!$slug || !$text) {
                     jsonResponse(['error' => 'slug and text are required'], 400);
                     exit;
                 }
@@ -263,6 +266,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $data = json_decode(file_get_contents('php://input'), true);
                 $email = $data['email'] ?? null;
                 $password = $data['password'] ?? null;
+                $gettingSub = $data['gettingSub'] ?? null;
 
                 //^ Validatie van vereiste velden
                 if (!$email || !$password) {
@@ -295,10 +299,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
                         strtotime($user['temp_password_expires_at']) > time()
                     ) {
                         $temp_used = true; // Temp wachtwoord is gebruikt
-                        // Temp wachtwoord is geldig
-                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
-                        $stmt->bind_param("i", $user['id']);
-                        $stmt->execute();
 
                     } elseif (password_verify($password, $user['password'])) {
                         // Normaal wachtwoord is geldig
@@ -328,7 +328,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $subscription = $result->fetch_assoc();
 
                 // stap 2: wijgeren als er geen abonnement is
-                if (!$subscription) {
+                if (!$subscription && !$gettingSub) {
                     jsonResponse([
                         'title' => 'Geen actief abonnement',
                         'message' => 'Neem een abonnement om in te loggen.',
@@ -337,9 +337,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     exit;
                 }
 
-                //^ active abonnement ophalen
 
-                $stmt = $conn->prepare("
+                //^ active abonnement ophalen
+                $activeSubscriptionId = null;
+
+                if (!$gettingSub) {
+                    $stmt = $conn->prepare("
                     SELECT s.id
                     FROM users_subscriptions us
                     JOIN subscriptions s ON us.subscription_id = s.id
@@ -347,22 +350,25 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     ORDER BY us.end_date DESC
                     LIMIT 1
                 ");
-                $stmt->bind_param("i", $user['id']);
-                $stmt->execute();
-                $subscriptionResult = $stmt->get_result();
-                $subscription = $subscriptionResult->fetch_assoc();
+                    $stmt->bind_param("i", $user['id']);
+                    $stmt->execute();
+                    $subscriptionResult = $stmt->get_result();
+                    $subscription = $subscriptionResult->fetch_assoc();
 
-                if ($subscription) {
-                    $activeSubscriptionId = $subscription['id'];
-
-                } else {
                     $activeSubscriptionId = null;
-                    jsonResponse([
-                        'title' => 'Geen actief abonnement',
-                        'message' => 'Neem een abonnement om in te loggen.',
-                        'type' => 'error'
-                    ], 401);
+                    if ($subscription) {
+                        $activeSubscriptionId = $subscription['id'];
+
+                    } else {
+                        $activeSubscriptionId = null;
+                        jsonResponse([
+                            'title' => 'Geen actief abonnement',
+                            'message' => 'Neem een abonnement om in te loggen.',
+                            'type' => 'error'
+                        ], 401);
+                    }
                 }
+                //jsonResponse(['message' => 'Login endpoint'], 200);
 
                 //^ Token genereren (JWT)
                 $secret_key = "your_secret_key"; // moet veilig zijn in productie
@@ -377,14 +383,23 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $user['otp_expires_at']
                 );
 
-                
 
-                $payload = [
-                    'iat' => $issuedAt,
-                    'exp' => $expirationTime,
-                    'user' => $user,
-                    'subscription' => $activeSubscriptionId,
-                ];
+                if ($activeSubscriptionId) {
+                    $payload = [
+                        'iat' => $issuedAt,
+                        'exp' => $expirationTime,
+                        'user' => $user,
+                        'subscription' => $activeSubscriptionId
+                    ];
+                } else {
+                    $payload = [
+                        'iat' => $issuedAt,
+                        'exp' => $expirationTime,
+                        'user' => $user,
+                    ];
+                }
+
+
 
                 $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
                 $payload_json = json_encode($payload);
@@ -398,7 +413,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
                 //^ kijken of de user laatst 2 weken heeft ingelogd
-                $lastLogin = $user['last_login']; 
+                $lastLogin = $user['last_login'];
                 $lastLoginTime = new DateTime($lastLogin);
                 $now = new DateTime();
                 $interval = $now->diff($lastLoginTime);
@@ -455,15 +470,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
 
                 //^ Succesvolle login, user info teruggeven (zonder wachtwoord!)
-                unset($user['password']); 
-                unset($user['last_login']); 
-                unset($user['created_at']); 
+                unset($user['password']);
+                unset($user['last_login']);
+                unset($user['created_at']);
 
                 jsonResponse([
                     'message' => 'Login successful',
                     'token' => $jwt,
                     'active' => $user['active'],
-                    'temp_used' => $temp_used, 
+                    'temp_used' => $temp_used,
                 ], 200);
 
                 break;
@@ -714,6 +729,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     break;
                 }
 
+
                 $userId = $data['user_id'];
                 $subscriptionId = $data['plan_id'];
 
@@ -735,10 +751,13 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt->execute();
                 $result = $stmt->get_result();
 
+
                 if ($result->num_rows > 0) {
                     jsonResponse(['title' => 'Wijziging geblokkeerd', 'message' => 'Je hebt al een actief abonnement.', 'type' => 'warning'], 403);
                     break;
                 }
+
+
 
                 // stap 3: maak een factuur aan met is_trial = 1
                 $createdAt = date('Y-m-d H:i:s');
@@ -746,16 +765,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt->bind_param("iis", $userId, $subscriptionId, $createdAt);
                 $stmt->execute();
 
+
                 if ($stmt->affected_rows === 0) {
                     jsonResponse(['title' => 'factuur probleem', 'message' => 'Kon factuur niet aanmaken.', 'type' => 'error'], 500);
                     break;
                 }
+
 
                 // stap 4: zet de nieuwe actieve abonnement in de users_subscriptions tabel
                 $expiryDate = date('Y-m-d', strtotime('+3 days'));
                 $stmt = $conn->prepare("INSERT INTO users_subscriptions (user_id, subscription_id, start_date, end_date) VALUES (?, ?, ?, ?)");
                 $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
                 $stmt->execute();
+
 
                 if ($stmt->affected_rows === 0) {
                     jsonResponse(['title' => 'iets verkeerd gegaan', 'message' => 'Kon abonnement niet activeren.', 'type' => 'error'], 500);
@@ -822,7 +844,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
         switch ($resource) {
 
         }
