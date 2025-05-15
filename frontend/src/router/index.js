@@ -5,6 +5,7 @@ import SubscriptionPlans from '@/views/subscription-plans.vue'
 import PrivacyVerklaring from '@/views/privacyVerklaring.vue'
 import Landingspage from '@/views/Landingspage.vue'
 import GebruikersVoorwaarden from '@/views/gebruikersVoorwaarden.vue'
+import Profile from '@/views/profile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,6 +39,11 @@ const router = createRouter({
       path: '/gebruikers-voorwaarden',
       name: 'gebruikers-voorwaarden',
       component: GebruikersVoorwaarden
+    },
+    {
+      path: '/profiel',
+      name: 'profiel',
+      component: Profile
     },
     {
       path: '/:slug',

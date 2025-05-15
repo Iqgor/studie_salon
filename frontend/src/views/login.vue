@@ -204,7 +204,6 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
 
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
@@ -240,7 +239,6 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
 
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
@@ -267,8 +265,6 @@ export default {
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 }
-                
-                console.log(incommingdata);
                 this.showForm = 'login'
 
             } catch (err) {

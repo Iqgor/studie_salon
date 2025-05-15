@@ -26,10 +26,6 @@ export const auth = reactive({
 
     //? zodra je wilt inloggen, krijg je binnen of je bent ingelogged en krijg je de token
     setAuth(logged, token) {
-        console.log('dsfsdafwesf');
-        
-
-
         if (logged === true) {
 
             //* Meld dat je bent ingelogd
@@ -61,7 +57,6 @@ export const auth = reactive({
             localStorage.setItem('token', this.token)
             let data = jwtDecode(storageToken)
             this.user = data.user
-            console.log(data);
             
             this.getSubscription()
 
@@ -109,7 +104,6 @@ export const auth = reactive({
             }
 
             const json = await response.json();
-            console.log(json);
             this.subscriptionId = json.id
             this.subscriptionName = json.name
             this.subscriptionFeatures = json.features

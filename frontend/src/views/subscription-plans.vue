@@ -228,7 +228,6 @@ export default {
         },
 
         choosePlan(plan) {
-            console.log(plan);
             this.selectedPlan = plan;
         },
 
@@ -239,11 +238,6 @@ export default {
         checkForm() {
 
             if (this.donthaveAccount) {
-                // Handle account creation
-                console.log('Creating account with', {
-                    name: this.name,
-                    email: this.email
-                });
                 this.createAccount()
             } else if (this.showOtp) {
                 this.sendOtp()
@@ -263,7 +257,6 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
 
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
@@ -295,7 +288,6 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
 
 
@@ -320,7 +312,6 @@ export default {
                 let incommingdata = await response.json()
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 this.donthaveAccount = false
-                console.log(incommingdata);
             } catch (err) {
                 // error handling hier
             }
