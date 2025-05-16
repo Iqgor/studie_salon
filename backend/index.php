@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // PHPMailer importeren
@@ -26,6 +26,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
         $resource = $urlParts[2] ?? null;
+
         switch ($resource) {
             case 'subscriptions':
                 $stmt = $conn->prepare("
@@ -135,7 +136,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
 
             default:
-                jsonResponse(['error' => 'Method not allowed'], 405);
+                jsonResponse(['error' => 'No GET request found'], 405);
                 break;
         }
 
@@ -182,7 +183,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $text = $_POST['tekst'] ?? null; // Get text from POST data
                 // Remove inline styling from the text
                 $text = preg_replace('/style="[^"]*"/i', '', $text);
-                if(!$slug || !$text) {
+                if (!$slug || !$text) {
                     jsonResponse(['error' => 'slug and text are required'], 400);
                     exit;
                 }
@@ -337,9 +338,14 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 
 
-                //^ active abonnement ophalen
 
-if(!$gettingSub){                $stmt = $conn->prepare("
+                //^ active abonnement ophalen
+                $activeSubscriptionId = null;
+
+
+                if (!$gettingSub) {
+                    $stmt = $conn->prepare("
+
                     SELECT s.id
                     FROM users_subscriptions us
                     JOIN subscriptions s ON us.subscription_id = s.id
@@ -347,22 +353,26 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                     ORDER BY us.end_date DESC
                     LIMIT 1
                 ");
-                $stmt->bind_param("i", $user['id']);
-                $stmt->execute();
-                $subscriptionResult = $stmt->get_result();
-                $subscription = $subscriptionResult->fetch_assoc();
+                    $stmt->bind_param("i", $user['id']);
+                    $stmt->execute();
+                    $subscriptionResult = $stmt->get_result();
+                    $subscription = $subscriptionResult->fetch_assoc();
 
-                if ($subscription) {
-                    $activeSubscriptionId = $subscription['id'];
-
-                } else {
                     $activeSubscriptionId = null;
-                    jsonResponse([
-                        'title' => 'Geen actief abonnement',
-                        'message' => 'Neem een abonnement om in te loggen.',
-                        'type' => 'error'
-                    ], 401);
-                }}
+
+                    if ($subscription) {
+                        $activeSubscriptionId = $subscription['id'];
+
+                    } else {
+                        $activeSubscriptionId = null;
+                        jsonResponse([
+                            'title' => 'Geen actief abonnement',
+                            'message' => 'Neem een abonnement om in te loggen.',
+                            'type' => 'error'
+                        ], 401);
+                    }
+                }
+
                 //jsonResponse(['message' => 'Login endpoint'], 200);
 
                 //^ Token genereren (JWT)
@@ -378,14 +388,23 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                     $user['otp_expires_at']
                 );
 
-                
 
-                $payload = [
-                    'iat' => $issuedAt,
-                    'exp' => $expirationTime,
-                    'user' => $user,
-                    'subscription' => $activeSubscriptionId,
-                ];
+                if ($activeSubscriptionId) {
+                    $payload = [
+                        'iat' => $issuedAt,
+                        'exp' => $expirationTime,
+                        'user' => $user,
+                        'subscription' => $activeSubscriptionId
+                    ];
+                } else {
+                    $payload = [
+                        'iat' => $issuedAt,
+                        'exp' => $expirationTime,
+                        'user' => $user,
+                    ];
+                }
+
+
 
                 $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
                 $payload_json = json_encode($payload);
@@ -399,7 +418,7 @@ if(!$gettingSub){                $stmt = $conn->prepare("
 
 
                 //^ kijken of de user laatst 2 weken heeft ingelogd
-                $lastLogin = $user['last_login']; 
+                $lastLogin = $user['last_login'];
                 $lastLoginTime = new DateTime($lastLogin);
                 $now = new DateTime();
                 $interval = $now->diff($lastLoginTime);
@@ -456,15 +475,15 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                 }
 
                 //^ Succesvolle login, user info teruggeven (zonder wachtwoord!)
-                unset($user['password']); 
-                unset($user['last_login']); 
-                unset($user['created_at']); 
+                unset($user['password']);
+                unset($user['last_login']);
+                unset($user['created_at']);
 
                 jsonResponse([
                     'message' => 'Login successful',
                     'token' => $jwt,
                     'active' => $user['active'],
-                    'temp_used' => $temp_used, 
+                    'temp_used' => $temp_used,
                 ], 200);
 
                 break;
@@ -604,8 +623,8 @@ if(!$gettingSub){                $stmt = $conn->prepare("
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Jouw tijdelijke wachtwoord';
-                    $mail->Body = "De wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
-                    $mail->AltBody = "De wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
+                    $mail->Body = "Het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+                    $mail->AltBody = "Het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
 
                     $mail->send();
 
@@ -664,8 +683,8 @@ if(!$gettingSub){                $stmt = $conn->prepare("
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Jouw tijdelijke wachtwoord';
-                    $mail->Body = "De wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
-                    $mail->AltBody = "De wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
+                    $mail->Body = "het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+                    $mail->AltBody = "het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
 
                     $mail->send();
 
@@ -676,35 +695,6 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                     jsonResponse(['title' => 'Verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
                 }
                 break;
-            case 'change_password':
-                $data = json_decode(file_get_contents('php://input'), true);
-                $userId = $data['userId'] ?? null;
-                $newPassword = $data['newPassword'] ?? null;
-
-                // Validate input
-                if (!$userId || !$newPassword) {
-                    jsonResponse(['title' => 'Gegevens missen', 'message' => 'Geef uw wachtwoord op', 'type' => 'error'], 400);
-                    exit;
-                }
-
-                // Hash new password
-                $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-
-                // Update password in the database
-                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
-                $stmt->bind_param("si", $hashedNewPassword, $userId);
-
-                if ($stmt->execute()) {
-                    $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
-                    $stmt->bind_param("i", $userId);
-                    $stmt->execute();
-                    jsonResponse(['title' => 'Wachtwoord veranderd', 'message' => 'Uw wachtwoord is veranderd', 'type' => 'success'], 200);
-                } else {
-                    jsonResponse(['title' => 'Veranderen gevaald', 'message' => 'wachtwoord veranderen gevaald', 'type' => 'error'], 500);
-                }
-                break;
-
-
 
 
             case 'subscribeTrial':
@@ -715,6 +705,7 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                     break;
                 }
                 
+
 
                 $userId = $data['user_id'];
                 $subscriptionId = $data['plan_id'];
@@ -738,12 +729,15 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                 $result = $stmt->get_result();
                 
 
+
                 if ($result->num_rows > 0) {
                     jsonResponse(['title' => 'Wijziging geblokkeerd', 'message' => 'Je hebt al een actief abonnement.', 'type' => 'warning'], 403);
                     break;
                 }
                 
                 
+
+
 
                 // stap 3: maak een factuur aan met is_trial = 1
                 $createdAt = date('Y-m-d H:i:s');
@@ -752,11 +746,13 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                 $stmt->execute();
                 
 
+
                 if ($stmt->affected_rows === 0) {
                     jsonResponse(['title' => 'factuur probleem', 'message' => 'Kon factuur niet aanmaken.', 'type' => 'error'], 500);
                     break;
                 }
                 
+
 
                 // stap 4: zet de nieuwe actieve abonnement in de users_subscriptions tabel
                 $expiryDate = date('Y-m-d', strtotime('+3 days'));
@@ -764,6 +760,7 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                 $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
                 $stmt->execute();
                 
+
 
                 if ($stmt->affected_rows === 0) {
                     jsonResponse(['title' => 'iets verkeerd gegaan', 'message' => 'Kon abonnement niet activeren.', 'type' => 'error'], 500);
@@ -822,7 +819,7 @@ if(!$gettingSub){                $stmt = $conn->prepare("
                 break;
 
             default:
-                jsonResponse(['error' => 'Resource not found'], 404);
+                jsonResponse(['error' => 'No POST request found'], 405);
                 break;
         }
         break;
@@ -830,9 +827,82 @@ if(!$gettingSub){                $stmt = $conn->prepare("
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
         switch ($resource) {
+            case 'change_password':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $userId = $data['userId'] ?? null;
+                $newPassword = $data['newPassword'] ?? null;
+                $oldPassword = $data['oldPassword'] ?? null;
 
+                if (!$userId || !$newPassword || !$oldPassword) {
+                    jsonResponse([
+                        'title' => 'Gegevens missen',
+                        'message' => 'Gebruikers-ID, oud wachtwoord en nieuw wachtwoord zijn vereist.',
+                        'type' => 'error'
+                    ], 400);
+                    exit;
+                }
+
+                // 1. Haal de gebruiker op uit de database
+                $stmt = $conn->prepare("SELECT password, temp_password FROM users WHERE id = ?");
+                $stmt->bind_param("i", $userId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows === 0) {
+                    jsonResponse(['title' => 'Gebruiker niet gevonden', 'message' => 'Ongeldig gebruikers-ID.', 'type' => 'error'], 404);
+                    exit;
+                }
+
+                $user = $result->fetch_assoc();
+
+                // 2. Controleer of het ingevoerde oude wachtwoord overeenkomt met het huidige wachtwoord of tijdelijke wachtwoord
+                $passwordMatches = password_verify($oldPassword, $user['password']);
+                $tempPasswordMatches = $user['temp_password'] ? password_verify($oldPassword, $user['temp_password']) : false;
+
+                if (!$passwordMatches && !$tempPasswordMatches) {
+                    jsonResponse([
+                        'title' => 'Oud wachtwoord ongeldig',
+                        'message' => 'Het ingevoerde oude wachtwoord is onjuist.',
+                        'type' => 'error'
+                    ], 401);
+                    exit;
+                }
+
+                // 3. Update wachtwoord
+                $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+                $updateStmt = $conn->prepare("
+                    UPDATE users 
+                    SET 
+                        password = ?, 
+                        temp_password = NULL, 
+                        temp_password_expires_at = NULL, 
+                        updated_at = NOW() 
+                    WHERE id = ?
+                ");
+
+                $updateStmt->bind_param("si", $hashedNewPassword, $userId);
+
+                if ($updateStmt->execute()) {
+                    jsonResponse([
+                        'title' => 'Wachtwoord veranderd',
+                        'message' => 'Uw wachtwoord is succesvol aangepast.',
+                        'type' => 'success'
+                    ], 200);
+                } else {
+                    jsonResponse([
+                        'title' => 'Fout bij wijzigen',
+                        'message' => 'Er is een fout opgetreden bij het wijzigen van het wachtwoord.',
+                        'type' => 'error'
+                    ], 500);
+                }
+
+                break;
+            default:
+                jsonResponse(['error' => 'No PUT request found'], 405);
+                break;
         }
 
 

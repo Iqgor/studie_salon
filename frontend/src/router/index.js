@@ -5,7 +5,10 @@ import SubscriptionPlans from '@/views/subscription-plans.vue'
 import PrivacyVerklaring from '@/views/privacyVerklaring.vue'
 import Landingspage from '@/views/Landingspage.vue'
 import GebruikersVoorwaarden from '@/views/gebruikersVoorwaarden.vue'
-import { auth } from '@/auth.js'
+import Profile from '@/views/profile.vue'
+import { auth } from '@/auth'
+
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -25,7 +28,7 @@ const router = createRouter({
       component: Login
     },
     {
-      path: '/plans',
+      path: '/abonnementen',
       name: 'subscription plans',
       component: SubscriptionPlans
     },
@@ -38,6 +41,19 @@ const router = createRouter({
       path: '/gebruikers-voorwaarden',
       name: 'gebruikers-voorwaarden',
       component: GebruikersVoorwaarden
+    },
+    {
+      path: '/profiel',
+      name: 'profiel',
+      component: Profile,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/profiel/:slug',
+      name: 'profiel-slug',
+      component: Profile,
+      meta: { requiresAuth: true },
+      props: true
     },
     {
       path: '/:slug',
@@ -57,16 +73,29 @@ const router = createRouter({
   ],
 })
 
+
+// global navigatie beveiliging
 router.beforeEach((to, from, next) => {
-  const isLoggedIn = auth.isLoggedIn ; // Check if user is logged in
-  if (!isLoggedIn && to.name !== 'index' && to.name !== 'login') {
-    if (to.name === 'home') {
-      to.matched[0].components.default = Landingspage; // Replace HomeView with Landingspage
-    }
-    next(); // Proceed to the route
-  } else {
-    next(); // Proceed to the route
+
+  // redirect in gelogde gebruiker naar profiel
+  if (to.path === '/login' && auth.isLoggedIn) {
+    return next('/profiel')
   }
-});
+
+  // forceer profiel pagina als gebruiker temp_password heeft gebruikt
+  if (auth.temp_used && to.path !== '/profiel/wachtwoord-wijzigen') {
+    return next('/profiel/wachtwoord-wijzigen')
+  }
+
+  // redirect naar login pagina als gebruiker niet is ingelogd op pagina's die auth vereisen
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!auth.isLoggedIn) {
+      return next('/login')
+    }
+  }
+
+  next()
+})
+
 
 export default router

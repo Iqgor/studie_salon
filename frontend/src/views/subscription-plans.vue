@@ -26,7 +26,7 @@
 
                         <label v-if="donthaveAccount" for="terms" class="getplan__input_label">
                             <input type="checkbox" name="terms" id="terms" v-model="acceptTerms" required>
-                            <p>Ik ga akkoord met de <a href="/privacy-verklaring">privacy verklaring</a> en <a href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
+                            <p>Ik ga akkoord met de <a href="/privacy-verklaring" target="_blank">privacy verklaring</a> en <a target="_blank" href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
                         </label>
 
                     </div>
@@ -228,7 +228,6 @@ export default {
         },
 
         choosePlan(plan) {
-            console.log(plan);
             this.selectedPlan = plan;
         },
 
@@ -239,11 +238,6 @@ export default {
         checkForm() {
 
             if (this.donthaveAccount) {
-                // Handle account creation
-                console.log('Creating account with', {
-                    name: this.name,
-                    email: this.email
-                });
                 this.createAccount()
             } else if (this.showOtp) {
                 this.sendOtp()
@@ -253,6 +247,7 @@ export default {
             }
         },
         async checkAccount() {
+
             try {
                 const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
                     method: 'POST',
@@ -264,12 +259,11 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
-
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 }
-
+                
+                
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)
                     this.checkhowToSub()
@@ -296,7 +290,6 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
 
 
@@ -321,12 +314,12 @@ export default {
                 let incommingdata = await response.json()
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 this.donthaveAccount = false
-                console.log(incommingdata);
             } catch (err) {
                 // error handling hier
             }
         },
         checkhowToSub() {
+            
             if (this.selectedPlan.is_trial) {
                 this.subscribeToTrial()
             } else {
@@ -350,6 +343,9 @@ export default {
 
                 let incommingdata = await response.json();
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                if (incommingdata?.type == 'success') {
+                    this.$router.push('/')
+                }
             } catch (err) {
                 console.error('Error subscribing to trial:', err);
             }
@@ -421,7 +417,7 @@ export default {
 }
 
 .plan__card {
-    background-color: var(--color-background-400);
+    background-color: var(--color-card-500);
     border-radius: 8px;
     box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
     padding: 2rem;
@@ -452,14 +448,14 @@ export default {
 
 .card__header span i {
     font-size: 2rem;
-    color: var(--color-primary-500);
+    color: var(--color-secondary-500);
 }
 
 .card__header .rank {
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--color-background-100);
-    background-color: var(--color-primary-500);
+    background-color: var(--color-secondary-500);
     padding: 0.5rem 1rem;
     border-radius: 4px;
 }
@@ -481,20 +477,18 @@ export default {
 }
 
 .feature__icon {
-    max-width: 2.5rem;
-    min-width: 2.5rem;
-    max-height: 2rem;
+    max-width: max-content;
+    max-height: max-content;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    padding: 1rem;
     margin-right: 0.5rem;
-    background: -webkit-linear-gradient(left, var(--color-primary-500), var(--color-secondary-500));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    overflow: hidden;
+    background: var(--color-secondary-500);
 }
 
 .card__list-titel {
     font-size: 1.75rem;
     font-weight: bold;
-    color: var(--color-primary-500);
 }
 
 .card__list-description {
@@ -532,7 +526,7 @@ export default {
 }
 
 .fa-euro-sign {
-    color: var(--color-primary-500);
+    color: var(--color-secondary-500);
     font-size: 1.6rem;
     font-weight: bold;
 }
@@ -544,7 +538,6 @@ export default {
 .price {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--color-primary-500);
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -644,15 +637,16 @@ export default {
     padding: 1rem;
     border-radius: 0.4rem;
     border: none;
-    background-color: var(--color-background-400);
+    background-color: var(--color-card-500);
     color: var(--color-text);
     font-size: 1.5rem;
     font-weight: bold;
     width: 100%;
+    transition: all 0.3s ease-in-out;
 }
 
 .getplan__input_wrapper input:focus {
-    background-color: var(--color-primary-500);
+    background-color: var(--color-card-700);
     border: none;
     outline: none;
     color: var(--color-background-100);
@@ -953,6 +947,5 @@ export default {
 hr {
     border: 1px solid var(--color-text);
     width: 100%;
-    margin: 1rem 0;
 }
 </style>

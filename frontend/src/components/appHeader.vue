@@ -17,26 +17,16 @@
     <h1 class="headerTitle"><a href="/">Studie Salon</a></h1>
     <div class="icons">
 
-      <a v-if="!auth.isLoggedIn" href="/login"><i class="fa-solid fa-arrow-right-to-bracket"></i></a>
-      <a v-else="" href="/user"><i class="fa-solid fa-user"></i></a>
+
+      <a :href="auth.isLoggedIn ? '/profiel' :'/login'"><i class="fa-solid fa-user"></i></a>
+
 
       <i class="fa-solid fa-language" title="Translate page" @click="toggleTranslate = !toggleTranslate">
 
         <div v-show="toggleTranslate" id="google_translate_element"></div>
       </i>
 
-      <!-- <div class="theme-switcher">
-    <label for="theme-select"><i class="fa-solid fa-palette"></i></label>
-    <select id="theme-select" class="theme-select" v-model="selectedTheme" @change="switchTheme(selectedTheme)">
-      <option v-for="theme in sharedfunctions.themes" :key="theme" :value="theme.name"
-      >
-        {{ theme.name }}
-      </option>
-    </select>
-  </div> -->
-
-
-      <div v-if="auth.isLoggedIn" class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
+      <div  class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
 
         <div class="dropdown">
           <i class="fa-solid fa-palette"></i>

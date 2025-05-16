@@ -12,7 +12,6 @@ export const sharedfunctions = reactive({
     ],
 
     daysBetween(date1, date2) {
-        console.log('date1', date1, 'date2', date2);
 
         const normalize = (date) => {
             // Als er al een "T" of " " in zit, dan is het datetime
@@ -33,13 +32,11 @@ export const sharedfunctions = reactive({
     },
 
     switchTheme(theme) {
-        console.log('Switching theme to:', theme);
         
         document.documentElement.className = `theme-${theme}`;
         localStorage.setItem('theme', theme);
         this.selectedTheme = theme;
         this.currentTheme = this.selectedTheme;
-        console.log('Theme switched to:', theme);
         
     },
 })

@@ -204,7 +204,6 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
 
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
@@ -212,6 +211,7 @@ export default {
 
                 if (incommingdata?.temp_used == true) {
                     auth.temp_used = true
+                    localStorage.setItem('temp_used', true)
                 }
 
                 if (incommingdata?.token) {
@@ -240,7 +240,6 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                console.log(incommingdata);
 
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
@@ -267,8 +266,6 @@ export default {
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 }
-                
-                console.log(incommingdata);
                 this.showForm = 'login'
 
             } catch (err) {
