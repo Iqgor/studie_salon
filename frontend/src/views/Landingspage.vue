@@ -3,9 +3,10 @@
     <section class="sectie-index">
       <div class="sectie-links">
         <h2 class="landingspage-h2">Leer actief leren,</h2>
-        <p class="landingspage-ondertitel">Leren <b class="sectie-links-kleur">actiever</b> en <b class="sectie-links-kleur">leuker</b> gemaakt door <b class="sectie-links-kleur">LerenLerenTool</b>.</p>
+        <p class="landingspage-ondertitel">Leren <b class="sectie-links-kleur">actiever</b> en <b class="sectie-links-kleur">leuker</b> gemaakt door de <b class="sectie-links-kleur">LerenLerenTool</b>.</p>
+        <p class="landingspage-ondertitel">Bekijk onze verschillende abonnement <b class="sectie-links-kleur"><router-link :to="'/plans'">hier</router-link></b></p>
       </div>
-        <img src="../assets/iphone-app-hand.webp" alt="" class="sectie-midden-img" />
+      <img src="../assets/iphone-app-hand.webp" alt="" class="sectie-midden-img" />
     </section>
     <!-- vakjes gedeelte -->
     <section class="landingspage-sectie">
@@ -34,16 +35,19 @@
     </section>
   </main>
 </Template>
+<script>
+
+</script>
 <style>
 
 .sectie-index {
   display: flex;
   justify-content: space-between;
-  align-items: top;
   padding: 5rem 10rem 0rem 10rem;
+  height:86vh;
 }
 .sectie-links {
-  width: 25%;
+  width: 35%;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -67,6 +71,14 @@
   font-weight: 500;
 }
 
+.sectie-links-kleur > a{
+  color: var(--color-primary-500);
+}
+
+.sectie-links-kleur > a:hover{
+  color: var(--color-primary-300);
+}
+
 .sectie-rechts {
   display: flex;
   flex-direction: column;
@@ -75,6 +87,7 @@
 
 .sectie-midden-img {
   width: 35%;
+  object-fit: contain;
 }
 
 /* onderste sectie */
@@ -83,8 +96,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  padding-bottom: 4rem;
-  gap: 20px;
+  padding-bottom: 2rem;
+  gap: 2rem;
 }
 
 .landingspage-box {

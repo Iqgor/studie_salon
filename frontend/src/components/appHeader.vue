@@ -8,7 +8,7 @@
           <ul>
             <li><a href="#">Abonnementen</a></li>
             <li><a href="#">Disclaimer</a></li>
-            <li><a href="#">Teksten</a></li>
+            <li v-if="auth.isLoggedIn"><a href="#">Teksten</a></li>
           </ul>
         </nav>
         <div style="width: 14.2rem; height: 100%;"></div>
@@ -17,7 +17,8 @@
     <h1 class="headerTitle"><a href="/">Studie Salon</a></h1>
     <div class="icons">
 
-      <a href="/login"><i class="fa-solid fa-user"></i></a>
+      <a v-if="!auth.isLoggedIn" href="/login"><i class="fa-solid fa-arrow-right-to-bracket"></i></a>
+      <a v-else="" href="/user"><i class="fa-solid fa-user"></i></a>
 
       <i class="fa-solid fa-language" title="Translate page" @click="toggleTranslate = !toggleTranslate">
 
@@ -210,7 +211,7 @@ export default {
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-.iconsClick>i {
+.iconsClick i {
   color: white;
 }
 

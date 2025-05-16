@@ -25,7 +25,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
         switch ($resource) {
             case 'subscriptions':
                 $stmt = $conn->prepare("
@@ -98,7 +98,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
             case 'create_activity':

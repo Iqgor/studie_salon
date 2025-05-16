@@ -5,7 +5,7 @@
     <div class="alarm-icon" @click="toggleAlarm"><i class="fa-solid fa-clock"></i></div>
   </div >
   <div v-else class="wekkers-app">
-    <div class="clock-icon" @click="togglePomodoro"><i class="fa-solid fa-stopwatch "></i></div>
+    <div class="clock-icon" @click="togglePomodoro"><p class="tomaat">🍅</p></div>
     <div class="alarm-icon" @click="toggleAlarm"><i class="fa-solid fa-clock"></i></div>
   </div>
 
@@ -109,7 +109,6 @@ export default {
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
-      console.log('Huidige tijd:', this.currentTime);
       if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
         this.triggerAlarm();
       }
