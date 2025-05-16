@@ -23,16 +23,10 @@
                         <input v-if="showOtp" type="text" placeholder="OTP code" :required="showOtp" v-model="otp">
 
 
-                        <label v-if="donthaveAccount" for="privacy" class="getplan__input_label">
-                            <input type="checkbox" name="privacy" id="privacy" v-model="acceptPrivacy" required>
-                            <p>Ik heb de <a href="/privacy-verklaring">privacy verklaring</a> gelezen en ga akkoord met
-                                de
-                                voorwaarden</p>
-                        </label>
 
-                        <label v-if="donthaveAccount" for="Policy" class="getplan__input_label">
-                            <input type="checkbox" name="Policy" id="Policy" v-model="acceptPolicy" required>
-                            <p>Ik ga akkoord met de <a href="/gebruikers-voorwaarden">gebruikers voorwaarden</a></p>
+                        <label v-if="donthaveAccount" for="terms" class="getplan__input_label">
+                            <input type="checkbox" name="terms" id="terms" v-model="acceptTerms" required>
+                            <p>Ik ga akkoord met de <a href="/privacy-verklaring">privacy verklaring</a> en <a href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
                         </label>
 
                     </div>
@@ -211,8 +205,7 @@ export default {
             showOtp: false,
             otp: '',
             canPay: false,
-            acceptPrivacy: false,
-            acceptPolicy: false,
+            acceptTerms: false,
         };
     },
     mounted() {
@@ -265,7 +258,8 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
-                        password: this.password
+                        password: this.password,
+                        gettingSub: true
                     })
                 })
 
