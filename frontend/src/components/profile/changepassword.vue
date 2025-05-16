@@ -2,10 +2,11 @@
     <div class="ww">
         <form @submit.prevent="validateInput()">
             <div class="form_div">
+
+                <label class="form_label" for="current-password">
+                    <p>Uw huidige wachtwoord/</p><small>tijdelijke wachtwoord</small>
+                </label>
                 <div class="form_eyecontainer">
-                    <label class="form_label" for="current-password">
-                        <p>Uw huidige wachtwoord/</p><small>tijdelijke wachtwoord</small>
-                    </label>
                     <input :class="{ form_input_error: invalidCurrentPassword == true }" class="form_input"
                         id="current-password" name="current-password" type="password" v-model.trim="currentPassword" />
                     <i @click="toggleInput('current-password')" class="fa-solid fa-eye"></i>
@@ -19,8 +20,9 @@
             </div>
 
             <div class="form_div">
+
+                <label class="form_label" for="new-password">Uw nieuwe wachtwoord</label>
                 <div class="form_eyecontainer">
-                    <label class="form_label" for="new-password">Uw nieuwe wachtwoord</label>
                     <input :class="{ form_input_error: newPasswordInvalid == true }" class="form_input"
                         id="new-password" name="new-password" type="password" v-model.trim="newPassword" />
                     <i @click="toggleInput('new-password')" class="fa-solid fa-eye"></i>
@@ -229,7 +231,9 @@ export default {
     flex-direction: column;
     align-items: start;
     justify-content: center;
-
+    background: var(--color-card-500);
+    border-radius: 2rem;
+    padding: 2rem;
 }
 
 form {
@@ -265,6 +269,7 @@ form {
     position: absolute;
     right: 1rem;
     top: 50%;
+    transform: translateY(-50%);
     font-size: 2rem;
     color: var(--color-text);
     cursor: pointer;
@@ -275,6 +280,8 @@ form {
     font-weight: bold;
     text-align: start;
     width: 100%;
+    color: var(--color-text);
+    margin-bottom: 1rem;
 }
 
 .form_input {
@@ -306,6 +313,11 @@ form {
     width: max-content;
     text-align: start;
     width: 100%;
+    background: var(--color-background-500);
+    border-radius: 2rem;
+    padding: 2rem;
+    border: var(--color-primary-500) solid 0.3rem;
+
 }
 
 .ww_list {
@@ -371,8 +383,8 @@ button:hover {
 }
 
 button[type="inactive"] {
-    background: var(--color-text);
-    color: var(--color-error);
+    background: var(--color-card-500);
+    color: var(--color-text);
     cursor: not-allowed;
 }
 </style>

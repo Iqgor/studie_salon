@@ -517,10 +517,6 @@ export default {
     text-decoration: underline;
 }
 
-.link:visited {
-    color: var(--color-secondary-300);
-}
-
 .link:active {
     color: var(--color-secondary-800);
 }

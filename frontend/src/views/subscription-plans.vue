@@ -26,7 +26,8 @@
 
                         <label v-if="donthaveAccount" for="terms" class="getplan__input_label">
                             <input type="checkbox" name="terms" id="terms" v-model="acceptTerms" required>
-                            <p>Ik ga akkoord met de <a href="/privacy-verklaring" target="_blank">privacy verklaring</a> en <a target="_blank" href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
+                            <p>Ik ga akkoord met de <a href="/privacy-verklaring" target="_blank">privacy verklaring</a>
+                                en <a target="_blank" href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
                         </label>
 
                     </div>
@@ -75,7 +76,7 @@
                             </div>
                             <h4 class="detail__button_period">Maandelijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
-                                }}</h3>
+                            }}</h3>
                             <h5 class="detail__button_description"></h5>
                         </button>
 
@@ -262,8 +263,8 @@ export default {
                 if (incommingdata?.title && incommingdata?.message) {
                     toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 }
-                
-                
+
+
                 if (incommingdata?.token) {
                     auth.setAuth(true, incommingdata?.token)
                     this.checkhowToSub()
@@ -272,6 +273,11 @@ export default {
                 else if (incommingdata?.otp_required) {
                     this.showOtp = true
 
+                }
+
+                if (incommingdata?.temp_used == true) {
+                    auth.temp_used = true
+                    localStorage.setItem('temp_used', true)
                 }
 
             } catch (err) {
@@ -319,7 +325,7 @@ export default {
             }
         },
         checkhowToSub() {
-            
+
             if (this.selectedPlan.is_trial) {
                 this.subscribeToTrial()
             } else {
