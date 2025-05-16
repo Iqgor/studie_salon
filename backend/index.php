@@ -25,7 +25,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
 
         switch ($resource) {
             case 'subscriptions':
@@ -146,7 +146,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
 
         switch ($resource) {
             case 'create_activity':
@@ -827,7 +827,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+        $resource = $urlParts[1] ?? null;
         switch ($resource) {
             case 'change_password':
                 $data = json_decode(file_get_contents('php://input'), true);
