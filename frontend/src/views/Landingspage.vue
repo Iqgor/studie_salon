@@ -3,22 +3,23 @@
     <section class="sectie-index">
       <div class="sectie-links">
         <h2 class="landingspage-h2">Leer actief leren,</h2>
-        <p class="landingspage-ondertitel">Leren <b class="sectie-links-kleur">actiever</b> en <b class="sectie-links-kleur">leuker</b> gemaakt door <b class="sectie-links-kleur">LerenLerenTool</b>.</p>
+        <p class="landingspage-ondertitel">Leren <b class="sectie-links-kleur">actiever</b> en <b class="sectie-links-kleur">leuker</b> gemaakt door de <b class="sectie-links-kleur">LerenLerenTool</b>.</p>
+        <p class="landingspage-ondertitel">Bekijk onze verschillende abonnement <b class="sectie-links-kleur"><router-link :to="'/plans'">hier</router-link></b></p>
       </div>
-        <img src="../assets/iphone-app-hand.webp" alt="" class="sectie-midden-img" />
+      <img src="../assets/iphone-app-hand.webp" alt="" class="sectie-midden-img" />
     </section>
     <!-- vakjes gedeelte -->
     <section class="landingspage-sectie">
       <div class="container-landingspage-box">
         <div class="landingspage-box">
-          <div class="icon">✔️</div>
+          <div class="icon">✅</div>
           <h2>Waarom ons?</h2>
           <p>Wij bieden praktische leerstrategieën die werken: meer resultaat in minder tijd. Persoonlijk, efficiënt en gericht op meer zelfvertrouwen. Zo wordt leren makkelijker en succesvoller.</p>
         </div>
         <div class="landingspage-box">
           <div class="icon">💡</div>
           <h2>Onze methode</h2>
-          <p>Leer actief en effectief met onze methoden: besteed 20% van de tijd om 80% van het resultaat te behalen. Geen tijdverspilling, maar efficiënt leren voor betere resultaten, minder stress en meer zelfvertrouwen.</p>
+          <p>onze methoden: besteed 20% van de tijd om 80% van het resultaat te behalen. Geen tijdverspilling, maar efficiënt leren voor betere resultaten, minder stress en meer zelfvertrouwen.</p>
         </div>
         <div class="landingspage-box">
           <div class="icon">⚡</div>
@@ -34,16 +35,19 @@
     </section>
   </main>
 </Template>
+<script>
+
+</script>
 <style>
 
 .sectie-index {
   display: flex;
   justify-content: space-between;
-  align-items: top;
   padding: 5rem 10rem 0rem 10rem;
+  height:86vh;
 }
 .sectie-links {
-  width: 25%;
+  width: 35%;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -67,6 +71,14 @@
   font-weight: 500;
 }
 
+.sectie-links-kleur > a{
+  color: var(--color-primary-500);
+}
+
+.sectie-links-kleur > a:hover{
+  color: var(--color-primary-300);
+}
+
 .sectie-rechts {
   display: flex;
   flex-direction: column;
@@ -75,6 +87,7 @@
 
 .sectie-midden-img {
   width: 35%;
+  object-fit: contain;
 }
 
 /* onderste sectie */
@@ -83,8 +96,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  padding-bottom: 4rem;
-  gap: 20px;
+  padding-bottom: 2rem;
+  gap: 2rem;
 }
 
 .landingspage-box {

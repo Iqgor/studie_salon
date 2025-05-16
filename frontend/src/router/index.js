@@ -8,6 +8,7 @@ import GebruikersVoorwaarden from '@/views/gebruikersVoorwaarden.vue'
 import Profile from '@/views/profile.vue'
 import { auth } from '@/auth'
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -72,6 +73,7 @@ const router = createRouter({
   ],
 })
 
+
 // global navigatie beveiliging
 router.beforeEach((to, from, next) => {
 
@@ -94,5 +96,6 @@ router.beforeEach((to, from, next) => {
 
   next()
 })
+
 
 export default router

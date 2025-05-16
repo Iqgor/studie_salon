@@ -3,7 +3,7 @@
     <a class="waterFallLink" :href="('/')">
       < Terug naar Home</a>
         <div class="title-views">
-          <h2>Alle links naar de teksten voor {{ capitalizeWords(slug.replaceAll('-', ' ')) }}</h2>
+          <h2>{{ capitalizeWords(slug.replaceAll('-', ' ')) }}</h2>
           <span class="views"><i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i><i
               @click="changeView('table')" :class="{'isActive' : view == 'table'}" class="fa-solid fa-table"></i></span>
         </div>
