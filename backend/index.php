@@ -25,35 +25,33 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
             case 'subscriptions':
                 $stmt = $conn->prepare("
-                SELECT 
-                    s.id AS subscription_id,
-                    s.name AS subscription_name,
-                    s.price,
-                    s.description AS subscription_description,
-                    s.rank AS subscription_rank,
-                    s.icon AS subscription_icon,
-                    s.sale AS subscription_sale,
-                    s.sale_type AS subscription_sale_type,
-                    s.is_trial AS subscription_is_trial,
-                    f.id AS feature_id,
-                    f.name AS feature_name,
-                    f.description AS feature_description,
-                    f.icon AS feature_icon,
-                    f.display AS feature_display
-                FROM subscriptions s
-                LEFT JOIN subscription_features sf ON s.id = sf.subscription_id
-                LEFT JOIN features f ON sf.feature_id = f.id
-                ORDER BY s.rank ASC
-            ");
+        SELECT 
+            s.id AS subscription_id,
+            s.name AS subscription_name,
+            s.price,
+            s.description AS subscription_description,
+            s.rank AS subscription_rank,
+            s.icon AS subscription_icon,
+            s.sale AS subscription_sale,
+            s.sale_type AS subscription_sale_type,
+            s.is_trial AS subscription_is_trial,
+            f.id AS feature_id,
+            f.name AS feature_name,
+            f.description AS feature_description,
+            f.icon AS feature_icon,
+            sf.display AS feature_display
+        FROM subscriptions s
+        LEFT JOIN subscription_features sf ON s.id = sf.subscription_id
+        LEFT JOIN features f ON sf.feature_id = f.id
+        ORDER BY s.rank ASC
+    ");
                 $stmt->execute();
                 $result = $stmt->get_result();
-
-
 
                 $subscriptions = [];
                 while ($row = $result->fetch_assoc()) {
@@ -80,7 +78,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                             'name' => $row['feature_name'],
                             'description' => $row['feature_description'],
                             'icon' => $row['feature_icon'],
-                            'display' => $row['feature_display']
+                            'display' => $row['feature_display'] // ← now correctly pulled from subscription_features
                         ];
                     }
                 }
@@ -89,6 +87,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 jsonResponse(['subscriptions' => $formattedSubscriptions], 200);
                 break;
+
 
             case 'activeSubscription':
                 $userId = $_GET['user_id'];
@@ -146,7 +145,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
             case 'create_activity':
@@ -261,7 +260,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
             case 'login':
-                
+
                 //^ JSON input uitlezen
                 $data = json_decode(file_get_contents('php://input'), true);
                 $email = $data['email'] ?? null;
@@ -336,7 +335,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     ], 401);
                     exit;
                 }
-                
+
 
 
                 //^ active abonnement ophalen
@@ -704,7 +703,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(["title" => 'Gegevens missen', 'message' => 'U moet ingelogd zijn en een abonnement keizen', 'type' => 'error'], 400);
                     break;
                 }
-                
+
 
 
                 $userId = $data['user_id'];
@@ -720,22 +719,22 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(['title' => 'Proefversie verlopen', 'message' => 'Je hebt deze proefversie al gebruikt.', 'type' => 'warning'], 403);
                     break;
                 }
-                
+
                 // stap 2: controleer of de gebruiker al een actief abonnement heeft
                 $today = date('Y-m-d');
                 $stmt = $conn->prepare("SELECT id FROM users_subscriptions WHERE user_id = ? AND end_date > ?");
                 $stmt->bind_param("is", $userId, $today);
                 $stmt->execute();
                 $result = $stmt->get_result();
-                
+
 
 
                 if ($result->num_rows > 0) {
                     jsonResponse(['title' => 'Wijziging geblokkeerd', 'message' => 'Je hebt al een actief abonnement.', 'type' => 'warning'], 403);
                     break;
                 }
-                
-                
+
+
 
 
 
@@ -744,14 +743,14 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt = $conn->prepare("INSERT INTO invoices (user_id, subscription_id, amount, is_trial, created_at) VALUES (?, ?, 0, 1, ?)");
                 $stmt->bind_param("iis", $userId, $subscriptionId, $createdAt);
                 $stmt->execute();
-                
+
 
 
                 if ($stmt->affected_rows === 0) {
                     jsonResponse(['title' => 'factuur probleem', 'message' => 'Kon factuur niet aanmaken.', 'type' => 'error'], 500);
                     break;
                 }
-                
+
 
 
                 // stap 4: zet de nieuwe actieve abonnement in de users_subscriptions tabel
@@ -759,7 +758,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt = $conn->prepare("INSERT INTO users_subscriptions (user_id, subscription_id, start_date, end_date) VALUES (?, ?, ?, ?)");
                 $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
                 $stmt->execute();
-                
+
 
 
                 if ($stmt->affected_rows === 0) {
@@ -827,7 +826,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $url = $_SERVER['REQUEST_URI'];
         $urlParts = explode('?', $url, 2);
         $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[1] ?? null;
+        $resource = $urlParts[2] ?? null;
         switch ($resource) {
             case 'change_password':
                 $data = json_decode(file_get_contents('php://input'), true);
