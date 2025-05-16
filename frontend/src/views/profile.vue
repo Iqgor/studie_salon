@@ -21,6 +21,8 @@
 <script>
 import Changepassword from '@/components/profile/changepassword.vue';
 import router from '@/router';
+import PrivacyVerklaring from './privacyVerklaring.vue';
+import GebruikersVoorwaarden from './gebruikersVoorwaarden.vue';
 
 export default {
     name: "profile",
@@ -32,6 +34,8 @@ export default {
                 { name: 'Kleuren wijzigen', slug: 'kleur-wijzigen', component: '' },
                 { name: 'Wachtwoord wijzigen', slug: 'wachtwoord-wijzigen', component: Changepassword },
                 { name: 'Profiel verwijderen', slug: 'profiel-verwijderen', component: '' },
+                { name: 'Privacy verklaring', slug: 'privacy-verklaring', component: PrivacyVerklaring },
+                { name: 'Gebruikersvoorwaarden', slug: 'gebruikersvoorwaarden', component: GebruikersVoorwaarden },
             ],
             active: '',
             activeName: '',
@@ -122,6 +126,11 @@ export default {
     padding: 1rem 2rem;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: wrap;
+    word-break: break-word;
 }
 
 
