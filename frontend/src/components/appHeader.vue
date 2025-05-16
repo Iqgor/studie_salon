@@ -24,18 +24,7 @@
         <div v-show="toggleTranslate" id="google_translate_element"></div>
       </i>
 
-      <!-- <div class="theme-switcher">
-    <label for="theme-select"><i class="fa-solid fa-palette"></i></label>
-    <select id="theme-select" class="theme-select" v-model="selectedTheme" @change="switchTheme(selectedTheme)">
-      <option v-for="theme in sharedfunctions.themes" :key="theme" :value="theme.name"
-      >
-        {{ theme.name }}
-      </option>
-    </select>
-  </div> -->
-
-
-      <div v-if="auth.isLoggedIn" class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
+      <div  class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
 
         <div class="dropdown">
           <i class="fa-solid fa-palette"></i>
