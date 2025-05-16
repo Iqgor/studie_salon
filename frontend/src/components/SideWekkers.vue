@@ -147,7 +147,6 @@ export default {
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
-      console.log('Huidige tijd:', this.currentTime);
       if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
         this.triggerAlarm();
       }

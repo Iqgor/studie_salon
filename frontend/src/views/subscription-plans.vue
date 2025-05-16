@@ -18,28 +18,24 @@
                         <input v-if="donthaveAccount" type="text" placeholder="Naam" :required="donthaveAccount"
                             v-model="name">
                         <input type="email" placeholder="Email" required v-model="email">
-                        <input type="password" placeholder="Wachtwoord" required v-model="password" v-if="!donthaveAccount">
+                        <input type="password" placeholder="Wachtwoord" required v-model="password"
+                            v-if="!donthaveAccount">
                         <input v-if="showOtp" type="text" placeholder="OTP code" :required="showOtp" v-model="otp">
 
 
-                        <label v-if="donthaveAccount" for="privacy" class="getplan__input_label">
-                            <input type="checkbox" name="privacy" id="privacy" v-model="acceptPrivacy" required>
-                            <p>Ik heb de <a href="/privacy-verklaring">privacy verklaring</a> gelezen en ga akkoord met
-                                de
-                                voorwaarden</p>
-                        </label>
 
-                        <label v-if="donthaveAccount" for="Policy" class="getplan__input_label">
-                            <input type="checkbox" name="Policy" id="Policy" v-model="acceptPolicy" required>
-                            <p>Ik ga akkoord met de <a href="/gebruikers-voorwaarden">gebruikers voorwaarden</a></p>
+                        <label v-if="donthaveAccount" for="terms" class="getplan__input_label">
+                            <input type="checkbox" name="terms" id="terms" v-model="acceptTerms" required>
+                            <p>Ik ga akkoord met de <a href="/privacy-verklaring">privacy verklaring</a> en <a href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
                         </label>
 
                     </div>
 
                     <div class="getplan__subject">
-                        <p>{{ donthaveAccount ? '' : 'Betaal gegevens' }}</p>
+                        <p>{{ selectedPlan.is_trial || donthaveAccount ? '' : 'Betaal gegevens' }}</p>
                     </div>
-                    <div class="getplan__buttons" v-if="!donthaveAccount">
+
+                    <div class="getplan__buttons" v-if="!selectedPlan.is_trial && !donthaveAccount">
                         <button class="getplan__button" type="button" @click="paymentChoice = 'ideal'"
                             :class="{ 'getplan__button_active': paymentChoice == 'ideal' }">
                             <i class="fa-brands fa-ideal"></i>
@@ -57,18 +53,18 @@
                     <div class="small_txt">
                         <p v-if="donthaveAccount">
                             Als je een account aanmaakt krijg je een tijdelijk wachtwoord toegestuurd naar je email.
-                            
+
                         </p>
                     </div>
 
-                    <button class="getplan__send">{{ donthaveAccount ? 'Registreer' : 'Betaal' }}</button>
+                    <button class="getplan__send">{{ donthaveAccount ? 'Registreer' : 'Neem abonnement' }}</button>
                 </form>
 
 
                 <article class="detail">
 
                     <h1 class="detail__name">{{ selectedPlan.name }}</h1>
-                    <div class="detail__buttons">
+                    <div class="detail__buttons" v-if="!selectedPlan.is_trial">
 
                         <button class="detail__button"
                             :class="{ 'detail__button_active': selectedperiode == 'maandelijks' }"
@@ -87,7 +83,8 @@
                             class="detail__button" @click="changePeriod('jaarlijks')">
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
-                                <p class="detail__sale_p">{{ selectedPlan.sale_type == '$' ? selectedPlan.sale * 12 : selectedPlan.sale}}{{ selectedPlan.sale_type }}</p>
+                                <p class="detail__sale_p">{{ selectedPlan.sale_type == '$' ? selectedPlan.sale * 12 :
+                                    selectedPlan.sale }}{{ selectedPlan.sale_type }}</p>
                             </div>
                             <h4 class="detail__button_period">jaarlijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
@@ -95,7 +92,7 @@
                             <h5 class="detail__button_description"></h5>
                         </button>
                     </div>
-                    <div class="detail__pricing">
+                    <div class="detail__pricing" v-if="!selectedPlan.is_trial">
                         <div class="detail__pricing_wrapper">
                             <div class="detail__pricing_name">Subtotaal</div>
                             <div class="detail__pricing_price" v-if="selectedperiode == 'maandelijks'">{{
@@ -104,7 +101,7 @@
                         </div>
                         <div class="detail__pricing_wrapper">
                             <div class="detail__pricing_name">korting</div>
-                            <div class="detail__pricing_price"> -{{ saleAmount }} {{selectedPlan.sale_type}}</div>
+                            <div class="detail__pricing_price"> -{{ saleAmount }} {{ selectedPlan.sale_type }}</div>
                         </div>
                         <div class="detail__pricing_wrapper">
                             <div class="detail__pricing_name">totaal</div>
@@ -115,6 +112,9 @@
 
                         </div>
                     </div>
+                    <p v-if="selectedPlan.is_trial">
+                        neem een tijdelijk abbonement van 3 dagen
+                    </p>
                     <hr>
                     <div class="detail__feature">
                         <div class="detail__feature_wrapper" v-for="feature in selectedPlan.features"
@@ -130,9 +130,9 @@
 
 
 
-            <section class="plans__container">
+            <section class="subscription__container">
 
-                <div v-for="plan in plans" :key="plan.id" class="plan__card">
+                <div v-for="plan in subscription" :key="plan.id" class="plan__card">
 
                     <div class="plan__sale" v-if="plan.sale && plan.sale_type">
                         <p class="plan__sale_p">{{ plan.sale }}{{ plan.sale_type }}</p>
@@ -148,7 +148,8 @@
 
                     <p class="description">{{ plan.description }}</p>
                     <p class="price__container">
-                        <span class="price" :class="{ 'price__inactive': plan.sale && plan.sale_type }"><i
+                        <span class="price" v-if="plan.sale && plan.sale_type"
+                            :class="{ 'price__inactive': plan.sale && plan.sale_type }"><i
                                 class="fa-solid fa-euro-sign"></i> {{ plan.price }}</span>
 
                         <span class="price" v-if="plan.sale && plan.sale_type === '%'"><i
@@ -162,7 +163,7 @@
 
 
                     <ul class="card__list">
-                        <li v-for="feature in plan.features" :key="feature.name">
+                        <li v-for="feature in plan.features" :key="feature.name" v-show="feature.display">
                             <div class="feature__icon" v-html="feature.icon"></div>
                             <span>
                                 <p class="card__list-titel">{{ feature.name }}</p>
@@ -192,7 +193,7 @@ export default {
     },
     data() {
         return {
-            plans: [],
+            subscription: [],
             selectedPlan: [],
             selectedperiode: 'maandelijks',
             donthaveAccount: false,
@@ -204,26 +205,25 @@ export default {
             showOtp: false,
             otp: '',
             canPay: false,
-            acceptPrivacy: false,
-            acceptPolicy: false,
+            acceptTerms: false,
         };
     },
     mounted() {
-        this.fetchPlans();
+        this.fetchsubscription();
     },
     methods: {
 
 
-        async fetchPlans() {
+        async fetchsubscription() {
             try {
-                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/plans`);
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/subscriptions`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                this.plans = data.plans
+                this.subscription = data.subscriptions;
             } catch (error) {
-                console.error('Error fetching plans:', error);
+                console.error('Error fetching subscriptions:', error);
             }
         },
 
@@ -258,7 +258,8 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         email: this.email,
-                        password: this.password
+                        password: this.password,
+                        gettingSub: true
                     })
                 })
 
@@ -270,12 +271,8 @@ export default {
                 }
 
                 if (incommingdata?.token) {
-
-                    const decoded = jwtDecode(incommingdata?.token);
-
                     auth.setAuth(true, incommingdata?.token)
-                    console.log(decoded);
-                    this.canPay = true
+                    this.checkhowToSub()
 
                 }
                 else if (incommingdata?.otp_required) {
@@ -300,12 +297,12 @@ export default {
 
                 let incommingdata = await response.json()
                 console.log(incommingdata);
-                if (incommingdata?.title && incommingdata?.message) {
-                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
-                }
+                toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+
 
                 if (incommingdata?.token) {
-                    this.canPay = true
+                    auth.setAuth(true, incommingdata?.token)
+                    this.checkhowToSub()
                 }
             } catch (err) {
                 // error handling hier
@@ -322,14 +319,44 @@ export default {
                 })
 
                 let incommingdata = await response.json()
-                if (incommingdata?.title && incommingdata?.message) {
-                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
-                }
+                toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+                this.donthaveAccount = false
                 console.log(incommingdata);
             } catch (err) {
                 // error handling hier
             }
-        }
+        },
+        checkhowToSub() {
+            if (this.selectedPlan.is_trial) {
+                this.subscribeToTrial()
+            } else {
+                if (this.paymentChoice == 'ideal') {
+                    this.subscribeToIdeal()
+                } else if (this.paymentChoice == 'creditcard') {
+                    this.subscribeToCreditCard()
+                }
+            }
+        },
+        async subscribeToTrial() {
+
+            try {
+                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/subscribeTrial`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        plan_id: this.selectedPlan.id,
+                        user_id: auth.user.id,
+                    })
+                });
+
+                let incommingdata = await response.json();
+                toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+            } catch (err) {
+                console.error('Error subscribing to trial:', err);
+            }
+        },
+
+
+
     },
     computed: {
         finalPrice() {
@@ -382,7 +409,7 @@ export default {
     gap: 2rem;
 }
 
-.plans__container {
+.subscription__container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -685,12 +712,14 @@ export default {
     font-weight: bold;
     color: var(--color-text);
 }
+
 .getplan__input_label a {
     color: var(--color-secondary-500);
     font-size: 1.5rem;
     font-weight: bold;
     text-decoration: none;
 }
+
 .getplan__input_label a:hover {
     color: var(--color-secondary-600);
 }
@@ -920,9 +949,10 @@ export default {
     font-size: 0.8rem;
     color: var(--color-text);
 }
-hr{
+
+hr {
     border: 1px solid var(--color-text);
     width: 100%;
-    margin: 2rem 0;
+    margin: 1rem 0;
 }
 </style>

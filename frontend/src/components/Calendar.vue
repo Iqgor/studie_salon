@@ -52,7 +52,11 @@
       <h3>{{ this.activityClickedInfo.title }}</h3>
       <p>Vak: {{ this.activityClickedInfo.vak }}</p>
       <p>Maakwerk: {{ this.activityClickedInfo.maakwerk }}</p>
-      <p>Tijd: {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}</p>
+      <p>Tijd: {{ new Date(this.activityClickedInfo.end_datetime).getDate() }}
+        {{ new Date(this.activityClickedInfo.end_datetime).toLocaleString('default', { month: 'short' }) }} {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}
+
+      </p>
+      <p>Gedaan: <span v-if="this.activityClickedInfo.done === 1">Ja</span> <span v-else>nee</span></p>
       <div ><i class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false" class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
     </div>
     <div class="createActivity" v-else-if="!isMobiel">
@@ -171,12 +175,12 @@
       <button @click="sendActivity"><i class="fa-regular fa-circle-check"></i></button>
     </div>
   </div>
-  <Toast v-if="loading" type="info" message="Laden..." />
-  <Toast v-if="activityCreated" type="success" message="Activiteit aangemaakt" />
 </template>
 <script>
 import vakken from '../assets/vakken.json'
-import Toast from './Toast.vue'
+import {auth} from '../auth.js'
+import { toastService } from '@/services/toastService';
+
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Calendar',
@@ -200,13 +204,12 @@ export default {
       newVak: vakken[0],
       maakWerk: "Huiswerk",
       loading: true,
-      activityCreated: false,
       isMobiel: false,
       oneDay: false,
     };
   },
   components: {
-    Toast
+    auth
   },
   computed: {
     currentWeekDays() {
@@ -366,7 +369,7 @@ export default {
     },
     sendActivity() {
       const formData = new FormData();
-      formData.append('userId', 1);
+      formData.append('userId', auth.user.id);
       formData.append('title', this.newActivityName);
       formData.append('vakName', this.newVak);
       formData.append('maakwerk', this.maakWerk);
@@ -379,14 +382,11 @@ export default {
       })
         .then(response => response.json())
         .then(() => {
-          this.activityCreated = true;
           this.newActivityClicked = false;
           this.newActivityName = null;
           this.newClass = null;
+          toastService.addToast('Activiteit aangemaakt',`Activiteit is zojuist aangemaakt door ${auth.user.name} `, 'success');
           this.fetchActivities();
-          setTimeout(() => {
-            this.activityCreated = false;
-          }, 2000);
         })
         .catch(error => {
           console.error('Error creating activity:', error);
@@ -507,7 +507,7 @@ export default {
       const existingActivities = document.querySelectorAll('.activity');
       existingActivities.forEach(activity => activity.remove());
       const formData = new FormData();
-      formData.append('userId', 1);
+      formData.append('userId', auth.user.id);
       const daysOfWeek = this.getDaysOfWeek();
       formData.append('startDate', `${daysOfWeek[0].year}-${daysOfWeek[0].month + 1}-${daysOfWeek[0].day}`);
       formData.append('endDate', `${daysOfWeek[6].year}-${daysOfWeek[6].month + 1}-${daysOfWeek[6].day}`);
@@ -546,11 +546,17 @@ export default {
             activityElement.style.padding = '0.5rem';
           }
 
+          if(activity.done ===1 ){
+            console.log('andere kleur')
+            activityElement.style.backgroundColor = 'var(--color-primary-500)';
+          }
+
 
           activityElement.innerHTML = `
             <strong>${activity.title}</strong>
             <p style="font-size:60%">${activity.vak}</p>
             <p style="font-size:60%">${activity.maakwerk}</p>
+
           `;
           activityElement.addEventListener('mouseenter', () => {
             if (activityElement.scrollHeight > activityElement.offsetHeight) {
@@ -910,12 +916,12 @@ export default {
 }
 
 .activityRadio {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
   margin-top: 1rem;
   align-items: center;
   padding: 0 0.5rem;
-  flex-wrap: wrap;
 }
 
 .activityRadio>input {

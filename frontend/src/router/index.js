@@ -5,7 +5,7 @@ import SubscriptionPlans from '@/views/subscription-plans.vue'
 import PrivacyVerklaring from '@/views/privacyVerklaring.vue'
 import Landingspage from '@/views/Landingspage.vue'
 import GebruikersVoorwaarden from '@/views/gebruikersVoorwaarden.vue'
-
+import { auth } from '@/auth.js'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -56,5 +56,17 @@ const router = createRouter({
     }
   ],
 })
+
+router.beforeEach((to, from, next) => {
+  const isLoggedIn = auth.isLoggedIn ; // Check if user is logged in
+  if (!isLoggedIn && to.name !== 'index' && to.name !== 'login') {
+    if (to.name === 'home') {
+      to.matched[0].components.default = Landingspage; // Replace HomeView with Landingspage
+    }
+    next(); // Proceed to the route
+  } else {
+    next(); // Proceed to the route
+  }
+});
 
 export default router
