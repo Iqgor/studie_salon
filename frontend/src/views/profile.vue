@@ -135,4 +135,22 @@ export default {
     background: var(--color-secondary-500);
     font-weight: bold;
 }
+
+@media screen and (max-width: 700px) {
+    .profiel {
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+    }
+
+    .profiel_list {
+        max-width: 100%;
+        border-right: none;
+        border-bottom: var(--color-primary-500) solid 0.1rem;
+    }
+
+    .profiel_list_item {
+        border: none;
+    }
+}
 </style>

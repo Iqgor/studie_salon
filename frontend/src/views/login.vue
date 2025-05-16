@@ -41,7 +41,7 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Inloggen</button>
-                    <p class="text">Nog geen account? <a href="/plans" class="link">Neem eerst een abonnement</a></p>
+                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a></p>
                     <p class="text">Wachtwoord vergeten? <span @click="showForm = 'forgot'" class="link">Krijg een tijdelijk wachtwoord</span></p>
 
                 </div>
@@ -82,7 +82,7 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Stuur wachtwoord</button>
-                    <p class="text">Nog geen account? <a href="/plans" class="link">Neem eerst een abonnement</a></p>
+                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a></p>
                 </div>
             </form>
 
@@ -515,10 +515,6 @@ export default {
 
 .link:hover {
     text-decoration: underline;
-}
-
-.link:visited {
-    color: var(--color-secondary-300);
 }
 
 .link:active {
