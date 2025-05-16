@@ -257,7 +257,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 .wekkers{
   position: fixed;
   top: 50%;
