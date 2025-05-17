@@ -16,7 +16,6 @@ export default {
   },
   data() {
     return {
-      currentTheme: '',
     }
   }
   ,
@@ -34,7 +33,7 @@ export default {
 
 <template>
 
-  <appheader :switchTheme="switchTheme" :currentTheme="currentTheme"/>
+  <appheader />
   <RouterView />
   <toast/>
   <footer>
