@@ -1,16 +1,11 @@
-import { reactive } from 'vue'
+import { ref } from 'vue';
+import { toastService } from './services/toastService';
 
-export const sharedfunctions = reactive({
-    currentTheme: 'light',
+//maak het watchable over de gehele aplicatie
+export const currentTheme = ref(localStorage.getItem('theme') || 'light');
 
-    themes: [
-        {name: 'Licht', value: 'light', primary: '#ffffff', background: '#0065ff'},
-        {name: 'Donker', value: 'dark', primary: '#1e1e1e', background: '#9b59b6'},
-        {name: 'Groen', value: 'green', primary: '#2f3327', background: '#83b551'},
-        {name: 'Blauw', value: 'blue', primary: '#84ccd7', background: '#0e788a'},
-        {name: 'Roze', value: 'pink', primary: '#7d494a', background: '#ca7a79'},
-    ],
-
+export const sharedfunctions = {
+    //als er gekeken moet worden tussen dagen
     daysBetween(date1, date2) {
 
         const normalize = (date) => {
@@ -30,13 +25,15 @@ export const sharedfunctions = reactive({
 
         return diffDays;
     },
-
-    switchTheme(theme) {
-        
+    
+    // verander de thema van de website
+    switchTheme(theme, name = null) {
         document.documentElement.className = `theme-${theme}`;
         localStorage.setItem('theme', theme);
-        this.selectedTheme = theme;
-        this.currentTheme = this.selectedTheme;
-        
+        currentTheme.value = theme;
+
+        if (name) {
+            toastService.addToast('Veranderd', 'Kleurenpalette veranderd naar ' + name, 'success');
+        }
     },
-})
+};

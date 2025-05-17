@@ -86,7 +86,7 @@ import { toastService } from '@/services/toastService';
 
 
 export default {
-    name: "profile",
+    name: "changePassword",
     components: {
     },
     data() {

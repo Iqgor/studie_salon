@@ -31,7 +31,7 @@
         <div class="dropdown">
           <i class="fa-solid fa-palette"></i>
           <div class="options_wrapper" v-if="isDropdownVisible">
-            <div class="options" v-for="theme in sharedfunctions.themes" :key="theme" @click="switchTheme(theme.value)"
+            <div class="options" v-for="theme in themes" :key="theme" @click="sharedfunctions.switchTheme(theme.value, theme.name)"
             :style="themeGradient(theme)">
               {{ theme.name }}
             </div>
@@ -46,6 +46,9 @@
 <script>
 import { sharedfunctions } from '../sharedFunctions';
 import { auth } from '@/auth';
+import themes from '@/assets/themes.json';
+
+
 export default {
   setup() {
     return { sharedfunctions, auth }
@@ -53,19 +56,13 @@ export default {
 
   name: 'appHeader',
   props: {
-    switchTheme: {
-      type: Function,
-      required: true
-    },
-    currentTheme: {
-      type: String,
-      required: true
-    }
+
   },
   data() {
     return {
       toggleTranslate: false,
       isDropdownVisible: false,
+      themes: themes.themes,
     }
   },
   mounted() {
@@ -73,6 +70,7 @@ export default {
     script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     script.async = true;
     document.body.appendChild(script);
+    
   },
   methods: {
     changeColor() {
@@ -80,12 +78,10 @@ export default {
       document.getElementsByClassName('topMenu')[0].classList.toggle('topMenuClick')
       document.getElementsByClassName('icons')[0].classList.toggle('iconsClick')
     },
-    switchTheme(theme) {
-      sharedfunctions.switchTheme(theme);
-    },
-    themeGradient(theme) {
+    themeGradient(theme) {      
       return {
         background: `linear-gradient(135deg, ${theme.background} 50%, ${theme.primary})`,
+        color: theme.text,
       }
     }
 

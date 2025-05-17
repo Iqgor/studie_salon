@@ -23,6 +23,7 @@ import Changepassword from '@/components/profile/changepassword.vue';
 import router from '@/router';
 import PrivacyVerklaring from './privacyVerklaring.vue';
 import GebruikersVoorwaarden from './gebruikersVoorwaarden.vue';
+import Changecolor from '@/components/profile/changecolor.vue';
 
 export default {
     name: "profile",
@@ -31,7 +32,7 @@ export default {
         return {
             options: [
                 { name: 'Profiel', slug: 'profiel', component: 'profiel' },
-                { name: 'Kleuren wijzigen', slug: 'kleur-wijzigen', component: '' },
+                { name: 'Kleuren wijzigen', slug: 'kleur-wijzigen', component: Changecolor },
                 { name: 'Wachtwoord wijzigen', slug: 'wachtwoord-wijzigen', component: Changepassword },
                 { name: 'Profiel verwijderen', slug: 'profiel-verwijderen', component: '' },
                 { name: 'Privacy verklaring', slug: 'privacy-verklaring', component: PrivacyVerklaring },
