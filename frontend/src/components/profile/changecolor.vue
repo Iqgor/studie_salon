@@ -13,16 +13,19 @@
                             <i class="fa-solid fa-palette" :style="{ color: demoTheme.secondary }"></i>
                             <h2>demo voor de kleuren</h2>
                         </span>
-                        <span class="demo_rank" :style="{ backgroundColor: demoTheme.secondary, color: demoTheme.text }">hey</span>
+                        <span class="demo_rank"
+                            :style="{ backgroundColor: demoTheme.secondary, color: demoTheme.text }">hey</span>
                     </div>
 
                     <p class="demo_description" :style="{ color: demoTheme.text }">hier wat uitleg</p>
                     <p class="demo_price__container">
-                        <span class="demo_price" :style="{ color: demoTheme.text }"><i class="fa-solid fa-euro-sign" :style="{ color: demoTheme.text }"></i> $$$</span>
+                        <span class="demo_price" :style="{ color: demoTheme.text }"><i class="fa-solid fa-euro-sign"
+                                :style="{ color: demoTheme.text }"></i> $$$</span>
                     </p>
                     <hr :style="{ borderColor: demoTheme.text }">
 
-                    <button class="demo_btn" :style="{ backgroundColor: demoTheme.primary, color: demoTheme.text }">Neem Abonemment</button>
+                    <button class="demo_btn" :style="{ backgroundColor: demoTheme.primary, color: demoTheme.text }">Neem
+                        Abonemment</button>
                 </div>
             </div>
 
@@ -94,34 +97,36 @@ export default {
 </script>
 
 <style scoped>
-
 hr {
     border: 1px solid var(--color-text);
     width: 100%;
 }
+
 main {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    padding: 2rem;
+    gap: 4rem;
+    flex-wrap: nowrap;
+    height: 100%;
 }
 
 
 .demo {
-    width: 100%;
-    height: 100%;
+    width: max-content;
     border-radius: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 2rem 0rem;
 }
 
-.demo__container{
+.demo__container {
     padding: 3rem;
     border-radius: 2rem;
     border: black 0.3rem solid;
-    box-shadow:black 0.5rem 0.5rem 1rem  ;
+    box-shadow: black 0.5rem 0.5rem 1rem;
+    background-color: var(--color-background-500);
 }
 
 .demo_card {
@@ -162,7 +167,7 @@ main {
 .demo_header .demo_rank {
     font-size: 1.2rem;
     font-weight: bold;
-    color: var(--color-background-100);
+    color: var(--color-text);
     background-color: var(--color-secondary-500);
     padding: 0.5rem 1rem;
     border-radius: 4px;
@@ -170,7 +175,7 @@ main {
 
 .demo_btn {
     background-color: var(--color-primary-500);
-    color: var(--color-background-100);
+    color: var(--color-text);
     padding: 1rem 2rem;
     border-radius: 0.4rem;
     border: none;
@@ -202,7 +207,7 @@ main {
     gap: 2rem;
 }
 
-.demo_sale{
+.demo_sale {
     position: absolute;
     top: -1.5rem;
     right: -1.5rem;
@@ -211,7 +216,7 @@ main {
     border-radius: 0.5rem;
 }
 
-.demo_sale_p{
+.demo_sale_p {
     font-size: 1.2rem;
     font-weight: bold;
 }
@@ -226,18 +231,24 @@ main {
     align-items: center;
     flex-wrap: wrap;
     width: 100%;
+    overflow-y: auto;
+    max-height: 80vh;
+    gap: 1rem;
+    padding: 1.5rem;
 }
 
 .card {
+
     width: 30rem;
-    height: 30rem;
-    margin: 20px;
+    aspect-ratio: 1/1;
     background-color: #fff;
     border-radius: 1.6rem;
     cursor: pointer;
     padding: 1rem;
     transition: all 0.3s ease-in-out;
     position: relative;
+
+
 }
 
 .card_active {
@@ -278,5 +289,23 @@ main {
 
 .card__stripe:last-child {
     border-radius: 0 0 1rem 1rem;
+}
+
+@media screen and (max-width: 1750px) {
+    .card {
+        max-width: 25rem;
+    }
+}
+
+@media screen and (max-width: 1160px) {
+    .card {
+        max-width: 17rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .card {
+        max-width: 13rem;
+    }
 }
 </style>
