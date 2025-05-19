@@ -2,11 +2,11 @@
 
   <div v-if="!app" class="wekkers">
     <div class="clock-icon" @click="togglePomodoro"><p class="tomaat">🍅</p></div>
-    <div class="alarm-icon" @click="toggleAlarm"><p class="tomaat">⏰</p></div>
+    <div class="alarm-icon" @click="toggleAlarm"><p class="klok">⏰</p></div>
   </div >
   <div v-else class="wekkers-app">
     <div class="clock-icon" @click="togglePomodoro"><p class="tomaat">🍅</p></div>
-    <div class="alarm-icon" @click="toggleAlarm"><p class="tomaat">⏰</p></div>
+    <div class="alarm-icon" @click="toggleAlarm"><p class="klok">⏰</p></div>
   </div>
 
   <!-- pomodoro -->
@@ -22,17 +22,9 @@
           </div>
           <div class="pomodoro-header-bottom">
             <div v-if="showPomodoroSettings" class="pomodoro-settings-menu">
-             <div>
-              <label for="longBreak" class="pomodoro-pauze-titel">Lange pauze:</label>
-                <select id="longBreak" class="pomodoro-pauze-keuze" v-model.number="longBreakDuration">
-                 <option :value="600">10 minuten</option>
-                 <option :value="900">15 minuten</option>
-                 <option :value="1200">20 minuten</option>
-                </select>
-              </div>
-              <div>
-                <label for="longBreak" class="pomodoro-pauze-titel">Timer:</label>
-                <select id="longBreak" class="pomodoro-pauze-keuze" v-model.number="TimerDuration">
+              <div class="pomodoro-settings-menuTimer">
+                <label for="Timer" class="pomodoro-pauze-titel">Timer:</label>
+                <select id="Timer" class="pomodoro-pauze-keuze" v-model.number="TimerDuration">
                   <option :value="900">15 minuten</option>
                   <option :value="1200">20 minuten</option>
                   <option :value="1500">25 minuten</option>
@@ -41,17 +33,27 @@
                   <option :value="2700">45 minuten</option>
                 </select>
               </div>
+             <div class="pomodoro-settings-menuKortepauze">
+              <label for="longBreak" class="pomodoro-pauze-titel">Lange pauze:</label>
+                <select id="longBreak" class="pomodoro-pauze-keuze" v-model.number="longBreakDuration">
+                 <option :value="600">10 minuten</option>
+                 <option :value="900">15 minuten</option>
+                 <option :value="1200">20 minuten</option>
+                </select>
+              </div>
+
             </div>
           </div>
       </div>
       <div class="pomodoro-box">
         <span class="pomodoro-text">{{ pomodoroLabel }}</span>
-        <button class="pomodoro-button pomodoro-button-start" v-if="!pomodoroRunning" @click="startPomodoro(pomodoroTime)">Start</button>
+<button
+  class="pomodoro-button pomodoro-button-start" v-if="!pomodoroRunning && !pomodoroFinished" @click="startPomodoro(pomodoroTime)">Start</button>
         <button class="pomodoro-button pomodoro-button-stop" v-if="pomodoroRunning" @click="stopPomodoro">Stop</button>
         <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
       </div>
       <div class="pomodoro-buttons">
-        <button class="pomodoro-button" @click="selectPomodoroDuration(25 * 60)">Timer</button>
+        <button class="pomodoro-button" @click="selectPomodoroDuration(TimerDuration)">Timer</button>
         <button class="pomodoro-button" @click="selectPomodoroDuration(5 * 60)">Korte pauze</button>
         <button class="pomodoro-button" @click="selectPomodoroDuration(longBreakDuration)">Lange pauze</button>
       </div>
@@ -112,9 +114,12 @@ export default {
       longBreakDuration: 15 * 60, // standaard 15 minuten
       pomodoroClicked: false,
       pomodoroTime: 1500, // in seconden (25 min)
+      TimerDuration: 1500,
       pomodoroLabel: '25:00',
       pomodoroRunning: false,
       pomodoroInterval: null,
+      pomodoroFinished: false,
+
     };
   },
   methods: {
@@ -123,14 +128,15 @@ export default {
       this.alarmClicked = !this.alarmClicked;
     },
     togglePomodoro() {
-      this.pomodoroClicked = !this.pomodoroClicked;
-      if (!this.pomodoroClicked) {
-        clearInterval(this.pomodoroInterval);
-        this.pomodoroRunning = false;
-        this.pomodoroLabel = '25:00';
-        this.pomodoroTime = 1500;
-      }
-    },
+  this.pomodoroClicked = !this.pomodoroClicked;
+  if (!this.pomodoroClicked) {
+    clearInterval(this.pomodoroInterval);
+    this.pomodoroRunning = false;
+    this.pomodoroTime = this.TimerDuration;
+    this.updatePomodoroLabel();
+    }
+  },
+
     togglePomodoroSettings() {
     this.showPomodoroSettings = !this.showPomodoroSettings;
     },
@@ -174,34 +180,18 @@ export default {
       });
     },
     stopAlarm() {
-      if (this.alarmAudio) {
-        this.alarmAudio.pause();
-        this.alarmAudio.currentTime = 0;
-        this.alarmAudio = null;
-      }
-      this.alarmSet = false;
-      this.alarmTime = '';
-      this.alarmRinging = false;
-    },
+  if (this.alarmAudio) {
+    this.alarmAudio.pause();
+    this.alarmAudio.currentTime = 0;
+    this.alarmAudio = null;
+  }
+  this.alarmSet = false;
+  this.alarmTime = '';
+  this.alarmRinging = false;
+  this.pomodoroFinished = false; // reset zodat de knop weer verschijnt
+},
 
-    // Pomodoro-functies
-    // startPomodoro(duration) {
-    //   clearInterval(this.pomodoroInterval);
-    //   this.pomodoroTime = duration;
-    //   this.pomodoroRunning = true;
-    //   this.updatePomodoroLabel();
 
-    //   this.pomodoroInterval = setInterval(() => {
-    //     if (this.pomodoroTime > 0) {
-    //       this.pomodoroTime--;
-    //       this.updatePomodoroLabel();
-    //     } else {
-    //       clearInterval(this.pomodoroInterval);
-    //       this.pomodoroRunning = false;
-    //       this.triggerAlarm();
-    //     }
-    //   }, 1000);
-    // },
     selectPomodoroDuration(duration) {
   clearInterval(this.pomodoroInterval); // reset lopende timer
   this.pomodoroRunning = false;
@@ -210,7 +200,9 @@ export default {
 },startPomodoro() {
   if (this.pomodoroRunning || this.pomodoroTime <= 0) return;
 
+  this.pomodoroFinished = false;
   this.pomodoroRunning = true;
+
   this.pomodoroInterval = setInterval(() => {
     if (this.pomodoroTime > 0) {
       this.pomodoroTime--;
@@ -218,11 +210,12 @@ export default {
     } else {
       clearInterval(this.pomodoroInterval);
       this.pomodoroRunning = false;
+      this.pomodoroFinished = true; // timer is klaar
       this.triggerAlarm();
     }
   }, 1000);
-}
-,
+},
+
 
     updatePomodoroLabel() {
       const minutes = Math.floor(this.pomodoroTime / 60).toString().padStart(2, '0');
@@ -318,12 +311,12 @@ export default {
 .fa-clock{
   font-size: 30px;
 }
-.tomaat{
+.tomaat, .klok{
   font-size: 35px;
   margin-bottom: 10px;
 }
 
-.tomaat:hover{
+.tomaat:hover, .klok:hover{
   cursor: pointer;
 }
 
@@ -463,6 +456,12 @@ export default {
   gap: 1rem;
   align-items: center;
 }
+
+.pomodoro-settings-menuKortepauze, .pomodoro-settings-menuTimer{
+  width: 50%;
+}
+
+
 
 .pomodoro-pauze-titel{
   font-size: 2.5rem;
