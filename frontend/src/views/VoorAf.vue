@@ -8,7 +8,7 @@
               @click="changeView('table')" :class="{'isActive' : view == 'table'}" class="fa-solid fa-table"></i></span>
         </div>
         <div class="niveaus">
-          <button :class="{ 'isActive': clickedNiveau === niveau }" @click="clickedNiveau = niveau"
+          <button :class="{ 'isActive': clickedNiveau === niveau }" @click="changeNiveau(niveau)"
             v-for="niveau in niveaus">{{ niveau }}</button>
         </div>
         <div :key="type" v-for="(link, type) in links">
@@ -16,7 +16,7 @@
             <h3>Teksten voor niveau {{ type.toUpperCase() }}</h3>
             <ul class="view" :class="{'tableView': view === 'table'}">
               <li v-for="(item, index) in link" :key="index">
-                <a :href="`${slug}/${item.slug.replace(slug, '').replace('-', '')}`">{{ item.name }}</a>
+                <a :href="`${slug}/${item.slug}`">{{ item.name }}</a>
               </li>
             </ul>
           </div>
@@ -51,8 +51,24 @@ export default {
   mounted() {
     this.getTekstLinks()
     this.changeView();
+    this.changeNiveau();
   },
   methods: {
+    changeNiveau(niveau = '') {
+      if(niveau.length !== 0){
+        this.clickedNiveau = niveau;
+        localStorage.setItem('niveauPreference', JSON.stringify({ slug: this.slug, niveau }));
+
+      }else{
+        const niveauPreference = localStorage.getItem('niveauPreference');
+        if (niveauPreference !== null) {
+          const parsedPreference = JSON.parse(niveauPreference);
+          if (parsedPreference.slug === this.slug) {
+            this.clickedNiveau = parsedPreference.niveau;
+          }
+        }
+      }
+    },
     changeView(view = '') {
       if(view.length !== 0){
         localStorage.setItem('viewPreference', JSON.stringify({ slug: this.slug, view }));

@@ -82,13 +82,9 @@
       {"title": "💪 Sta sterk", "url": "sta-sterk"}
     ],
     "Muziek": [
-      {"title": "🎵 Ontspanning 432 Hz", "url": "ontspanning-432-hz"},
-      {"title": "😊 Voor een gelukkig gevoel 396 Hz", "url": "voor-een-gelukkig-gevoel-396-hz"},
-      {"title": "🧠 Concentratie en geheugen 40 Hz", "url": "concentratie-en-geheugen-40-hz"},
-      {"title": "🌈 Voel je snel beter 741 Hz", "url": "voel-je-snel-beter-741-hz"},
-      {"title": "💖 Beter voeren 528 Hz", "url": "beter-voeren-528-hz"},
-      {"title": "🌙 Beter slapen 369 Hz", "url": "beter-slapen-369-hz"},
-      {"title": "🔮 Theda 4-6-7 Hz", "url": "theda-4-6-7-hz"}
+      {"title": "🧠 Concentratie", "url": "concentratie"},
+      {"title": "🎵 Ontspanning ", "url": "ontspanning"},
+      {"title": "🌙 Slapen", "url": "slapen"}
     ],
     "Sprookjes": [
       {"title": "👑 Koning merelbaard", "url": "koning-merelbaard"},

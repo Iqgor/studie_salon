@@ -5,7 +5,7 @@
     <Calander />
     <h2 class="appsTitle">Quotes & zoeken & wekkers</h2>
     <div class="apps">
-      <div v-if="Object.keys(quote).length !== 0" class="quote_container">
+      <div class="quote_container">
         <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">
           {{ quote.quote }}
           <strong>{{ quote.author }}</strong>
@@ -29,14 +29,15 @@
 import Carousel from '@/components/Carousel.vue';
 import Calander from '../components/Calendar.vue';
 import SideWekkers from '@/components/SideWekkers.vue';
-
+import { auth } from '@/auth';
 
 export default {
   name: 'HomeView',
   components: {
     Calander,
     Carousel,
-    SideWekkers
+    SideWekkers,
+    auth
   },
   data() {
     return {
@@ -85,10 +86,10 @@ export default {
         img.src = 'https://openweathermap.org/img/wn/' + this.temp.weather[0].icon + '@2x.png';
         const typewriter = document.querySelector('.typewriter');
         // waar igor staat later de username neerzetten die opgehaald wordt uit de api
-        typewriter.innerHTML = `${this.typeofDay} Igor ${Math.round(this.temp.main.temp)}°C`;
+        typewriter.innerHTML = `${this.typeofDay} ${auth.user.name ?  auth.user.name:'gebruiker'} ${Math.round(this.temp.main.temp)}°C`;
         typewriter.appendChild(img);
         // Wait for DOM update with this.typeofDay
-        this.typeWriterText = `${this.typeofDay} Igor ${Math.round(this.temp.main.temp)}°C`;
+        this.typeWriterText = `${this.typeofDay} ${auth.user.name ? auth.user.name:'gebruiker'} ${Math.round(this.temp.main.temp)}°C`;
         this.textLength = this.typeWriterText.length;
 
         // Set CSS variable
