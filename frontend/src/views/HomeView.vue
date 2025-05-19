@@ -3,7 +3,7 @@
     <p class="typewriter" :style="typewriterStyle">
     </p>
     <Calander />
-    <h2 class="appsTitle">Qoutes & zoeken & wekkers</h2>
+    <h2 class="appsTitle">Quotes & zoeken & wekkers</h2>
     <div class="apps">
       <div class="quote_container">
         <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">

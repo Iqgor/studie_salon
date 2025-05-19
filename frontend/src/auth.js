@@ -57,7 +57,7 @@ export const auth = reactive({
             let data = jwtDecode(storageToken)
             this.user = data.user
             this.temp_used = localStorage.getItem('temp_used') || false
-            
+
             this.getSubscription()
 
 
@@ -66,15 +66,15 @@ export const auth = reactive({
 
     },
     reset() {
-        (this.isLoggedIn = false),
-            (this.user = {}),
-            (this.token = null)
+        this.isLoggedIn = false,
+            this.user = {},
+            this.token = null
     },
     logout() {
-        this.isLoggedIn = false
-        this.user = {}
-        this.token = null
         localStorage.removeItem('token')
+        localStorage.removeItem('temp_used')
+        this.reset()
+        router.push('/index')
     },
     isLocalHost() {
         const currentUrl = window.location.href
@@ -96,16 +96,18 @@ export const auth = reactive({
                 }
             });
 
-            if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
+            const data = await response.json();
+            this.subscriptionId = data.id
+            this.subscriptionName = data.name
+            this.subscriptionFeatures = data.features
+            console.log(data);
+
+            if (data?.title == 'Geen abonnement') {
+                this.logout()
+
             }
 
-            const json = await response.json();
-            this.subscriptionId = json.id
-            this.subscriptionName = json.name
-            this.subscriptionFeatures = json.features
 
-            
         } catch (error) {
             console.error(error.message);
         }
