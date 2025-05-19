@@ -33,7 +33,7 @@ export const sharedfunctions = {
         currentTheme.value = theme;
 
         if (name) {
-            toastService.addToast('Veranderd', 'Kleurenpalette veranderd naar ' + name, 'success');
+            toastService.addToast('Veranderd', 'Kleurenpalet veranderd naar ' + name, 'success');
         }
     },
 };

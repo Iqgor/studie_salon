@@ -35,9 +35,15 @@
             <article class="card" :class="{ 'card_active': theme.value === currentTheme }" v-for="theme in themes"
                 :key="theme.value" @click="handleClick(theme)" @mouseenter="showDemo(theme)"
                 v-on:mouseleave="removeDemo()">
+
                 <i class="fa-solid fa-check card_icon" v-if="theme.value === currentTheme"></i>
-                <div class="card__stripe" v-for="(color, i) in getThemeStripeColors(theme)" :key="i"
-                    :style="{ backgroundColor: color }"></div>
+
+                <div class="card__stripes">
+
+                    <div class="card__stripe" v-for="(color, i) in getThemeStripeColors(theme)" :key="i"
+                        :style="{ backgroundColor: color }">
+                    </div>
+                </div>
             </article>
 
         </section>
@@ -67,7 +73,6 @@ export default {
     },
     watch: {
         currentTheme(newVal) {
-            console.log('Theme changed in watch:', newVal);
             // do something on theme change
         }
     },
@@ -86,11 +91,9 @@ export default {
         },
         showDemo(theme) {
             this.demoTheme = theme
-            console.log(this.demoTheme);
         },
         removeDemo() {
             this.demoTheme = {}
-            console.log(this.demoTheme);
         }
     }
 }
@@ -279,16 +282,18 @@ main {
 .card__stripe {
     width: 100%;
     height: 25%;
+    border-bottom: black solid 0.1rem;
+}
+
+.card__stripe:last-child{
+    border: none;
+}
+
+.card__stripes{
+    height: 100%;
+    border-radius: 1.5rem;
+    overflow: hidden;
     border: black solid 0.1rem;
-
-}
-
-.card__stripe:first-child {
-    border-radius: 1rem 1rem 0 0;
-}
-
-.card__stripe:last-child {
-    border-radius: 0 0 1rem 1rem;
 }
 
 @media screen and (max-width: 1750px) {

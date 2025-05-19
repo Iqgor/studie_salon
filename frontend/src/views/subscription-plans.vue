@@ -460,7 +460,7 @@ export default {
 .card__header .rank {
     font-size: 1.2rem;
     font-weight: bold;
-    color: var(--color-background-100);
+    color: var(--color-text);
     background-color: var(--color-secondary-500);
     padding: 0.5rem 1rem;
     border-radius: 4px;
@@ -512,7 +512,7 @@ export default {
 
 .btn {
     background-color: var(--color-primary-500);
-    color: var(--color-background-100);
+    color: var(--color-text);
     padding: 1rem 2rem;
     border-radius: 0.4rem;
     border: none;
@@ -740,7 +740,7 @@ export default {
     gap: 1rem;
     padding: 2rem;
     border-radius: 1.5rem;
-    background-color: var(--color-background-400);
+    background-color: var(--color-card-500);
     color: var(--color-text);
     font-size: 1.5rem;
     font-weight: bold;
@@ -761,23 +761,23 @@ export default {
 }
 
 .getplan__button:hover {
-    background-color: var(--color-primary-300);
-    color: var(--color-background-100);
+    background-color: var(--color-card-300);
+    color: var(--color-text);
 }
 
 .getplan__button:focus {
-    background-color: var(--color-primary-600);
+    background-color: var(--color-card-600);
     border: none;
     outline: none;
 }
 
 .getplan__button_active {
-    background-color: var(--color-primary-700);
+    background-color: var(--color-card-700);
 }
 
 .getplan__send {
     background-color: var(--color-primary-500);
-    color: var(--color-background-100);
+    color: var(--color-text);
     padding: 1rem 2rem;
     border-radius: 0.4rem;
     border: none;
@@ -838,7 +838,7 @@ export default {
     gap: 1rem;
     padding: 2rem;
     border-radius: 1.5rem;
-    background-color: var(--color-background-400);
+    background-color: var(--color-card-500);
     color: var(--color-text);
     font-size: 1.5rem;
     font-weight: bold;
@@ -861,15 +861,15 @@ export default {
 }
 
 .detail__button:hover {
-    background-color: var(--color-primary-300);
+    background-color: var(--color-card-300);
     color: var(--color-text);
 }
 
 .detail__button:focus {
-    background-color: var(--color-primary-600);
+    background-color: var(--color-card-600);
     border: none;
     outline: none;
-    color: var(--color-background-500);
+    color: var(--color-text);
 }
 
 .detail__button_active {

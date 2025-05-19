@@ -6,7 +6,7 @@
         <img @click="$router.push('/')" src="/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
-            <li><a href="#">Abonnementen</a></li>
+            <li><a href="/abonnementen">Abonnementen</a></li>
             <li><a href="#">Disclaimer</a></li>
             <li v-if="auth.isLoggedIn"><a href="#">Teksten</a></li>
           </ul>
@@ -18,7 +18,7 @@
     <div class="icons">
 
 
-      <a :href="auth.isLoggedIn ? '/profiel' :'/login'"><i class="fa-solid fa-user"></i></a>
+      <a :href="auth.isLoggedIn ? '/profiel' : '/login'"><i class="fa-solid fa-user"></i></a>
 
 
       <i class="fa-solid fa-language" title="Translate page" @click="toggleTranslate = !toggleTranslate">
@@ -26,14 +26,16 @@
         <div v-show="toggleTranslate" id="google_translate_element"></div>
       </i>
 
-      <div  class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
+      <div class="dropdown_wrapper" ref="dropdown" @click.stop="isDropdownVisible = !isDropdownVisible">
 
         <div class="dropdown">
           <i class="fa-solid fa-palette"></i>
           <div class="options_wrapper" v-if="isDropdownVisible">
-            <div class="options" v-for="theme in themes" :key="theme" @click="sharedfunctions.switchTheme(theme.value, theme.name)"
-            :style="themeGradient(theme)">
-              {{ theme.name }}
+            <div class="options" v-for="theme in themes" :key="theme"
+              @click="sharedfunctions.switchTheme(theme.value, theme.name)" >
+                <div class="option__stripe" v-for="(color, i) in getThemeStripeColors(theme)" :key="i"
+                    :style="{ backgroundColor: color }">
+                </div>
             </div>
           </div>
         </div>
@@ -70,7 +72,7 @@ export default {
     script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     script.async = true;
     document.body.appendChild(script);
-    
+
   },
   methods: {
     changeColor() {
@@ -78,17 +80,24 @@ export default {
       document.getElementsByClassName('topMenu')[0].classList.toggle('topMenuClick')
       document.getElementsByClassName('icons')[0].classList.toggle('iconsClick')
     },
-    themeGradient(theme) {      
-      return {
-        background: `linear-gradient(135deg, ${theme.background} 50%, ${theme.primary})`,
-        color: theme.text,
-      }
-    }
+    getThemeStripeColors(theme) {
+      return [
+        theme.primary,
+        theme.secondary,
+        theme.card,
+        theme.background
+      ];
+    },
 
   }
 }
 </script>
 <style scoped>
+
+
+
+
+
 .header {
   width: 100%;
   height: 10rem;
@@ -216,7 +225,7 @@ export default {
   position: relative;
 }
 
-.fa-language>div{
+.fa-language>div {
   position: absolute;
   top: 4rem;
   left: -12rem;
@@ -243,7 +252,7 @@ export default {
 .options_wrapper {
   position: absolute;
   top: 3rem;
-  left: -6rem;
+  left: -12rem;
   background-color: white;
   border-radius: 1rem;
   z-index: 10;
@@ -253,11 +262,24 @@ export default {
   padding: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  height: 4rem;
+  width: 15rem;
+  display: flex;
 }
 
-.options:hover {
-  background-color: var(--color-primary-500);
-  color: white;
+.option__stripe {
+    width: 100%;
+    height: 100%;
+    border: black solid 0.1rem;
+
+}
+
+.option__stripe:first-child {
+    border-radius: 1rem 0 0 1rem;
+}
+
+.option__stripe:last-child {
+    border-radius: 0 1rem 1rem 0;
 }
 
 @media screen and (max-width: 768px) {

@@ -60,7 +60,7 @@
                         ww_listItem_error: !forbidden,
                         ww_listItem_green: forbidden
                     }">
-                        <p class="ww_title">spatie of <strong>|</strong></p>
+                        <p class="ww_title">Geen spatie of <strong>|</strong></p>
                     </li>
                 </ul>
             </div>
