@@ -1063,6 +1063,8 @@ export default {
   }
   .createActivityButton{
     width: 80%;
+    margin: 0 auto;
+    margin-bottom: 2rem;
   }
 
   .createActivity{

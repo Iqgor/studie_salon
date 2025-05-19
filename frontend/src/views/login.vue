@@ -66,7 +66,7 @@
             </form>
 
             <form @submit.prevent="forgotPassword()" class="form" v-if="showForm === 'forgot'">
-                
+
                 <div class="login__header">
                     <h1 class="title">Wachtwoord vergeten?</h1>
                     <span class="text__container">
@@ -215,7 +215,7 @@ export default {
                 }
 
                 if (incommingdata?.token) {
-                    
+
                     auth.setAuth(true, incommingdata?.token)
                     router.push('/')
 
@@ -493,6 +493,7 @@ export default {
     width: 100%;
 }
 
+
 .btn {
     padding: 1rem;
     border-radius: 0.5rem;
@@ -502,6 +503,7 @@ export default {
     background-color: var(--color-primary-400);
     color: white;
     font-size: 1.25rem;
+    cursor: pointer;
 }
 
 .btn:hover {

@@ -349,3 +349,62 @@ select:focus {
 .waterFallLink:hover {
   opacity: 1;
 }
+
+.adminText{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.adminText h2{
+  font-size: 200%;
+  margin-bottom: 1rem;
+}
+.adminText > button{
+  width: max-content;
+  background: var(--color-primary-500);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 1rem 2rem;
+  font-size: 110%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+
+.adminText > p > button{
+  background: none;
+  border: none;
+  font-size: inherit;
+  color: var(--color-primary-500);
+  cursor: pointer;
+}
+
+.adminText > button:hover{
+  background: var(--color-primary-400);
+}
+.adminText > button:active{
+  transform: translateY(2px);
+}
+
+.jodit-workplace{
+  height: 40vh !important;
+}
+
+.jodit-workplace ul, .jodit-workplace ol{
+  padding-left: 2rem !important;
+}
+
+.editLink {
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  transition: 0.25s all;
+}
+.editLink:focus {
+  outline: none;
+  border-color: #007bff;
+}
+

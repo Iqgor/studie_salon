@@ -1,5 +1,5 @@
 <template>
-  <div class="carousel">
+  <div id="carousel" class="carousel">
     <div v-for="(info, index,i) in CarouselData" :key="index" class="carousel-inner">
       <CarouselItem :info="info" :index="index" :indexNumber="i" />
     </div>
@@ -7,17 +7,17 @@
 </template>
 
 <script>
-import CarouselData from "../assets/carousel.json"
 import CarouselItem from "./carouselItem.vue";
 export default {
   name: "ImageCarousel",
   components: {
     CarouselItem,
   },
-  data() {
-    return {
-      CarouselData: CarouselData,
-    };
+  props:{
+    CarouselData: {
+      type: Object,
+      required: true,
+    },
   },
 };
 </script>

@@ -143,13 +143,6 @@ export default {
   transition: transform 0.4s ease;
 }
 
-
-@media (max-width: 768px) {
-  .carousel-container::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 .carousel-top {
   display: flex;
   justify-content: space-between;
@@ -223,6 +216,13 @@ export default {
     margin-right: 0;
     padding-left: 1rem;
   }
-
+    .carousel-container::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel-top{
+    margin-right: 0;
+    margin-left: 0;
+    padding: 1rem 1rem;
+  }
 }
 </style>

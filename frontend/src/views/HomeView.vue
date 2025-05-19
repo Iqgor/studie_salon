@@ -19,13 +19,19 @@
       <div>
         <SideWekkers :app="true"/>
       </div>
-      <input type="text" class="search" placeholder="Zoek een tekst..." />
+      <input type="text" class="search" :input="updateCarouselData()" v-model="searchCarousel" placeholder="Zoek een tekst..." />
     </div>
-    <Carousel />
+    <div v-if="Object.keys(updatedCarouselData).length > 0">
+      <Carousel :CarouselData="updatedCarouselData"/>
+    </div>
+    <div v-else class="no-results" style="text-align:center; margin:2rem 0;">
+      Geen teksten gevonden.
+    </div>
     <SideWekkers />
   </main>
 </template>
 <script>
+import CarouselData from "../assets/carousel.json"
 import Carousel from '@/components/Carousel.vue';
 import Calander from '../components/Calendar.vue';
 import SideWekkers from '@/components/SideWekkers.vue';
@@ -60,7 +66,8 @@ export default {
       },
       currentLanguageCode :navigator.language || navigator.userLanguage,
       loading: true,
-
+      searchCarousel: '',
+      updatedCarouselData: CarouselData,
     };
   },
   mounted() {
@@ -69,6 +76,20 @@ export default {
     this.getWeer();
   },
   methods: {
+    updateCarouselData() {
+      if(this.searchCarousel.length === 0){
+        this.updatedCarouselData = CarouselData;
+        return;
+      }
+      // CarouselData is an object, so filter its arrays and keep the structure
+      const search = this.searchCarousel.toLowerCase();
+      this.updatedCarouselData = Object.fromEntries(
+        Object.entries(CarouselData).map(([category, items]) => [
+          category,
+          items.filter(item => item.title.toLowerCase().includes(search))
+        ]).filter(([_, items]) => items.length > 0)
+      );
+    },
     getDay() {
       const date = new Date();
       const hours = date.getHours();
@@ -361,7 +382,7 @@ export default {
     padding: 0 1rem;
   }
   .typewriter {
-    font-size: 125%;
+    font-size: clamp(120%, calc(200vw / var(--text-length)), 200%);
     padding-left: 1rem;
     width: 100%;
   }

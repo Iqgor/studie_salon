@@ -8,7 +8,7 @@
           <ul>
             <li><a href="/abonnementen">Abonnementen</a></li>
             <li><a href="#">Disclaimer</a></li>
-            <li v-if="auth.isLoggedIn"><a href="#">Teksten</a></li>
+            <li v-if="auth.isLoggedIn"><a href="/">Teksten</a></li>
           </ul>
         </nav>
         <div style="width: 14.2rem; height: 100%;"></div>
@@ -70,7 +70,7 @@ export default {
     script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     script.async = true;
     document.body.appendChild(script);
-    
+
   },
   methods: {
     changeColor() {
@@ -78,7 +78,7 @@ export default {
       document.getElementsByClassName('topMenu')[0].classList.toggle('topMenuClick')
       document.getElementsByClassName('icons')[0].classList.toggle('iconsClick')
     },
-    themeGradient(theme) {      
+    themeGradient(theme) {
       return {
         background: `linear-gradient(135deg, ${theme.background} 50%, ${theme.primary})`,
         color: theme.text,

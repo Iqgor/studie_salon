@@ -189,9 +189,41 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $stmt = $conn->prepare("UPDATE teksten SET tekst = ? WHERE slug = ?");
                 $stmt->bind_param("ss", $text, $slug);
                 if ($stmt->execute()) {
-                    jsonResponse(['message' => 'Text added successfully'], 201);
+                    jsonResponse(['success' => 'Text added successfully'], 201);
                 } else {
                     jsonResponse(['error' => 'Failed to add text'], 500);
+                }
+                break;
+            case 'addLinks':
+                $tegel = $_POST['slug'] ?? null; // Get slug from POST data
+                $link = $_POST['link'] ?? null; // Get links from POST data
+                if (!$tegel || !$link) {
+                    jsonResponse(['error' => 'slug and links are required'], 400);
+                    exit;
+                }
+                $slug = strtolower(trim($link));
+                $slug = str_replace(' ', '-', $slug);
+                if ($link !== '') {
+                    $link = "➔ " . $link;
+                    $stmt = $conn->prepare("INSERT INTO teksten (tegel,name,slug ) VALUES (?, ?, ?)");
+                    $stmt->bind_param("sss", $tegel, $link, $slug);
+                    $stmt->execute();
+                }
+                jsonResponse(['success' => 'Links added successfully'], 200);
+                break;
+            case 'editLink':
+                $link = $_POST['name'] ?? null; // Get link from POST data
+                $slug = $_POST['slug'] ?? null; // Get slug from POST data
+                if ( !$link || !$slug) {
+                    jsonResponse(['error' => 'link and slug are required'], 400);
+                    exit;
+                }
+                $stmt = $conn->prepare("UPDATE teksten SET name = ? WHERE slug = ?");
+                $stmt->bind_param("ss", $link, $slug);
+                if ($stmt->execute()) {
+                    jsonResponse(['success' => 'Link updated successfully'], 200);
+                } else {
+                    jsonResponse(['error' => 'Failed to update link'], 500);
                 }
                 break;
             case 'users':
