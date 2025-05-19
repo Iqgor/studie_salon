@@ -31,19 +31,29 @@
             "name": "Blauw",
             "value": "blue",
             "primary": "#0e788a",
-            "background": "#84ccd7",
+            "background": "#c6eae6",
             "secondary": "#1bb9b3",
             "card": "#8dcca2",
             "text": "#000000"
         },
         {
-            "name": "Roze",
+            "name": "Rose",
             "value": "pink",
             "primary": "#ca7a79",
             "background": "#7d494a",
             "secondary": "#e9c3c1",
             "card": "#9d7373",
             "text": "#000000"
+        }
+        ,
+        {
+            "name": "Bruin",
+            "value": "brown",
+            "primary": "#e9db6a",
+            "background": "#5a4536",
+            "secondary": "#d6ba51",
+            "card": "#a87f3c",
+            "text": "#ffffff"
         }
     ]
 }
