@@ -161,7 +161,7 @@ export default {
                     }),
                      headers: {
                         'Content-Type': 'application/json',
-                        Authorization: this.bearerToken
+                        Authorization: auth.bearerToken
                     }
                 })
 
