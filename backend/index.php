@@ -33,7 +33,6 @@ $publicRoutes = [
     'subscriptions',
     'verify_otp',
     'subscribeTrial',
-    'change_password'
 ];
 
 // onze secret key //! moet veranderd worden
@@ -543,7 +542,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 //jsonResponse(['message' => 'Login endpoint'], 200);
 
                 //^ Token genereren (JWT)
-                $secret_key = "your_secret_key"; // moet veilig zijn in productie
                 $issuedAt = time();
                 $expirationTime = $issuedAt + 3600; // 1 uur waard
 
@@ -697,7 +695,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 unset($user['otp_expires_at']);
 
                 // JWT genereren
-                $secret_key = "your_secret_key"; // Gebruik veilige env variabelen in productie
                 $issuedAt = time();
                 $expirationTime = $issuedAt + 3600; // 1 uur geldig
 
