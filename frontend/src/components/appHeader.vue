@@ -6,6 +6,7 @@
         <img @click="$router.push('/')" src="/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
+            <li><a href="/">Home</a></li>
             <li><a href="/abonnementen">Abonnementen</a></li>
             <li><a href="#">Disclaimer</a></li>
             <li v-if="auth.isLoggedIn"><a href="/">Teksten</a></li>
@@ -94,10 +95,6 @@ export default {
 }
 </script>
 <style scoped>
-
-
-
-
 
 .header {
   width: 100%;

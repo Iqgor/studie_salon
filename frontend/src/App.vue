@@ -1,29 +1,36 @@
 <script>
 import { RouterView } from 'vue-router'
 import appheader from './components/appHeader.vue'
-import SideWekkers from './components/SideWekkers.vue'
-import { onMounted, ref } from 'vue';
 import { auth } from '@/auth';
 import Toast from './components/Toast.vue';
 import { sharedfunctions } from './sharedFunctions';
+import Muziek from './components/Muziek.vue';
 
 export default {
   name: 'App',
   components: {
     appheader,
     RouterView,
-    Toast
+    Toast,
+    Muziek
+  },
+  watch: {
+    $route(to, from) {
+      if (to.name === 'Landingspage') {
+        this.isLoggedIn = false
+      } else {
+        this.isLoggedIn = auth.isLoggedIn
+      }
+    }
   },
   data() {
     return {
+      isLoggedIn: false,
     }
-  }
-  ,
-  methods: {
   },
   mounted() {
     auth.check()
-    
+    this.isLoggedIn = auth.isLoggedIn
     const savedTheme = localStorage.getItem('theme') || 'light'
     sharedfunctions.switchTheme(savedTheme)
   }
@@ -36,6 +43,7 @@ export default {
   <appheader />
   <RouterView />
   <toast/>
+  <Muziek v-if="isLoggedIn"/>
   <footer>
 
   </footer>
