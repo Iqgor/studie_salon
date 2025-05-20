@@ -41,8 +41,10 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Inloggen</button>
-                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a></p>
-                    <p class="text">Wachtwoord vergeten? <span @click="showForm = 'forgot'" class="link">Krijg een tijdelijk wachtwoord</span></p>
+                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a>
+                    </p>
+                    <p class="text">Wachtwoord vergeten? <span @click="showForm = 'forgot'" class="link">Krijg een
+                            tijdelijk wachtwoord</span></p>
 
                 </div>
             </form>
@@ -66,7 +68,7 @@
             </form>
 
             <form @submit.prevent="forgotPassword()" class="form" v-if="showForm === 'forgot'">
-                
+
                 <div class="login__header">
                     <h1 class="title">Wachtwoord vergeten?</h1>
                     <span class="text__container">
@@ -82,7 +84,8 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Stuur wachtwoord</button>
-                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a></p>
+                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a>
+                    </p>
                 </div>
             </form>
 
@@ -109,9 +112,10 @@ export default {
         return {
             slideIndex: 0,
             slides: [
-                "Toegang tot een volledige agenda voor al jouw studeersessies.",
-                "Meerdere leerstrategieën tot je beschikking voor hogere cijfers.",
-                "Beste tips voor thuis leren zonder afleidingen.",
+                "Wat voor leerder ben jij? Vind leerstrategieën, tips & tricks voor elk vak, op elk niveau en in elke denkbare taal.",
+                "Je gaf overigens een prima voorzet! Ontdek tips om tijdens de les te leren, thuis snel en zonder afleiding huiswerk te maken, en goede cijfers te halen, zodat je tijd overhoudt voor jezelf!",
+                "Snel en eenvoudig je huiswerk noteren, zodat je je dag en week plant, organiseert en prioriteiten stelt.",
+                "In 20% van je tijd voor 80% van je cijfer leren."
             ],
             activeSlide: '',
 
@@ -215,7 +219,7 @@ export default {
                 }
 
                 if (incommingdata?.token) {
-                    
+
                     auth.setAuth(true, incommingdata?.token)
                     router.push('/')
 
@@ -396,7 +400,7 @@ export default {
     top: 50%;
     right: 1rem;
     transform: translateY(-50%);
-    color: var(--color-primary-100);
+    color: var(--color-card-500);
     font-size: 1.5rem;
 }
 
@@ -429,7 +433,7 @@ export default {
 }
 
 .text {
-    color: white;
+    color: var(--color-text);
     font-size: 1.2rem;
     text-align: start;
 }
@@ -447,7 +451,7 @@ export default {
     border: none;
     outline: none;
     width: 100%;
-    background-color: var(--color-primary-300);
+    background-color: var(--color-card-300);
 }
 
 .input:focus {
@@ -456,12 +460,9 @@ export default {
 }
 
 .input::placeholder {
-    color: var(--color-primary-100);
+    color: var(--color-text);
 }
 
-.input:focus::placeholder {
-    color: --color-background-100;
-}
 
 .checkbox {
     width: 1.5rem;
@@ -478,7 +479,7 @@ export default {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: white;
+    color: var(--color-text);
     font-size: 1.2rem;
 }
 
@@ -493,24 +494,30 @@ export default {
     width: 100%;
 }
 
+.buttons .text {
+    color: var(--color-text);
+}
+
 .btn {
     padding: 1rem;
     border-radius: 0.5rem;
     border: none;
     outline: none;
     width: 100%;
-    background-color: var(--color-primary-400);
+    background-color: var(--color-card-500);
     color: white;
     font-size: 1.25rem;
+    transition: all 0.5s ease-in-out;
 }
 
 .btn:hover {
-    background-color: var(--color-primary-600);
+    background-color: var(--color-card-700);
 }
 
 .link {
     cursor: pointer;
-    color: var(--color-secondary-500);
+    color: var(--color-background-500);
+    transition: all 0.5s ease-in-out;
 }
 
 .link:hover {

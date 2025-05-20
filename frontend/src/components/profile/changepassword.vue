@@ -147,7 +147,6 @@ export default {
             // is alles ingevuld
             this.newPasswordInvalid = false;
             this.invalidCurrentPassword = false;
-            console.log('alles ingevuld');
 
             this.changePass();
         },
@@ -159,7 +158,11 @@ export default {
                         userId: auth.user.id,
                         newPassword: this.newPassword,
                         oldPassword: this.currentPassword,
-                    })
+                    }),
+                     headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: this.bearerToken
+                    }
                 })
 
                 let incommingdata = await response.json()
@@ -172,6 +175,9 @@ export default {
                     localStorage.removeItem('temp_used')
                     auth.temp_used = false
                 }
+
+                auth.checkAction(incommingdata?.action)
+
             } catch (err) {
                 console.error(err);
             }

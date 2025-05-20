@@ -20,6 +20,8 @@ export const auth = reactive({
     hidden: false,
     //* om te checken of je je temp was gebruikt
     temp_used: false,
+    //*
+    bearerToken: ``,
 
 
 
@@ -57,6 +59,7 @@ export const auth = reactive({
             let data = jwtDecode(storageToken)
             this.user = data.user
             this.temp_used = localStorage.getItem('temp_used') || false
+            this.bearerToken = `Bearer ${this.token}`
 
             this.getSubscription()
 
@@ -92,7 +95,7 @@ export const auth = reactive({
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    //Authorization: `Bearer ${this.token}`
+                    Authorization: this.bearerToken
                 }
             });
 
@@ -100,7 +103,8 @@ export const auth = reactive({
             this.subscriptionId = data.id
             this.subscriptionName = data.name
             this.subscriptionFeatures = data.features
-            console.log(data);
+            this.checkAction(data?.action)
+            
 
             if (data?.title == 'Geen abonnement') {
                 this.logout()
@@ -114,5 +118,13 @@ export const auth = reactive({
     },
     hasFeature(feature) {
         return this.subscriptionFeatures.includes(feature)
+    },
+    checkAction(action) {
+        if (action == 'logout') {
+            this.logout()
+        }
+        else {
+            return
+        }
     }
 })

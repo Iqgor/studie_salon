@@ -1,7 +1,7 @@
 <template>
   <div class="calendar">
     <aside v-if="!newActivityClicked && !activityClicked" class="calendar-sidebar">
-      <button  v-if="!isMobiel" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
+      <button v-if="!isMobiel" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
         day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
         day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
         day.year === (this.setDate ? this.setDate.getFullYear() : this.shownDate.getFullYear())
@@ -28,13 +28,14 @@
           'current-day': isCurrentDay(day.day, -1), 'clicked-day': isClickedDay(day.day, -1),
           'week-day': currentWeekDays.some(weekDay => weekDay.day === day.day && weekDay.month === day.month)
         }" v-for="day in previousMonthDays" :key="'prev-' + day.day" style="opacity: 0.5;"
-          @click="selectDate(day.day, day.month, day.year),unFocusDay()">
+          @click="selectDate(day.day, day.month, day.year), unFocusDay()">
           {{ day.day }}
         </div>
         <div class="calendar-day" :class="{
           'current-day': isCurrentDay(day.day), 'clicked-day': isClickedDay(day.day),
           'week-day': currentWeekDays.some(weekDay => weekDay.day === day.day && weekDay.month === day.month)
-        }" v-for="(day, index) in daysInMonth" :key="day.day" @click="selectDate(day.day, day.month, day.year),unFocusDay()"
+        }" v-for="(day, index) in daysInMonth" :key="day.day"
+          @click="selectDate(day.day, day.month, day.year), unFocusDay()"
           :style="{ gridColumnStart: index === 0 ? (new Date(shownDate.getFullYear(), shownDate.getMonth(), 1).getDay() || 7) : 'auto' }">
           {{ day.day }}
         </div>
@@ -42,8 +43,8 @@
         <div class="calendar-day" :class="{
           'current-day': isCurrentDay(day.day, 1), 'clicked-day': isClickedDay(day.day, 1),
           'week-day': currentWeekDays.some(weekDay => weekDay.day === day.day && weekDay.month === day.month)
-        }" v-for="day in nextMonthDays" @click="selectDate(day.day, day.month, day.year),unFocusDay()" :key="'next-' + day.day"
-          style="opacity: 0.5;">
+        }" v-for="day in nextMonthDays" @click="selectDate(day.day, day.month, day.year), unFocusDay()"
+          :key="'next-' + day.day" style="opacity: 0.5;">
           {{ day.day }}
         </div>
       </div>
@@ -53,11 +54,16 @@
       <p>Vak: {{ this.activityClickedInfo.vak }}</p>
       <p>Maakwerk: {{ this.activityClickedInfo.maakwerk }}</p>
       <p>Tijd: {{ new Date(this.activityClickedInfo.end_datetime).getDate() }}
-        {{ new Date(this.activityClickedInfo.end_datetime).toLocaleString('default', { month: 'short' }) }} {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}
+        {{ new Date(this.activityClickedInfo.end_datetime).toLocaleString('default', { month: 'short' }) }} {{
+          this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{
+          this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{
+          this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{
+          this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}
 
       </p>
       <p>Gedaan: <span v-if="this.activityClickedInfo.done === 1">Ja</span> <span v-else>nee</span></p>
-      <div ><i class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false" class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
+      <div><i class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false"
+          class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
     </div>
     <div class="createActivity" v-else-if="!isMobiel">
       <h3>Nieuwe activiteit</h3>
@@ -94,20 +100,20 @@
     <div class="calendar-week">
       <div class="calendar-weekTop">
         <div v-if="oneDay" class="backTo" @click="unFocusDay()">Terug naar week</div>
-        <div v-for="(days, i) in getDaysOfWeek()" :key="i" @click="selectDate(days.day, days.month, days.year),focusDay()">
-          <span
-            class="dayNumber"
+        <div v-for="(days, i) in getDaysOfWeek()" :key="i"
+          @click="selectDate(days.day, days.month, days.year), focusDay()">
+          <span class="dayNumber"
             :class="{ 'current-day': isCurrentDay(days.day, 0, days.month), 'clicked-day': isClickedDay(days.day, 0, days.month) }">{{
               days.day
             }}</span>
 
-            <span>{{ days.name }}</span>
+          <span>{{ days.name }}</span>
         </div>
       </div>
       <div class="calendar-weekBottom">
         <ul class="calendar-weekBottomList">
-          <div :title="newActivityName || `(afspraaknaam)`" v-if="newActivityClicked" class="newActivity" ref="newActivity"
-            @resize="handleResize">
+          <div :title="newActivityName || `(afspraaknaam)`" v-if="newActivityClicked" class="newActivity"
+            ref="newActivity" @resize="handleResize">
             {{ newActivityName || `(afspraaknaam)` }}
             <p class="activityTime">
               {{ newActivityBegintime }} - {{ newActivityEndTime }}
@@ -132,17 +138,21 @@
         </ul>
       </div>
     </div>
-    <button  v-if="isMobiel && !newActivityClicked" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
-        day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
-        day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
-        day.year === (this.setDate ? this.setDate.getFullYear() : this.shownDate.getFullYear())
-      ), new Date().getHours())" class="createActivityButton"><span>+</span> Maak Activiteit</button>
+    <button v-if="isMobiel && !newActivityClicked" @click="makeActivity(this.getDaysOfWeek().findIndex(day =>
+      day.day === (this.setDate ? this.setDate.getDate() : this.shownDate.getDate()) &&
+      day.month === (this.setDate ? this.setDate.getMonth() : this.shownDate.getMonth()) &&
+      day.year === (this.setDate ? this.setDate.getFullYear() : this.shownDate.getFullYear())
+    ), new Date().getHours())" class="createActivityButton"><span>+</span> Maak Activiteit</button>
     <div class="activityInfo" v-else-if="activityClicked && isMobiel">
       <h3>{{ this.activityClickedInfo.title }}</h3>
       <p>Vak: {{ this.activityClickedInfo.vak }}</p>
       <p>Maakwerk: {{ this.activityClickedInfo.maakwerk }}</p>
-      <p>Tijd: {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}</p>
-      <div ><i class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false" class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
+      <p>Tijd: {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{
+        this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{
+          this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{
+          this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}</p>
+      <div><i class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false"
+          class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
     </div>
     <div class="createActivity" v-else-if="isMobiel && newActivityClicked">
       <h3>Nieuwe activiteit</h3>
@@ -178,7 +188,7 @@
 </template>
 <script>
 import vakken from '../assets/vakken.json'
-import {auth} from '../auth.js'
+import { auth } from '../auth.js'
 import { toastService } from '@/services/toastService';
 
 export default {
@@ -196,7 +206,7 @@ export default {
       intervalId: null, // Store the interval ID for clearing it later
       newActivityClicked: false, // Flag to prevent multiple activity creation
       activityClicked: false,
-      activityClickedInfo:[],
+      activityClickedInfo: [],
       newActivityDate: null,
       newActivityBegintime: null,
       newActivityEndTime: null,
@@ -326,7 +336,7 @@ export default {
     }
   },
   methods: {
-    focusDay(){
+    focusDay() {
       this.oneDay = true;
       const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
       const dayIndex = this.getDaysOfWeek().findIndex(day =>
@@ -338,7 +348,7 @@ export default {
         const weekTopDays = document.querySelectorAll('.calendar-weekTop > div');
         weekTopDays.forEach((day, index) => {
           day.style.display = index === dayIndex ? 'flex' : 'none'; // Show only the current day
-          day.style.gridColumn= '2/8'
+          day.style.gridColumn = '2/8'
         });
         slotElement.style.gridTemplateColumns = '1fr'; // Change to one column
         const listItems = slotElement.querySelectorAll('li');
@@ -347,7 +357,7 @@ export default {
         });
       }
     },
-    unFocusDay(){
+    unFocusDay() {
       this.oneDay = false;
       const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
       const weekTopDays = document.querySelectorAll('.calendar-weekTop > div');
@@ -379,14 +389,18 @@ export default {
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/create_activity`, {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
       })
         .then(response => response.json())
         .then(() => {
           this.newActivityClicked = false;
           this.newActivityName = null;
           this.newClass = null;
-          toastService.addToast('Activiteit aangemaakt',`Activiteit is zojuist aangemaakt door ${auth.user.name} `, 'success');
+          toastService.addToast('Activiteit aangemaakt', `Activiteit is zojuist aangemaakt door ${auth.user.name} `, 'success');
           this.fetchActivities();
+          auth.checkAction(response?.action)
         })
         .catch(error => {
           console.error('Error creating activity:', error);
@@ -396,7 +410,7 @@ export default {
 
       if (!this.newActivityClicked) {
         this.newActivityClicked = true;
-        this.newActivityDate = `${this.getDaysOfWeek()[day].year}-${(this.getDaysOfWeek()[day].month + 1) < 10 ? '0' + (this.getDaysOfWeek()[day].month + 1) : (this.getDaysOfWeek()[day].month + 1)}-${this.getDaysOfWeek()[day].day > 10 ? this.getDaysOfWeek()[day].day: '0' + this.getDaysOfWeek()[day].day}`;
+        this.newActivityDate = `${this.getDaysOfWeek()[day].year}-${(this.getDaysOfWeek()[day].month + 1) < 10 ? '0' + (this.getDaysOfWeek()[day].month + 1) : (this.getDaysOfWeek()[day].month + 1)}-${this.getDaysOfWeek()[day].day > 10 ? this.getDaysOfWeek()[day].day : '0' + this.getDaysOfWeek()[day].day}`;
         this.$nextTick(() => {
           const slotElement = document.getElementsByClassName('calendar-weekBottomList')[0];
           const newElement = document.getElementsByClassName('newActivity')[0];
@@ -507,7 +521,7 @@ export default {
       const existingActivities = document.querySelectorAll('.activity');
       existingActivities.forEach(activity => activity.remove());
       const formData = new FormData();
-      formData.append('userId', auth.user.id);
+      formData.append('userId', auth.user.id);      
       const daysOfWeek = this.getDaysOfWeek();
       formData.append('startDate', `${daysOfWeek[0].year}-${daysOfWeek[0].month + 1}-${daysOfWeek[0].day}`);
       formData.append('endDate', `${daysOfWeek[6].year}-${daysOfWeek[6].month + 1}-${daysOfWeek[6].day}`);
@@ -515,6 +529,11 @@ export default {
       const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/activities`, {
         method: 'POST',
         body: formData,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: auth.bearerToken
+        }
+
       });
       if (!response.ok) {
         this.loading = false;
@@ -523,6 +542,7 @@ export default {
       }
       this.loading = false;
       const data = await response.json();
+      auth.checkAction(data?.action)
       data.activities.forEach(activity => {
         const dayIndex = this.getDaysOfWeek().findIndex(day =>
           activity.start_datetime && `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === activity.start_datetime.split(' ')[0]
@@ -546,7 +566,7 @@ export default {
             activityElement.style.padding = '0.5rem';
           }
 
-          if(activity.done ===1 ){
+          if (activity.done === 1) {
             console.log('andere kleur')
             activityElement.style.backgroundColor = 'var(--color-primary-500)';
           }
@@ -568,7 +588,7 @@ export default {
             activityElement.style.height = `${height}rem`;
           });
 
-          activityElement.addEventListener('click',()=>{
+          activityElement.addEventListener('click', () => {
             this.activityClicked = true;
             this.activityClickedInfo = activity;
             console.log(this.activityClickedInfo)
@@ -779,8 +799,9 @@ export default {
 .calendar-weekTop>div:not(:last-child) {
   border-right: 0.125rem solid var(--color-text);
 }
-.backTo{
-  grid-column: 1 /   2;
+
+.backTo {
+  grid-column: 1 / 2;
   justify-content: center;
   font-weight: bold;
 }
@@ -814,6 +835,7 @@ export default {
 .calendar-weekBottomList>li:not(:last-child) {
   border-right: 0.125rem solid var(--color-text);
 }
+
 .calendar-weekBottomList>li {
   position: relative;
 }
@@ -879,7 +901,7 @@ export default {
   overflow: hidden;
   cursor: pointer;
   width: 90%;
-  margin-left:0.5rem;
+  margin-left: 0.5rem;
 }
 
 
@@ -961,7 +983,8 @@ export default {
   color: white;
 }
 
-.createActivity>button ,.activityInfo>button{
+.createActivity>button,
+.activityInfo>button {
   background-color: transparent;
   border: none;
   color: var(--color-primary-500);
@@ -972,18 +995,21 @@ export default {
 }
 
 
-.createActivity>button>i, .activityInfo>button>i{
+.createActivity>button>i,
+.activityInfo>button>i {
   border-radius: 50%;
   transition: all 0.3s ease;
 
 }
 
-.createActivity>button:first-of-type , .activityInfo>button:first-of-type{
+.createActivity>button:first-of-type,
+.activityInfo>button:first-of-type {
   color: var(--color-error);
   margin-right: 1rem;
 }
 
-.createActivity>button>i:hover,.activityInfo>button>i:hover {
+.createActivity>button>i:hover,
+.activityInfo>button>i:hover {
   background-color: #eee;
 }
 
@@ -1015,7 +1041,7 @@ export default {
   gap: 0.5rem;
 }
 
-.activityInfo{
+.activityInfo {
   min-width: 30rem;
   display: flex;
   gap: 1rem;
@@ -1026,12 +1052,12 @@ export default {
   border-radius: 0.25rem;
 }
 
-.activityInfo>h3{
+.activityInfo>h3 {
   font-size: 150%;
   margin-bottom: 1rem;
 }
 
-.activityInfo > div{
+.activityInfo>div {
   width: 100%;
   display: flex;
   justify-content: space-evenly;
@@ -1040,13 +1066,13 @@ export default {
   margin-top: 2rem;
 }
 
-.activityInfo > div > i{
+.activityInfo>div>i {
   cursor: pointer;
   color: var(--color-text);
   transition: all 0.3s ease;
 }
 
-.activityInfo > div > i:hover{
+.activityInfo>div>i:hover {
   color: var(--color-primary-500);
 }
 
@@ -1057,28 +1083,31 @@ export default {
     gap: 2rem;
     align-items: center;
   }
+
   .calendar-sidebar {
     width: 100%;
     padding: 0 1rem;
   }
-  .createActivityButton{
+
+  .createActivityButton {
     width: 80%;
   }
 
-  .createActivity{
+  .createActivity {
     width: 90%;
   }
 
-  .activityInfo{
+  .activityInfo {
     width: 90%;
   }
+
   .calendar-week {
     margin: 0;
     width: 100%;
   }
 
   .calendar-weekTop {
-    padding:0;
+    padding: 0;
     overflow-y: hidden;
   }
 

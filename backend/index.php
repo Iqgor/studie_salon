@@ -17,15 +17,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 $config = require_once __DIR__ . '/config.php';
-
 $conn = getDBConnection();
+
+// een keer neer zetten voor de route
+
+$url = $_SERVER['REQUEST_URI'];
+$urlParts = explode('?', $url, 2);
+$urlParts = explode('/', trim($urlParts[0], '/'));
+$resource = $urlParts[2] ?? null;
+
+$publicRoutes = [
+    'login',
+    'register',
+    'forgot_password',
+    'subscriptions',
+    'verify_otp',
+    'subscribeTrial',
+    'change_password'
+];
+
+// onze secret key //! moet veranderd worden
+$secret_key = "your_secret_key"; 
+
+// JWT verificatie function
+function base64UrlDecode($data)
+{
+    return base64_decode(strtr($data, '-_', '+/'));
+}
+
+function isValidJWT($jwt, $secret_key)
+{
+    $parts = explode('.', $jwt);
+    if (count($parts) !== 3)
+        return false;
+
+    list($headerB64, $payloadB64, $signatureB64) = $parts;
+    $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret_key, true);
+    $expectedSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+
+    if (!hash_equals($signatureB64, $expectedSignature)) {
+        return false;
+    }
+
+    $payload = json_decode(base64UrlDecode($payloadB64), true);
+    if (!$payload || !isset($payload['exp']) || time() >= $payload['exp']) {
+        return false;
+    }
+
+    return $payload;
+}
+
+if (!in_array($resource, $publicRoutes)) {
+    $headers = getallheaders();
+
+    if (!isset($headers['Authorization'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Ontbrekende autorisatieheader', 'action' => 'logout']);
+
+        exit;
+    }
+
+    if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
+        $jwt = $matches[1];
+        $payload = isValidJWT($jwt, $secret_key);
+        if (!$payload) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Ongeldige of verlopen token', 'action' => 'logout']);
+            exit;
+        }
+
+        // Token is valid, user is geathenticated
+        // kan nu de informatie van de user pakken uit de token
+        $currentUser = $payload['user'];
+
+    } else {
+        http_response_code(401);
+        echo json_encode(['error' => 'Misvormde autorisatieheader', 'action' => 'logout']);
+        exit;
+    }
+}
 
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
-        $url = $_SERVER['REQUEST_URI'];
-        $urlParts = explode('?', $url, 2);
-        $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
             case 'subscriptions':
@@ -48,7 +121,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         FROM subscriptions s
         LEFT JOIN subscription_features sf ON s.id = sf.subscription_id
         LEFT JOIN features f ON sf.feature_id = f.id
-        ORDER BY s.rank ASC
+        ORDER BY s.id ASC
     ");
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -142,10 +215,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
     case 'POST':
 
-        $url = $_SERVER['REQUEST_URI'];
-        $urlParts = explode('?', $url, 2);
-        $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
             case 'create_activity':
@@ -823,10 +892,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
         }
         break;
     case 'PUT':
-        $url = $_SERVER['REQUEST_URI'];
-        $urlParts = explode('?', $url, 2);
-        $urlParts = explode('/', trim($urlParts[0], '/'));
-        $resource = $urlParts[2] ?? null;
+
         switch ($resource) {
             case 'change_password':
                 $data = json_decode(file_get_contents('php://input'), true);

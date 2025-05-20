@@ -348,6 +348,7 @@ export default {
                 });
 
                 let incommingdata = await response.json();
+                auth.checkAction(incommingdata?.action)
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 if (incommingdata?.type == 'success') {
                     this.$router.push('/')

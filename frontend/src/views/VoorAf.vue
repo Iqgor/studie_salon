@@ -30,6 +30,7 @@
   <Toast v-if="loading" type="info" message="Laden..." />
 </template>
 <script>
+import { auth } from '@/auth';
 import Toast from '../components/Toast.vue'
 
 export default {
@@ -96,6 +97,10 @@ export default {
       await fetch(`${import.meta.env.VITE_APP_API_URL}backend/getTekstLinks`, {
         method: 'POST',
         body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: auth.bearerToken
+        }
       })
         .then(response => {
           if (!response.ok) {
@@ -104,6 +109,7 @@ export default {
           return response.json();
         })
         .then(data => {
+          auth.checkAction(data?.action)
           if (data.length !== 0) {
             this.succes = true;
             this.loading = false;
