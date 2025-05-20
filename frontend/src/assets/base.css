@@ -455,3 +455,30 @@ select:focus {
   border-color: #007bff;
 }
 
+.fa-circle-xmark{
+  color: var(--color-error);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.fa-circle-check{
+  color: var(--color-primary-600);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+input[type="text"]{
+  border: none;
+  border-bottom: 0.125rem solid var(--color-text);
+  padding-bottom: 0.25rem;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: var(--color-text);
+}
+
+input[type="text"]:focus{
+  padding-bottom: 0.5rem;
+  outline: none;
+  border-bottom: 0.25rem solid var(--color-primary-500);
+}
+

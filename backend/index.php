@@ -148,6 +148,31 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $resource = $urlParts[2] ?? null;
 
         switch ($resource) {
+            case 'editCarouselLink':
+                $id = $_POST['id'] ?? null; // Get id from POST data
+                $title = $_POST['title'] ?? null; // Get name from POST data
+                if (!$id || !$title) {
+                    jsonResponse(['error' => 'id and title are required'], 400);
+                    exit;
+                }
+                $stmt = $conn->prepare("UPDATE coursel_items SET title = ? WHERE id = ?");
+                $stmt->bind_param("si", $title, $id);
+                if ($stmt->execute()) {
+                    jsonResponse(['success' => 'Link updated successfully'], 200);
+                } else {
+                    jsonResponse(['error' => 'Failed to update link'], 500);
+                }
+                break;
+            case 'getCarouselItems':
+                $stmt = $conn->prepare("SELECT * FROM `coursel_items`");
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $carouselItems = [];
+                while ($row = $result->fetch_assoc()) {
+                    $carouselItems[] = $row;
+                }
+                jsonResponse(['carouselItems' => $carouselItems], 200);
+                break;
             case 'create_activity':
                 $userId = $_POST['userId'] ?? null; // Get userId from POST data
                 $title = $_POST['title'] ?? null; // Get title from POST data
@@ -176,6 +201,48 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     jsonResponse(['error' => 'Failed to create activity'], 500);
                 }
                 $stmt->close();
+                break;
+            case 'edit_activity':
+                $activityData = $_POST['shownActivity'] ?? null; // Get activityId from POST data
+                if(!$activityData) {
+                    jsonResponse(['error' => 'Activity data is required'], 400);
+                    exit;
+                }
+                // Decode JSON string to array
+                if (is_string($activityData)) {
+                    $activityData = json_decode($activityData, true);
+                }
+
+                $activityId = $activityData['activity_id'] ?? null; // Get activityId from POST data
+                $title = $activityData['title'] ?? null; // Get title from POST data
+                $vakName = $activityData['vak'] ?? null; // Get vakName from POST data
+                $maakWerk = $activityData['maakwerk'] ?? null; // Get vakName from POST data
+                $startDate = $activityData['start_datetime'] ?? null; // Get startDate from POST data
+                $endDate = $activityData['end_datetime'] ?? null; // Get endDate from POST data
+                $done = $activityData['done'] ?? null; // Get done from POST data
+                $stmt = $conn->prepare("UPDATE activities SET title = ?, vak = ?, maakwerk = ?, done = ?, start_datetime = ?, end_datetime = ? WHERE activity_id  = ?");
+                $startDateTime = $startDate . ':00';
+                $endDateTime = $endDate ? $endDate . ':00' : null;
+                $stmt->bind_param("sssissi", $title, $vakName, $maakWerk, $done, $startDateTime, $endDateTime,  $activityId);
+                if ($stmt->execute()) {
+                    jsonResponse(['message' => 'Activity updated successfully'], 200);
+                } else {
+                    jsonResponse(['error' => 'Failed to update activity'], 500);
+                }
+                break;
+            case 'delete_activity':
+                $activityId = $_POST['activity_id'] ?? null; // Get activityId from POST data
+                if (!$activityId) {
+                    jsonResponse(['error' => 'activity_id is required'], 400);
+                    exit;
+                }
+                $stmt = $conn->prepare("DELETE FROM activities WHERE activity_id = ?");
+                $stmt->bind_param("i", $activityId);
+                if ($stmt->execute()) {
+                    jsonResponse(['message' => 'Activity deleted successfully'], 200);
+                } else {
+                    jsonResponse(['error' => 'Failed to delete activity'], 500);
+                }
                 break;
             case 'addText':
                 $slug = $_POST['slug'] ?? null; // Get slug from POST data

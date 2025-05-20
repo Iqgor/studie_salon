@@ -1,7 +1,7 @@
 <template>
   <div id="carousel" class="carousel">
     <div v-for="(info, index,i) in CarouselData" :key="index" class="carousel-inner">
-      <CarouselItem :info="info" :index="index" :indexNumber="i" />
+      <CarouselItem :info="info" :index="index" :indexNumber="i" @getCarouselData="$emit('getCarouselData')"/>
     </div>
   </div>
 </template>
@@ -19,6 +19,7 @@ export default {
       required: true,
     },
   },
+  emits:['getCarouselData'],
 };
 </script>
 

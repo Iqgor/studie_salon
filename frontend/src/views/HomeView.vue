@@ -22,7 +22,7 @@
       <input type="text" class="search" :input="updateCarouselData()" v-model="searchCarousel" placeholder="Zoek een tekst..." />
     </div>
     <div v-if="Object.keys(updatedCarouselData).length > 0">
-      <Carousel :CarouselData="updatedCarouselData"/>
+      <Carousel :CarouselData="updatedCarouselData" @getCarouselData="getCarouselData"/>
     </div>
     <div v-else class="no-results" style="text-align:center; margin:2rem 0;">
       Geen teksten gevonden.
@@ -31,7 +31,6 @@
   </main>
 </template>
 <script>
-import CarouselData from "../assets/carousel.json"
 import Carousel from '@/components/Carousel.vue';
 import Calander from '../components/Calendar.vue';
 import SideWekkers from '@/components/SideWekkers.vue';
@@ -67,18 +66,46 @@ export default {
       currentLanguageCode :navigator.language || navigator.userLanguage,
       loading: true,
       searchCarousel: '',
-      updatedCarouselData: CarouselData,
+      updatedCarouselData: [],
     };
   },
   mounted() {
     this.getDay();
     this.getQuote();
     this.getWeer();
+    this.getCarouselData();
   },
   methods: {
+    getCarouselData() {
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/getCarouselItems`,{
+        method: 'POST'
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+            // Group items by carousel_name
+            const grouped = {};
+            data.carouselItems.forEach(item => {
+            const key = item.coursel_name || 'Overig';
+            if (!grouped[key]) {
+              grouped[key] = [];
+            }
+            grouped[key].push(item);
+            });
+            console.log(grouped);
+            this.updatedCarouselData = grouped;
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+        return;
+    },
     updateCarouselData() {
       if(this.searchCarousel.length === 0){
-        this.updatedCarouselData = CarouselData;
         return;
       }
       // CarouselData is an object, so filter its arrays and keep the structure
