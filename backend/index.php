@@ -24,7 +24,7 @@ $conn = getDBConnection();
 $url = $_SERVER['REQUEST_URI'];
 $urlParts = explode('?', $url, 2);
 $urlParts = explode('/', trim($urlParts[0], '/'));
-$resource = $urlParts[2] ?? null;
+$resource = $urlParts[1] ?? null;
 
 $publicRoutes = [
     'login',
@@ -51,17 +51,23 @@ function isValidJWT($jwt, $secret_key)
         return false;
 
     list($headerB64, $payloadB64, $signatureB64) = $parts;
+
+    if (empty($headerB64) || empty($payloadB64) || empty($signatureB64))
+        return false;
+
+    $header = json_decode(base64UrlDecode($headerB64), true);
+    if (!isset($header['alg']) || $header['alg'] !== 'HS256')
+        return false;
+
     $signature = hash_hmac('sha256', "$headerB64.$payloadB64", $secret_key, true);
     $expectedSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
 
-    if (!hash_equals($signatureB64, $expectedSignature)) {
+    if (!hash_equals($signatureB64, $expectedSignature))
         return false;
-    }
 
     $payload = json_decode(base64UrlDecode($payloadB64), true);
-    if (!$payload || !isset($payload['exp']) || time() >= $payload['exp']) {
+    if (!$payload || !isset($payload['exp']) || time() >= $payload['exp'])
         return false;
-    }
 
     return $payload;
 }
