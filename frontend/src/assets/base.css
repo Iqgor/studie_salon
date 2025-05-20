@@ -191,15 +191,15 @@
   --color-background-800: #0c0c0c;
   --color-background-900: #060606;
 
-  --color-card-100: #e5dce9;
-  --color-card-200: #ccb8d3;
-  --color-card-300: #b294bc;
-  --color-card-400: #996fa6;
-  --color-card-500: #7f4b90;
-  --color-card-600: #653c73;
-  --color-card-700: #4b2d56;
-  --color-card-800: #311e39;
-  --color-card-900: #180f1c;
+      --color-card-100: #e0dee7;
+      --color-card-200: #c1bdce;
+      --color-card-300: #a19bb6;
+      --color-card-400: #827a9d;
+      --color-card-500: #635985;
+      --color-card-600: #4f476a;
+      --color-card-700: #3b3550;
+      --color-card-800: #282435;
+      --color-card-900: #14121b;
 
 
   --color-text: #f1f1f1;
