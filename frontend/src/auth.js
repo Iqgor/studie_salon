@@ -108,7 +108,6 @@ export const auth = reactive({
 
             if (data?.title == 'Geen abonnement') {
                 this.logout()
-
             }
 
 

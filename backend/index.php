@@ -249,7 +249,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $maakWerk = $_POST['maakwerk'] ?? null; // Get vakName from POST data
                 $startDate = $_POST['startDate'] ?? null; // Get startDate from POST data
                 $endDate = $_POST['endDate'] ?? null; // Get endDate from POST data
-
+                
                 // Validate required fields
                 if (!$userId || !$startDate || !$title || !$vakName) {
                     jsonResponse(['error' => 'userId, startDate, and activityType are required'], 400);
@@ -376,7 +376,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 jsonResponse(['users' => $users], 200);
                 break;
             case 'activities':
-                $userId = $_POST['userId'] ?? null; // Get userId from POST data
+                $userId = $currentUser['id'] ?? null; // Get userId from POST data
                 $startDate = $_POST['startDate'] ?? null; // Get startDate from POST data
                 $endDate = $_POST['endDate'] ?? null; // Get endDate from POST data
                 // Validate required fields

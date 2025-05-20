@@ -472,7 +472,7 @@ export default {
       formData.append('maakwerk', this.maakWerk);
       formData.append('startDate', this.newActivityDate + ' ' + this.newActivityBegintime);
       formData.append('endDate', this.newActivityDate + ' ' + this.newActivityEndTime);
-
+      
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/create_activity`, {
         method: 'POST',
         body: formData,
@@ -608,7 +608,7 @@ export default {
       const existingActivities = document.querySelectorAll('.activity');
       existingActivities.forEach(activity => activity.remove());
       const formData = new FormData();
-      formData.append('userId', auth.user.id);      
+      formData.append('userId', auth.user.id);
       const daysOfWeek = this.getDaysOfWeek();
       formData.append('startDate', `${daysOfWeek[0].year}-${daysOfWeek[0].month + 1}-${daysOfWeek[0].day}`);
       formData.append('endDate', `${daysOfWeek[6].year}-${daysOfWeek[6].month + 1}-${daysOfWeek[6].day}`);
