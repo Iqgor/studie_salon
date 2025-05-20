@@ -217,36 +217,23 @@ export default{
   text-align: left;
 }
 
-.adminText{
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
 
-.adminText h2{
-  font-size: 200%;
-  margin-bottom: 1rem;
-}
-.adminText > button{
-  width: max-content;
-  background: var(--color-primary-500);
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  padding: 1rem 2rem;
-  font-size: 120%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.adminText > button:hover{
-  background: var(--color-primary-400);
-}
-.adminText > button:active{
-  transform: translateY(2px);
-}
-
-.jodit-workplace{
-  height: 40vh !important;
+@media screen and (max-width: 768px) {
+  .containerTekst {
+    padding: 3rem 2rem;
+    font-size: 1.5rem;
+  }
+  .containerTekst h1{
+    font-size: 2.5rem;
+  }
+  .containerTekst h2{
+    font-size: 2rem;
+  }
+  .containerTekst h3{
+    font-size: 1.5rem;
+  }
+  .waterFallLink{
+    margin-left: 2rem;
+  }
 }
 </style>

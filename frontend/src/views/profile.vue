@@ -34,9 +34,10 @@ export default {
                 { name: 'Profiel', slug: 'profiel', component: 'profiel' },
                 { name: 'Kleuren wijzigen', slug: 'kleur-wijzigen', component: Changecolor },
                 { name: 'Wachtwoord wijzigen', slug: 'wachtwoord-wijzigen', component: Changepassword },
-                { name: 'Profiel verwijderen', slug: 'profiel-verwijderen', component: '' },
                 { name: 'Privacy verklaring', slug: 'privacy-verklaring', component: PrivacyVerklaring },
-                { name: 'Gebruikersvoorwaarden', slug: 'gebruikersvoorwaarden', component: GebruikersVoorwaarden },
+                { name: 'Gebruikers voorwaarden', slug: 'gebruikersvoorwaarden', component: GebruikersVoorwaarden },
+                { name: 'Profiel verwijderen', slug: 'profiel-verwijderen', component: '' },
+
             ],
             active: '',
             activeName: '',

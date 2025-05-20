@@ -3,7 +3,7 @@
     <p class="typewriter" :style="typewriterStyle">
     </p>
     <Calander />
-    <h2 class="appsTitle">Qoutes & zoeken & wekkers</h2>
+    <h2 class="appsTitle">Quotes & zoeken & wekkers</h2>
     <div class="apps">
       <div class="quote_container">
         <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">
@@ -19,9 +19,14 @@
       <div>
         <SideWekkers :app="true"/>
       </div>
-      <input type="text" class="search" placeholder="Zoek een tekst..." />
+      <input type="text" class="search" :input="updateCarouselData()" v-model="searchCarousel" placeholder="Zoek een tekst..." />
     </div>
-    <Carousel />
+    <div v-if="Object.keys(updatedCarouselData).length > 0">
+      <Carousel :CarouselData="updatedCarouselData" @getCarouselData="getCarouselData"/>
+    </div>
+    <div v-else class="no-results" style="text-align:center; margin:2rem 0;">
+      Geen teksten gevonden.
+    </div>
     <SideWekkers />
   </main>
 </template>
@@ -60,15 +65,58 @@ export default {
       },
       currentLanguageCode :navigator.language || navigator.userLanguage,
       loading: true,
-
+      searchCarousel: '',
+      updatedCarouselData: [],
     };
   },
   mounted() {
     this.getDay();
     this.getQuote();
     this.getWeer();
+    this.getCarouselData();
   },
   methods: {
+    getCarouselData() {
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/getCarouselItems`,{
+        method: 'POST'
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+            // Group items by carousel_name
+            const grouped = {};
+            data.carouselItems.forEach(item => {
+            const key = item.coursel_name || 'Overig';
+            if (!grouped[key]) {
+              grouped[key] = [];
+            }
+            grouped[key].push(item);
+            });
+            console.log(grouped);
+            this.updatedCarouselData = grouped;
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+        return;
+    },
+    updateCarouselData() {
+      if(this.searchCarousel.length === 0){
+        return;
+      }
+      // CarouselData is an object, so filter its arrays and keep the structure
+      const search = this.searchCarousel.toLowerCase();
+      this.updatedCarouselData = Object.fromEntries(
+        Object.entries(CarouselData).map(([category, items]) => [
+          category,
+          items.filter(item => item.title.toLowerCase().includes(search))
+        ]).filter(([_, items]) => items.length > 0)
+      );
+    },
     getDay() {
       const date = new Date();
       const hours = date.getHours();
@@ -361,7 +409,7 @@ export default {
     padding: 0 1rem;
   }
   .typewriter {
-    font-size: 125%;
+    font-size: clamp(120%, calc(200vw / var(--text-length)), 200%);
     padding-left: 1rem;
     width: 100%;
   }
