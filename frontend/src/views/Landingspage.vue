@@ -3,8 +3,8 @@
     <section class="sectie-index">
       <div class="sectie-links">
         <h2 class="landingspage-h2">Leer actief leren,</h2>
-        <p class="landingspage-ondertitel">Leren <b class="sectie-links-kleur">actiever</b> en <b class="sectie-links-kleur">leuker</b> gemaakt door de <b class="sectie-links-kleur">LerenLerenTool</b>.</p>
-        <p class="landingspage-ondertitel">Bekijk onze verschillende abonnement <b class="sectie-links-kleur"><router-link :to="'/plans'">hier</router-link></b></p>
+        <p class="landingspage-ondertitel">Met onze <b class="sectie-links-kleur">LerenLerenTool</b> wordt leren <b class="sectie-links-kleur">leuker</b> en <b class="sectie-links-kleur">makkelijker</b>.</p>
+        <p class="landingspage-ondertitel">Bekijk onze verschillende abonnement <b class="sectie-links-kleur"><router-link :to="'/plans'">hier</router-link></b>.</p>
       </div>
       <img src="../assets/iphone-app-hand.webp" alt="" class="sectie-midden-img" />
     </section>
@@ -13,23 +13,23 @@
       <div class="container-landingspage-box">
         <div class="landingspage-box">
           <div class="icon">✅</div>
-          <h2>Waarom ons?</h2>
-          <p>Wij bieden praktische leerstrategieën die werken: meer resultaat in minder tijd. Persoonlijk, efficiënt en gericht op meer zelfvertrouwen. Zo wordt leren makkelijker en succesvoller.</p>
+          <h2>Waarom kiezen voor ons?</h2>
+          <p>We bieden makkelijke en snel te gebruiken LerenLerenStragegieën, gericht op de leerstijl die het beste bij jou past. Welke leerstijl heb beste bij jou past, ontdek je snel door een eenvoudige quiz. Leuk weetje: voor elk vak kan je je eigen leerstijl ontdekken! </p>
         </div>
         <div class="landingspage-box">
           <div class="icon">💡</div>
           <h2>Onze methode</h2>
-          <p>onze methoden: besteed 20% van de tijd om 80% van het resultaat te behalen. Geen tijdverspilling, maar efficiënt leren voor betere resultaten, minder stress en meer zelfvertrouwen.</p>
+          <p>Met onze tips & tricks kun je in 20% van de tijd voor 80% van je cijfer leren. Geen tijdsverspilling met 'hoe begin ik', maar meteen aan de slag met leuke en makkelijke LerenLerenStrategieën die werken. Zo haal je in minder tijd een beter cijfer!</p>
         </div>
         <div class="landingspage-box">
           <div class="icon">⚡</div>
           <h2>Snel en eenvoudig</h2>
-          <p>Leren kan altijd en overal. Met onze flexibele methoden leer je efficiënt, zonder lang stil te zitten. Samenwerken met anderen maakt leren sneller, effectiever en leuker!</p>
+          <p>Leren kan altijd en overal. Door de talloze flexibele tips kan je overal en altijd éven leren, met of zonder AI, zonder dat je lang stil zit. Zo kun je ook tussen het sporten door of als je ergens moet wachten, je leerwerk erbij pakken. Dat scheelt thuis weer!</p>
         </div>
         <div class="landingspage-box purple">
           <div class="icon">🌐</div>
-          <h2>Meerdere talen</h2>
-          <p>Onze effectieve studiestrategieën zijn beschikbaar op twee niveaus en in 14 talen, waaronder Nederlands, Engels, Frans, Spaans, Mandarijn en Arabisch. Teksten kunnen ook worden voorgelezen voor extra toegankelijkheid.</p>
+          <h2>Meerdere niveaus, talen, voorgelezen en ondersteund door muziek</h2>
+          <p>Al onze tips & tricks zijn beschikbaar op drie niveaus en in alle denkbare talen. Je kunt de teksten laten voorlezen door een stem die je aanspreekt en ze kunnen worden ondersteund door muziek voor extra focus, als dat voor jou werkt. Door de online agenda met planhulp, kun je snel je dag plannen, organiseren en ook prioriteiten stellen.</p>
         </div>
       </div>
     </section>
@@ -38,7 +38,7 @@
 <script>
 
 </script>
-<style>
+<style scoped>
 
 .sectie-index {
   display: flex;
@@ -102,13 +102,13 @@
 
 .landingspage-box {
   max-width: 35rem;
-  padding: 30px;
+  padding: 2rem;
   border-radius: 8px;
 }
 
 .landingspage-box .icon {
   font-size: 5rem;
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
 }
 
 .landingspage-box h2 {

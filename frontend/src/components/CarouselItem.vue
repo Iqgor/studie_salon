@@ -13,14 +13,20 @@
         </div>
       </div>
       <div v-if="isClickedout && view === 'list' || view === 'table'" :class="{'clickedOut':isClickedout && view === 'table' }" :id="`carousel-${indexNumber}`"  class="carousel-container">
-        <router-link v-for="(text,i) in info" :to="text.url" class="carousel-inhoud">
-          <p class="carousel-informatie">
-          {{ text.title }}
-          </p>
-        </router-link>
+        <p v-for="(text,i) in info" class="carousel-inhoud">
+          <router-link v-if="!isEditClicked[i]"  :to="text.url"  class="carousel-informatie">
+            <span >{{ text.title }}</span>
+          </router-link>
+          <input v-else type="text" v-model="lastTitle" class="editLink" />
+          <span>
+            <i v-if="!isAdmin" @click="isEditClicked[i] = !isEditClicked[i], lastTitle = text.title" class="fa-solid fa-pen"></i>
+            <i v-if="isEditClicked[i]" @click="editLink(i)" class="fa-regular fa-circle-check"></i>
+          </span>
+        </p>
       </div>
 </template>
 <script>
+import { toastService } from '@/services/toastService';
 export default {
   name: "CarouselItem",
   props: {
@@ -37,6 +43,7 @@ export default {
       required: true
     }
   },
+  emits:['getCarouselData'],
   mounted(){
     this.changeIsClicked()
     this.checkOverflowing()
@@ -47,9 +54,36 @@ export default {
       view: 'table',
       isClickedout:false,
       isOverflowing: false,
+      isEditClicked: [],
+      isAdmin: false,
+      lastTitle:'',
     };
   },
   methods: {
+    editLink(index) {
+      const item = this.info[index];
+      console.log(item);
+      const formData = new FormData();
+      formData.append('id', item.id);
+      formData.append('title', this.lastTitle);
+
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/editCarouselLink`,{
+        method: 'POST',
+        body: formData,
+      }).then(response => {
+        if (response.ok) {
+          this.$emit('getCarouselData');
+          this.isEditClicked[index] = false;
+          this.lastTitle = '';
+          toastService.addToast('Naam aangepast',`Naam is zojuist aangepast`, 'success');
+
+        } else {
+          console.error('Error updating link:', response.statusText);
+        }
+      }).catch(error => {
+        console.error('Error:', error);
+      });
+    },
     initOverflowing(){
       const carouselContainer = document.getElementById(`carousel-${this.indexNumber}`);
       if (carouselContainer.scrollWidth > carouselContainer.clientWidth) {
@@ -85,6 +119,10 @@ export default {
 
     },
     changeIsClicked(index = null) {
+      if(!this.isOverflowing){
+        this.isClickedout = false;
+        return;
+      }
       if(typeof index === 'number'){
         this.isClickedout = !this.isClickedout;
         localStorage.setItem('isClickedout', JSON.stringify({ index, isClickedout: this.isClickedout }));
@@ -143,13 +181,6 @@ export default {
   transition: transform 0.4s ease;
 }
 
-
-@media (max-width: 768px) {
-  .carousel-container::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 .carousel-top {
   display: flex;
   justify-content: space-between;
@@ -186,7 +217,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: row;
+  flex-direction: column;
+  gap: 1rem;
   height: 13rem;
   width: 23rem;
   font-size: 2rem;
@@ -203,6 +235,27 @@ export default {
   transition: background-color 0.4s ease;
 }
 
+
+.carousel-inhoud > span{
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.carousel-inhoud >span > i{
+  font-size: 75%;
+  cursor: pointer;
+  transition: transform 0.4s ease;
+}
+.carousel-inhoud >span > i:hover{
+  transform: scale(1.2);
+}
+
+.carousel-inhoud > a:hover{
+  color:var(--color-text);
+}
+
 .clickedOut {
   overflow: hidden;
   flex-wrap: wrap;
@@ -211,6 +264,7 @@ export default {
   padding: 0;
 
 }
+
 
 @media screen and (max-width: 768px) {
   .carousel-container {
@@ -223,6 +277,13 @@ export default {
     margin-right: 0;
     padding-left: 1rem;
   }
-
+    .carousel-container::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel-top{
+    margin-right: 0;
+    margin-left: 0;
+    padding: 1rem 1rem;
+  }
 }
 </style>

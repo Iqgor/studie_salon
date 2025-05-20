@@ -6,9 +6,10 @@
         <img @click="$router.push('/')" src="/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
+            <li><a href="/">Home</a></li>
             <li><a href="/abonnementen">Abonnementen</a></li>
             <li><a href="#">Disclaimer</a></li>
-            <li v-if="auth.isLoggedIn"><a href="#">Teksten</a></li>
+            <li v-if="auth.isLoggedIn"><a href="/">Teksten</a></li>
           </ul>
         </nav>
         <div style="width: 14.2rem; height: 100%;"></div>
@@ -80,6 +81,7 @@ export default {
       document.getElementsByClassName('topMenu')[0].classList.toggle('topMenuClick')
       document.getElementsByClassName('icons')[0].classList.toggle('iconsClick')
     },
+
     getThemeStripeColors(theme) {
       return [
         theme.primary,
@@ -93,10 +95,6 @@ export default {
 }
 </script>
 <style scoped>
-
-
-
-
 
 .header {
   width: 100%;

@@ -234,6 +234,7 @@ export default {
   text-align: left;
 }
 
+
 .adminText {
   display: flex;
   flex-direction: column;
@@ -267,5 +268,25 @@ export default {
 
 .jodit-workplace {
   height: 40vh !important;
+
+
+@media screen and (max-width: 768px) {
+  .containerTekst {
+    padding: 3rem 2rem;
+    font-size: 1.5rem;
+  }
+  .containerTekst h1{
+    font-size: 2.5rem;
+  }
+  .containerTekst h2{
+    font-size: 2rem;
+  }
+  .containerTekst h3{
+    font-size: 1.5rem;
+  }
+  .waterFallLink{
+    margin-left: 2rem;
+  }
+
 }
 </style>
