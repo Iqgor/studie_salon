@@ -494,9 +494,11 @@ export default {
     width: 100%;
 }
 
+
 .buttons .text {
     color: var(--color-text);
 }
+
 
 .btn {
     padding: 1rem;
@@ -507,7 +509,11 @@ export default {
     background-color: var(--color-card-500);
     color: white;
     font-size: 1.25rem;
+
     transition: all 0.5s ease-in-out;
+
+    cursor: pointer;
+
 }
 
 .btn:hover {
