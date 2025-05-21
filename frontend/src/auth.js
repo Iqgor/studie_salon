@@ -2,6 +2,7 @@
 import { reactive } from 'vue'
 import { jwtDecode } from 'jwt-decode'
 
+
 //TODO import { getCookie, deleteCookie } from "./cookie.js"
 
 export const auth = reactive({
@@ -69,15 +70,20 @@ export const auth = reactive({
 
     },
     reset() {
-        this.isLoggedIn = false,
-            this.user = {},
-            this.token = null
+        this.isLoggedIn = false
+        this.user = {}
+        this.token = null
+        this.subscriptionFeatures = []
+        this.subscriptionId = null
+        this.subscriptionName = null
+        this.bearerToken = ''
+
     },
-    logout() {
+    async logout() {
         localStorage.removeItem('token')
         localStorage.removeItem('temp_used')
         this.reset()
-        router.push('/index')
+        window.location.href = '/index';
     },
     isLocalHost() {
         const currentUrl = window.location.href
@@ -104,7 +110,7 @@ export const auth = reactive({
             this.subscriptionName = data.name
             this.subscriptionFeatures = data.features
             this.checkAction(data?.action)
-            
+
 
             if (data?.title == 'Geen abonnement') {
                 this.logout()
@@ -118,6 +124,9 @@ export const auth = reactive({
     },
     hasFeature(feature) {
         return this.subscriptionFeatures.includes(feature)
+    },
+    isRole(role) {
+        return this.user.role === role
     },
     checkAction(action) {
         if (action == 'logout') {

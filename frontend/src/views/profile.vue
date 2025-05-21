@@ -24,6 +24,7 @@ import router from '@/router';
 import PrivacyVerklaring from './privacyVerklaring.vue';
 import GebruikersVoorwaarden from './gebruikersVoorwaarden.vue';
 import Changecolor from '@/components/profile/changecolor.vue';
+import { auth } from '@/auth';
 
 export default {
     name: "profile",
