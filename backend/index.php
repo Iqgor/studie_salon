@@ -24,7 +24,7 @@ $conn = getDBConnection();
 $url = $_SERVER['REQUEST_URI'];
 $urlParts = explode('?', $url, 2);
 $urlParts = explode('/', trim($urlParts[0], '/'));
-$resource = $urlParts[2] ?? null;
+$resource = $urlParts[1] ?? null;
 
 $publicRoutes = [
     'login',
@@ -334,14 +334,29 @@ switch ($_SERVER['REQUEST_METHOD']) {
             case 'addText':
                 $slug = $_POST['slug'] ?? null; // Get slug from POST data
                 $text = $_POST['tekst'] ?? null; // Get text from POST data
+                $carouselName = $_POST['carouselName'] ?? null; // Get name from POST data
                 // Remove inline styling from the text
                 $text = preg_replace('/style="[^"]*"/i', '', $text);
                 if (!$slug || !$text) {
                     jsonResponse(['error' => 'slug and text are required'], 400);
                     exit;
                 }
-                $stmt = $conn->prepare("UPDATE teksten SET tekst = ? WHERE slug = ?");
-                $stmt->bind_param("ss", $text, $slug);
+                // Check if the slug already exists in teksten
+                $checkStmt = $conn->prepare("SELECT COUNT(*) as count FROM teksten WHERE slug = ?");
+                $checkStmt->bind_param("s", $slug);
+                $checkStmt->execute();
+                $checkResult = $checkStmt->get_result();
+                $row = $checkResult->fetch_assoc();
+
+                if ($row['count'] == 0) {
+                    // Generate name from slug: remove dashes, capitalize each word
+                    $name = ucwords(str_replace('-', ' ', $slug));
+                    $stmt = $conn->prepare("INSERT INTO teksten (tegel, name, slug, tekst) VALUES (?, ?, ?, ?)");
+                    $stmt->bind_param("ssss", $carouselName, $name, $slug, $text);
+                } else {
+                    $stmt = $conn->prepare("UPDATE teksten SET tekst = ? WHERE slug = ?");
+                    $stmt->bind_param("ss", $text, $slug);
+                }
                 if ($stmt->execute()) {
                     jsonResponse(['success' => 'Text added successfully'], 201);
                 } else {

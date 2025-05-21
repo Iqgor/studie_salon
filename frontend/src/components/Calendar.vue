@@ -418,6 +418,9 @@ export default {
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/delete_activity`, {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
       })
         .then(response => response.json())
         .then(() => {

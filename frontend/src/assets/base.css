@@ -429,19 +429,19 @@ select:focus {
   margin-bottom: 1rem;
 }
 
-.buttons>i{
+.buttonsTekst>i{
   font-size: 200%;
 
 }
 
-.buttons{
+.buttonsTekst{
   display: flex;
   align-items: center;
   gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.adminText > button, .buttons >  button{
+.adminText > button, .buttonsTekst >  button{
   width: max-content;
   background: var(--color-primary-500);
   color: white;

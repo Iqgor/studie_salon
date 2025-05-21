@@ -16,7 +16,7 @@
     <div v-if="!isEditClicked" class="containerTekst" v-html="tekst"></div>
     <div class="adminText" v-else>
       <jodit-editor  v-model="editedContent" ></jodit-editor>
-      <div class="buttons">
+      <div class="buttonsTekst">
         <button @click="sendEdit">Verander tekst</button>
         <i @click="isEditClicked = false, editedContent = tekst" class="fa-regular fa-circle-xmark"></i>
       </div>
@@ -94,6 +94,7 @@ export default {
       const formData = new FormData();
       formData.append('slug', this.slug.replace('/', '-'));
       formData.append('tekst', this.content);
+      formData.append('carouselName',window.location.pathname.split('/')[1])
       if (this.content.length === 0) {
         toastService.addToast('Geen tekst toegevoegd', 'Vul eers tekst in om te verzenden', 'error');
         return;
@@ -107,7 +108,6 @@ export default {
       })
         .then(response => response.json())
         .then(() => {
-          auth.checkAction(response?.action)
           this.getTekst();
           this.loading = false;
         })
