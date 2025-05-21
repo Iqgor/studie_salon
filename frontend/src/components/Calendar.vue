@@ -50,6 +50,7 @@
       </div>
     </aside>
     <div class="activityInfo" v-else-if="activityClicked && !isMobiel">
+            {{ this.activityClickedInfo.maakwerk }}
 
       <h3 v-if="!editActivity">{{ this.activityClickedInfo.title }}</h3>
       <label v-else for="editTitel">Titel:<input v-model="this.activityClickedInfo.title" id="editTitel" type="text"></label>
@@ -170,38 +171,43 @@
     ), new Date().getHours())" class="createActivityButton"><span>+</span> Maak Activiteit</button>
     <div class="activityInfo" v-else-if="activityClicked && isMobiel">
 
-      <h3 v-if="!editActivity">{{ this.activityClickedInfo.title }}</h3>
-      <label  v-else for="editTitel">Titel:<input id="editTitel" type="text"></label>
-      <p v-if="!editActivity">Vak: {{ this.activityClickedInfo.vak }}</p>
-      <select v-else @change="editActivityVak = $event.target.value">
+            <h3 v-if="!editActivity">{{ this.activityClickedInfo.title }}</h3>
+      <label v-else for="editTitel">Titel:<input v-model="this.activityClickedInfo.title" id="editTitel" type="text"></label>
+      <p >Vak: {{ !editActivity ? this.activityClickedInfo.vak : '' }}</p>
+      <select v-if="editActivity" v-model="this.activityClickedInfo.vak" @change="editActivityVak = $event.target.value">
         <option :key="index" :value="vak" v-for="(vak, index) in vakken">{{ vak }}</option>
       </select>
-      <p v-if="!editActivity">Maakwerk: {{ this.activityClickedInfo.maakwerk }}</p>
-      <div v-else class="activityRadio">
+      <p>Maakwerk: {{ !editActivity ? this.activityClickedInfo.maakwerk: '' }}</p>
+      <div v-if="editActivity" class="activityRadio">
         <label for="Maakwerk">Maakwerk</label>
-        <input checked @input="editMaakWerk = 'Maakwerk'" type="radio" name="maakwerk" id="Maakwerk">
+        <input :checked="this.activityClickedInfo.maakwerk === 'Maakwerk'"  @input="this.activityClickedInfo.maakwerk = 'Maakwerk'" type="radio" name="maakwerk" id="Maakwerk">
         <label for="Leerwerk">Leerwerk</label>
-        <input @input="editmaakWerk = 'Leerwerk'" type="radio" name="maakwerk" id="Leerwerk">
-        <label for="Te-doen">Te doen</label>
-        <input @input="editMaakWerk = 'Te doen'" type="radio" name="maakwerk" id="Te-doen">
+        <input :checked="this.activityClickedInfo.maakwerk === 'Leerwerk'" @input="this.activityClickedInfo.maakwerk = 'Leerwerk'" type="radio" name="maakwerk" id="Leerwerk">
+        <label  for="Te-doen">Te doen</label>
+        <input :checked="this.activityClickedInfo.maakwerk === 'Te doen'" @input="this.activityClickedInfo.maakwerk = 'Te doen'" type="radio" name="maakwerk" id="Te-doen">
         <label for="Anders">Anders</label>
-        <input @input="editMaakWerk = 'Anders'" type="radio" name="maakwerk" id="Anders">
+        <input :checked="this.activityClickedInfo.maakwerk === 'Anders'" @input="this.activityClickedInfo.maakwerk = 'Anders'" type="radio" name="maakwerk" id="Anders">
       </div>
       <p v-if="!editActivity">Tijd: {{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }} - {{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0] }}:{{ this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1] }}</p>
-      <div v-else>
+      <div class="editTime time" v-else>
           Tijd:
-          <input type="time" >
+          <input @input="this.activityClickedInfo.start_datetime = this.activityClickedInfo.start_datetime.split(' ')[0] + ' ' + $event.target.value + ':00'"
+        :value="`${this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[0] }:${ this.activityClickedInfo.start_datetime.split(' ')[1].split(':')[1] }`" type="time" >
           <span>-</span>
-          <input type="time" >
+            <input
+            type="time"
+            :value="`${this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[0]}:${this.activityClickedInfo.end_datetime.split(' ')[1].split(':')[1]}`"
+            @input="this.activityClickedInfo.end_datetime = this.activityClickedInfo.end_datetime.split(' ')[0] + ' ' + $event.target.value + ':00'"
+            >
       </div>
-      <p v-if="!editActivity">Gedaan: <span v-if="this.activityClickedInfo.done === 1">Ja</span> <span v-else>nee</span></p>
-      <div v-else>
+      <p >Gedaan: <span v-if="this.activityClickedInfo.done === 1 && !editActivity">Ja</span> <span v-else-if="!editActivity">nee</span></p>
+      <div class="editDone" v-if="editActivity">
         <label for="notdone">Ja</label>
-        <input type="radio" name="done" id="notdone">
+        <input @input="this.activityClickedInfo.done = 1" :checked="this.activityClickedInfo.done === 1" type="radio" name="done" id="notdone">
         <label for="done">Nee</label>
-        <input type="radio" name="done" id="done">
+        <input @input="this.activityClickedInfo.done = 0" :checked="this.activityClickedInfo.done !== 1" type="radio" name="done" id="done">
       </div>
-      <div class="buttons"><i @click="editActivity = !editActivity" class="fa-solid fa-pen-to-square"></i><i @click="activityClicked = false" class="fa-regular fa-circle-xmark"></i><i class="fa-solid fa-trash"></i></div>
+      <div class="buttons"><i @click="editActivity = !editActivity" class="fa-solid fa-pen-to-square"></i><i v-if="!editActivity" @click="activityClicked = false" class="fa-regular fa-circle-xmark"></i><i v-else @click="sendEdit" class="fa-regular fa-circle-check"></i>  <i @click="deleteAcitivity" class="fa-solid fa-trash"></i></div>
 
     </div>
     <div class="createActivity" v-else-if="isMobiel && newActivityClicked">
@@ -213,7 +219,7 @@
       </select>
       <label for="">Soort huiswerk:</label>
       <div class="activityRadio">
-        <label for="Huiswerk">Maakwerk</label>
+        <label for="Maakwerk">Maakwerk</label>
         <input checked @input="maakWerk = 'Maakwerk'" type="radio" name="maakwerk" id="Maakwerk">
         <label for="Leren">Leerwerk</label>
         <input @input="maakWerk = 'Leerwerk'" type="radio" name="maakwerk" id="Leerwerk">
@@ -262,7 +268,7 @@ export default {
       newActivityEndTime: null,
       newActivityName: null,
       newVak: vakken[0],
-      maakWerk: "Huiswerk",
+      maakWerk: "Maakwerk",
       loading: true,
       isMobiel: false,
       oneDay: false,
@@ -371,7 +377,6 @@ export default {
         this.setDate = new Date(year, month - 1, day)
         if (dayIndex === -1) {
           this.shownDate = new Date(year, month - 1, day);
-          console.log(this.shownDate)
           this.daysInMonth = this.getDaysInMonth(this.shownDate);
           const dayIndex = this.getDaysOfWeek().findIndex(day =>
             `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === this.newActivityDate
@@ -386,13 +391,15 @@ export default {
     }
   },
   methods: {
-
     sendEdit(){
       const formData = new FormData();
       formData.append('shownActivity', JSON.stringify(this.activityClickedInfo));
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/edit_activity`, {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
       })
         .then(response => response.json())
         .then(() => {
@@ -472,7 +479,7 @@ export default {
       formData.append('maakwerk', this.maakWerk);
       formData.append('startDate', this.newActivityDate + ' ' + this.newActivityBegintime);
       formData.append('endDate', this.newActivityDate + ' ' + this.newActivityEndTime);
-      
+
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/create_activity`, {
         method: 'POST',
         body: formData,
@@ -617,7 +624,6 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-            'Content-Type': 'application/json',
             Authorization: auth.bearerToken
         }
 
@@ -654,7 +660,6 @@ export default {
           }
 
           if (activity.done === 1) {
-            console.log('andere kleur')
             activityElement.style.backgroundColor = 'var(--color-primary-500)';
           }
 
@@ -689,8 +694,6 @@ export default {
 
     },
     initializeCalendar() {
-      console.log('Calendar initialized with date:', this.shownDate);
-
       this.fetchActivities();
     },
     getDaysInMonth(date) {
@@ -755,7 +758,6 @@ export default {
       this.shownDate = this.setDate
       this.daysInMonth = this.getDaysInMonth(this.shownDate);
 
-      console.log('Selected date for activities:', this.setDate);
       if (!isInCurrentWeek) {
         this.fetchActivities();
       }
@@ -1166,10 +1168,17 @@ export default {
 }
 
 .activityInfo input[type='text']{
+border: none;
+  border-bottom: 0.125rem solid var(--color-text);
   width: 100% !important;
   font-size: 100%;
   margin-top: 0.5rem;
   padding-left: 0.5rem;
+}
+
+.activityInfo input[type='text']:focus{
+  outline: none;
+  border-bottom: 0.125rem solid var(--color-primary-500);
 }
 
 .activityInfo select{

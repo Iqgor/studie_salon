@@ -1,6 +1,6 @@
 <template>
   <main v-if="succes" class="main">
-    <div>
+    <div class="link">
       <a class="waterFallLink" :href="('/' + firstSlug)">
         < Terug naar {{ firstSlug }}</a>
           <!-- <button @click="playTekst">Speel teksts af</button>
@@ -11,8 +11,16 @@
       <button @click="changeSpeed(2)">2x</button>
       <button @click="skipBackward"><<</button>
       <button @click="skipForward">>></button> -->
+        <i v-if="!isAdmin && !isEditClicked" @click="isEditClicked = !isEditClicked" class="fa-solid fa-pen"></i>
     </div>
-    <div class="containerTekst" v-html="tekst"></div>
+    <div v-if="!isEditClicked" class="containerTekst" v-html="tekst"></div>
+    <div class="adminText" v-else>
+      <jodit-editor  v-model="editedContent" ></jodit-editor>
+      <div class="buttons">
+        <button @click="sendEdit">Verander tekst</button>
+        <i @click="isEditClicked = false, editedContent = tekst" class="fa-regular fa-circle-xmark"></i>
+      </div>
+    </div>
     <a class="waterFallLink" :href="('/' + firstSlug)">
       < Terug naar {{ firstSlug }}</a>
   </main>
@@ -20,7 +28,7 @@
     <div class="adminText">
       <h2>Geen tekst gevonden</h2>
       <p>Je kan deze tekst aanmaken door tekst toe te voegen via dit tekst veld en op de knop er onder te klikken</p>
-      <jodit-editor class="textEditor" v-model="content" />
+      <jodit-editor v-model="content" />
       <button @click="addTekst">Voeg tekst toe</button>
     </div>
   </main>
@@ -51,6 +59,9 @@ export default {
       isSpeaking: false,
       utterance: null,
       content: '',
+      editedContent: '',
+      isEditClicked: false,
+      isAdmin: false,
     };
   },
   mounted() {
@@ -58,6 +69,27 @@ export default {
   },
 
   methods: {
+    sendEdit(){
+      const formData = new FormData();
+      formData.append('editedContent', this.editedContent);
+      formData.append('slug', this.slug.replace('/', '-'));
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/editTekst`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => response.json())
+        .then(() => {
+          this.isEditClicked = false;
+          toastService.addToast('Tekst aangepast',`Tekst is zojuist aangepast door ${auth.user.name} `, 'success');
+          this.getTekst();
+        })
+        .catch(error => {
+          console.error('Error creating activity:', error);
+        });
+    },
     addTekst() {
       const formData = new FormData();
       formData.append('slug', this.slug.replace('/', '-'));
@@ -70,7 +102,6 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'application/json',
           Authorization: auth.bearerToken
         }
       })
@@ -85,7 +116,6 @@ export default {
         });
     },
     stopSpeech() {
-      console.log('stopSpeech');
       window.speechSynthesis.cancel();
       this.isSpeaking = false;
     },
@@ -139,7 +169,6 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'application/json',
           Authorization: auth.bearerToken
         }
       })
@@ -155,6 +184,7 @@ export default {
             this.succes = true;
             this.loading = false;
             this.tekst = data.tekst;
+            this.editedContent = data.tekst;
           } else {
             this.succes = false;
             this.loading = false;
@@ -235,41 +265,32 @@ export default {
 }
 
 
-.adminText {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.adminText h2 {
-  font-size: 200%;
-  margin-bottom: 1rem;
-}
-
-.adminText>button {
-  width: max-content;
-  background: var(--color-primary-500);
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  padding: 1rem 2rem;
-  font-size: 120%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.adminText>button:hover {
-  background: var(--color-primary-400);
-}
-
-.adminText>button:active {
-  transform: translateY(2px);
-}
-
 .jodit-workplace {
   height: 40vh !important;
 }
 
+.link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 1rem;
+}
+
+.link > i{
+  font-size: 2.5rem;
+  cursor: pointer;
+  color: var(--color-primary-500);
+  transition: all 0.3s ease;
+}
+
+.link > i:hover{
+  color: var(--color-primary-400);
+}
+
+
+.jodit-container{
+  margin: 2rem 0;
+}
 
 @media screen and (max-width: 768px) {
   .containerTekst {

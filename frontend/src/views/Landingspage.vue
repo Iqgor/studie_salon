@@ -4,7 +4,7 @@
       <div class="sectie-links">
         <h2 class="landingspage-h2">Leer actief leren,</h2>
         <p class="landingspage-ondertitel">Met onze <b class="sectie-links-kleur">LerenLerenTool</b> wordt leren <b class="sectie-links-kleur">leuker</b> en <b class="sectie-links-kleur">makkelijker</b>.</p>
-        <p class="landingspage-ondertitel">Bekijk onze verschillende abonnement <b class="sectie-links-kleur"><router-link :to="'/plans'">hier</router-link></b>.</p>
+        <p class="landingspage-ondertitel">Bekijk onze verschillende abonnement <b class="sectie-links-kleur"><router-link :to="'/abonnementen'">hier</router-link></b>.</p>
       </div>
       <img src="../assets/iphone-app-hand.webp" alt="" class="sectie-midden-img" />
     </section>

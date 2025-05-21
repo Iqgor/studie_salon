@@ -131,7 +131,6 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'application/json',
           Authorization: auth.bearerToken
         }
       })
@@ -196,7 +195,6 @@ export default {
           return response.json();
         })
         .then(data => {
-          console.log(data);
           if (data.success) {
             this.succes = true;
             this.loading = false;

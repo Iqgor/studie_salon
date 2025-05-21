@@ -265,26 +265,26 @@
 
 
 
-          --color-secondary-100: #f7f1dc;
-          --color-secondary-200: #efe3b9;
-          --color-secondary-300: #e6d697;
-          --color-secondary-400: #dec874;
-          --color-secondary-500: #d6ba51;
-          --color-secondary-600: #ab9541;
-          --color-secondary-700: #807031;
-          --color-secondary-800: #564a20;
-          --color-secondary-900: #2b2510;
+  --color-secondary-100: #f7f1dc;
+  --color-secondary-200: #efe3b9;
+  --color-secondary-300: #e6d697;
+  --color-secondary-400: #dec874;
+  --color-secondary-500: #d6ba51;
+  --color-secondary-600: #ab9541;
+  --color-secondary-700: #807031;
+  --color-secondary-800: #564a20;
+  --color-secondary-900: #2b2510;
 
 
-          --color-card-100: #eee5d8;
-          --color-card-200: #dcccb1;
-          --color-card-300: #cbb28a;
-          --color-card-400: #b99963;
-          --color-card-500: #a87f3c;
-          --color-card-600: #866630;
-          --color-card-700: #654c24;
-          --color-card-800: #433318;
-          --color-card-900: #22190c;
+  --color-card-100: #eee5d8;
+  --color-card-200: #dcccb1;
+  --color-card-300: #cbb28a;
+  --color-card-400: #b99963;
+  --color-card-500: #a87f3c;
+  --color-card-600: #866630;
+  --color-card-700: #654c24;
+  --color-card-800: #433318;
+  --color-card-900: #22190c;
 
 
   --color-background-100: #dedad7;
@@ -424,11 +424,24 @@ select:focus {
   gap: 2rem;
 }
 
-.adminText h2{
+.adminText  h2{
   font-size: 200%;
   margin-bottom: 1rem;
 }
-.adminText > button{
+
+.buttons>i{
+  font-size: 200%;
+
+}
+
+.buttons{
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.adminText > button, .buttons >  button{
   width: max-content;
   background: var(--color-primary-500);
   color: white;
@@ -438,6 +451,7 @@ select:focus {
   font-size: 110%;
   cursor: pointer;
   transition: all 0.3s ease;
+
 }
 
 
@@ -487,19 +501,5 @@ select:focus {
   transition: all 0.3s ease;
 }
 
-input[type="text"]{
-  border: none;
-  border-bottom: 0.125rem solid var(--color-text);
-  padding-bottom: 0.25rem;
-  font-size: 2rem;
-  transition: all 0.3s ease;
-  background: transparent;
-  color: var(--color-text);
-}
 
-input[type="text"]:focus{
-  padding-bottom: 0.5rem;
-  outline: none;
-  border-bottom: 0.25rem solid var(--color-primary-500);
-}
 

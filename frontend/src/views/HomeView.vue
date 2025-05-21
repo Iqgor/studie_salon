@@ -67,6 +67,7 @@ export default {
       currentLanguageCode: navigator.language || navigator.userLanguage,
       loading: true,
       searchCarousel: '',
+      CarouselData: [],
       updatedCarouselData: [],
     };
   },
@@ -100,7 +101,7 @@ export default {
             }
             grouped[key].push(item);
             });
-            console.log(grouped);
+            this.CarouselData = grouped;
             this.updatedCarouselData = grouped;
         })
         .catch(error => {
@@ -110,12 +111,13 @@ export default {
     },
     updateCarouselData() {
       if(this.searchCarousel.length === 0){
+        this.updatedCarouselData = this.CarouselData;
         return;
       }
       // CarouselData is an object, so filter its arrays and keep the structure
       const search = this.searchCarousel.toLowerCase();
       this.updatedCarouselData = Object.fromEntries(
-        Object.entries(CarouselData).map(([category, items]) => [
+        Object.entries(this.CarouselData).map(([category, items]) => [
           category,
           items.filter(item => item.title.toLowerCase().includes(search))
         ]).filter(([_, items]) => items.length > 0)
@@ -211,7 +213,6 @@ export default {
           return response.json();
         })
         .then(data => {
-          auth.checkAction(response?.action)
           this.loading = false;
           if (data) {
             this.quote = data.quote;
@@ -272,11 +273,17 @@ export default {
   width: 4rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  height: max-content ;
 }
 
 .quote_chooser>div:active {
   transform: scale(1.2);
 }
+
+/* .quote_chooser svg{
+  stroke: var(--color-text);
+  stroke-width: 0.125rem;
+} */
 
 
 
