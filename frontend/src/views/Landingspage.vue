@@ -13,7 +13,7 @@
       <div class="container-landingspage-box">
         <div class="landingspage-box">
           <div class="icon">✅</div>
-          <h2>Waarom kiezen voor ons?</h2>
+          <h2>Waarom Studie Salon?</h2>
           <p>We bieden makkelijke en snel te gebruiken LerenLerenStragegieën, gericht op de leerstijl die het beste bij jou past. Welke leerstijl heb beste bij jou past, ontdek je snel door een eenvoudige quiz. Leuk weetje: voor elk vak kan je je eigen leerstijl ontdekken! </p>
         </div>
         <div class="landingspage-box">

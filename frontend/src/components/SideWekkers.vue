@@ -47,8 +47,7 @@
       </div>
       <div class="pomodoro-box">
         <span class="pomodoro-text">{{ pomodoroLabel }}</span>
-<button
-  class="pomodoro-button pomodoro-button-start" v-if="!pomodoroRunning && !pomodoroFinished" @click="startPomodoro(pomodoroTime)">Start</button>
+        <button class="pomodoro-button pomodoro-button-start" v-if="!pomodoroRunning && !pomodoroFinished" @click="startPomodoro(pomodoroTime)">Start</button>
         <button class="pomodoro-button pomodoro-button-stop" v-if="pomodoroRunning" @click="stopPomodoro">Stop</button>
         <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
       </div>
@@ -70,15 +69,19 @@
       </div>
           <div class="timer-box">
               <span class="timer-text">{{ currentTime }}</span>
-              <p v-if="alarmTime.length > 1 && !alarmRinging" class="timer-alarm"> {{ alarmTime }}</p>
+              <p v-if="alarmMessage" class="timer-alarm">{{ alarmMessage }}</p>
               <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
           </div>
         <div class="alarm-setter">
-          <label class="alarm-label">
-          Voeg alarm toe:
+          <label class="alarm-label">Voeg alarm toe:
           <input type="time" v-model="alarmInputTime" />
         </label>
         <button class="alarm-button" @click="setAlarm" >Toevoegen</button>
+        <ul class="timer-alarm-ul" v-if="alarmTimes.length > 0 && !alarmRinging">
+          <li v-for="(time, index) in alarmTimes" :key="index">Alarm gezet voor {{ time }}
+          <button @click="removeAlarm(index)" class="wekker-remove-button"><i class="fa-solid fa-x"></i></button>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -103,7 +106,8 @@ export default {
       alarmClicked: false,
       alarmInputTime: '',
       currentTime: '',
-      alarmTime: '',
+      alarmMessage: '',
+      alarmTimes: [],
       alarmSet: false,
       alarmRinging: false,
       alarmAudio: null,
@@ -111,9 +115,9 @@ export default {
 
       // Pomodoro
       showPomodoroSettings: false,
-      longBreakDuration: 15 * 60, // standaard 15 minuten
+      longBreakDuration: 15 * 60,
       pomodoroClicked: false,
-      pomodoroTime: 1500, // in seconden (25 min)
+      pomodoroTime: 1500,
       TimerDuration: 1500,
       pomodoroLabel: '25:00',
       pomodoroRunning: false,
@@ -127,6 +131,10 @@ export default {
     toggleAlarm() {
       this.alarmClicked = !this.alarmClicked;
     },
+    removeAlarm(index) {
+  this.alarmTimes.splice(index, 1);
+},
+
     togglePomodoro() {
   this.pomodoroClicked = !this.pomodoroClicked;
   if (!this.pomodoroClicked) {
@@ -153,22 +161,38 @@ export default {
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const seconds = now.getSeconds().toString().padStart(2, '0');
       this.currentTime = `${hours}:${minutes}:${seconds}`;
-      if (this.alarmSet && `${hours}:${minutes}` === this.alarmInputTime) {
-        this.triggerAlarm();
-      }
+      if (this.alarmSet) {
+  this.alarmTimes.forEach((time, index) => {
+    if (`${hours}:${minutes}` === time) {
+      this.triggerAlarm();
+      this.alarmTimes.splice(index, 1); // verwijder alarm zodra hij afgaat
+    }
+  });
+}
+
     },
     setAlarm() {
-      if (this.alarmInputTime) {
-        let [hours, minutes] = this.currentTime.split(':');
-        if (this.alarmInputTime === `${hours}:${minutes}`) {
-          this.alarmTime = 'Tijd is hetzelfde als nu, kies een andere tijd.';
-        } else {
-          this.alarmTime = "Alarm gezet voor " + this.alarmInputTime;
-          this.alarmSet = true;
-          console.log('Alarm ingesteld voor:', this.alarmTime);
-        }
-      }
-    },
+  if (this.alarmInputTime) {
+    const now = new Date();
+    const currentHours = now.getHours().toString().padStart(2, '0');
+    const currentMinutes = now.getMinutes().toString().padStart(2, '0');
+    const currentTimeShort = `${currentHours}:${currentMinutes}`;
+
+    if (this.alarmInputTime === currentTimeShort) {
+      this.alarmMessage = 'Tijd is hetzelfde als nu, kies een andere tijd.';
+    } else if (this.alarmTimes.includes(this.alarmInputTime)) {
+      this.alarmMessage = 'Alarm voor deze tijd bestaat al.';
+    } else {
+      this.alarmTimes.push(this.alarmInputTime);
+      this.alarmMessage = 'Alarm toegevoegd voor ' + this.alarmInputTime;
+      this.alarmSet = true;
+    }
+  } else {
+    this.alarmMessage = 'Kies eerst een tijd.';
+  }
+}
+
+,
     triggerAlarm() {
       this.alarmSet = false;
       this.alarmRinging = true;
@@ -417,10 +441,23 @@ export default {
   flex-direction: column;
 }
 
-.timer-alarm{
+.timer-alarm, .timer-alarm-ul{
   font-size: 2rem;
   margin-top: 2rem;
+  text-align: center;
 }
+
+.timer-alarm-ul{
+  list-style: none;
+}
+
+.wekker-remove-button{
+
+  background: none;
+  border: none;
+  font-size: 2rem;
+}
+
 .timer-text, .pomodoro-text{
     font-size: 8rem;
     color: var(--color-text-500);
@@ -459,8 +496,6 @@ export default {
 .pomodoro-settings-menuKortepauze, .pomodoro-settings-menuTimer{
   width: 50%;
 }
-
-
 
 .pomodoro-pauze-titel{
   font-size: 2.5rem;
