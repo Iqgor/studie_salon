@@ -73,12 +73,12 @@
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
                                 <p class="detail__sale_p">{{ Math.round(selectedPlan.sale) }}{{ selectedPlan.sale_type
-                                    }}</p>
+                                }}</p>
                             </div>
                             <h4 class="detail__button_period">Maandelijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{
                                 selectedPlan.price
-                                }}</h3>
+                            }}</h3>
                             <h5 class="detail__button_description"></h5>
                         </button>
 
@@ -121,14 +121,13 @@
                     <hr>
 
                 </article>
-                                    <div class="detail__feature">
-                        <div class="detail__feature_wrapper" v-for="feature in selectedPlan.features"
-                            :key="feature.name">
-                            <div class="detail__feature_icon" v-html="feature.icon"></div>
-                            <div class="detail__feature_name">{{ feature.name }}</div>
-                        </div>
-
+                <div class="detail__feature">
+                    <div class="detail__feature_wrapper" v-for="feature in selectedPlan.features" :key="feature.name">
+                        <div class="detail__feature_icon" v-html="feature.icon"></div>
+                        <div class="detail__feature_name">{{ feature.name }}</div>
                     </div>
+
+                </div>
             </section>
 
 
@@ -164,7 +163,7 @@
                             (plan.price - plan.sale).toFixed(2) }}</span>
                     </p>
                     <hr>
-                                        <button class="btn" @click="choosePlan(plan)">Neem Abonemment</button>
+                    <button class="btn" @click="choosePlan(plan)">Neem Abonemment</button>
 
                     <ul class="card__list">
                         <li v-for="feature in plan.features" :key="feature.name" class="card__list-item">
@@ -174,6 +173,48 @@
                             </span>
                         </li>
                     </ul>
+
+
+                </div>
+
+                <div class="plan__card">
+
+
+                    <div class="card__header">
+                        <span>
+                            <i class="fa-solid fa-school"></i>
+                            <h2>Voor scholen</h2>
+                        </span>
+                        <span class="rank">School</span>
+                    </div>
+
+                    <p class="description">
+                        Abonnementen voor scholen gaan in overleg met de Studie Salon. Neem contact op met ons via <a
+                            href="mailto:studiesalon.lerenlerentool@gmail.com">studiesalon.lerenlerentool@gmail.com</a>
+                    </p>
+                    <!-- <p class="price__container">
+                        <span class="price" v-if="plan.sale && plan.sale_type"
+                            :class="{ 'price__inactive': plan.sale && plan.sale_type }"><i
+                                class="fa-solid fa-euro-sign"></i> {{ plan.price }}</span>
+
+                        <span class="price" v-if="plan.sale && plan.sale_type === '%'"><i
+                                class="fa-solid fa-euro-sign"></i>{{
+                                    (plan.price - (plan.price * plan.sale / 100)).toFixed(2) }}</span>
+
+                        <span class="price" v-else><i class="fa-solid fa-euro-sign"></i>{{
+                            (plan.price - plan.sale).toFixed(2) }}</span>
+                    </p> -->
+                    <hr>
+                    <a href="mailto:studiesalon.lerenlerentool@gmail.com" class="btn">Neem contact</a>
+
+                    <!-- <ul class="card__list">
+                        <li v-for="feature in plan.features" :key="feature.name" class="card__list-item">
+                            <div class="feature__icon" v-html="feature.icon"></div>
+                            <span>
+                                <p class="card__list-titel">{{ feature.name }}</p>
+                            </span>
+                        </li>
+                    </ul> -->
 
 
                 </div>
@@ -337,6 +378,9 @@ export default {
                     this.subscribeToIdeal()
                 } else if (this.paymentChoice == 'creditcard') {
                     this.subscribeToCreditCard()
+                }
+                else {
+                    toastService.addToast('Geen betaal methode', 'Kies een betaal methode', 'error')
                 }
             }
         },
@@ -553,6 +597,7 @@ export default {
     font-weight: bold;
     transition: all 0.3s ease-in-out;
     margin-top: auto;
+    text-align: center;
 }
 
 .btn:hover {
@@ -572,6 +617,11 @@ export default {
 
 .description {
     font-size: 1.25rem;
+}
+
+.description a {
+    color: var(--color-primary-500);
+    text-decoration: underline;
 }
 
 .price {
@@ -607,9 +657,9 @@ export default {
 
 .getplan {
     display: grid;
-    grid-template-areas: 
-    'form detail' 
-    'feature feature'
+    grid-template-areas:
+        'form detail'
+        'feature feature'
     ;
     grid-template-columns: auto auto;
     border-radius: 1.5rem;
@@ -791,7 +841,6 @@ export default {
 .getplan__button i {
     font-size: 3.5rem;
     overflow: hidden;
-    color: var(--color-primary-500);
 }
 
 .getplan__button p {
@@ -851,8 +900,8 @@ export default {
     height: 100%;
     background: var(--color-card-500);
     border-radius: 2.5rem;
-    border-bottom-right-radius:0rem ;
-    border-bottom-left-radius:0rem ;
+    border-bottom-right-radius: 0rem;
+    border-bottom-left-radius: 0rem;
     padding: 2rem;
     grid-area: detail;
 }
@@ -907,12 +956,7 @@ export default {
     color: var(--color-text);
 }
 
-.detail__button:focus {
-    background-color: var(--color-card-600);
-    border: none;
-    outline: none;
-    color: var(--color-text);
-}
+
 
 .detail__button_active {
     background-color: var(--color-primary-500);
@@ -971,8 +1015,8 @@ export default {
     grid-area: feature;
     padding: 2rem;
     background: var(--color-card-500);
-        border-radius: 2.5rem;
-    border-top-right-radius:0rem ;
+    border-radius: 2.5rem;
+    border-top-right-radius: 0rem;
     justify-content: space-between;
 
 }
@@ -1011,5 +1055,31 @@ export default {
 hr {
     border: 1px solid var(--color-text);
     width: 100%;
+}
+
+@media screen and (max-width: 830px) {
+    .getplan {
+        grid-template-areas:
+            'detail'
+            'form'
+            'feature'
+        ;
+        grid-template-columns: auto;
+        width: 40rem;
+
+    }
+
+    .detail{
+        border-radius: 2.5rem;
+    }
+
+    .detail__feature{
+        width: 100%;
+        border-top-left-radius: 0rem;
+        border-radius: 2.5rem;
+    }
+    .detail__feature_wrapper{
+        width: 100%;
+    }
 }
 </style>
