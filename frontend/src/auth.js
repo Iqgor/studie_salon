@@ -62,7 +62,7 @@ export const auth = reactive({
             this.temp_used = localStorage.getItem('temp_used') || false
             this.bearerToken = `Bearer ${this.token}`
 
-            this.getSubscription()
+            //this.getSubscription()
 
 
         }

@@ -326,7 +326,7 @@ export default {
                 }
 
             } catch (err) {
-                // error handling hier
+                console.error('Error logging in:', err)
             }
 
         },
@@ -349,7 +349,7 @@ export default {
                     this.checkhowToSub()
                 }
             } catch (err) {
-                // error handling hier
+                console.error('Error verifying otp:', err)
             }
         },
         async createAccount() {
@@ -366,7 +366,7 @@ export default {
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 this.donthaveAccount = false
             } catch (err) {
-                // error handling hier
+                console.error('Error registering:', err)
             }
         },
         checkhowToSub() {
@@ -391,8 +391,12 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         plan_id: this.selectedPlan.id,
-                        user_id: auth.user.id,
-                    })
+                        auth_id: auth.user.id
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: auth.bearerToken
+                    }
                 });
 
                 let incommingdata = await response.json();
@@ -1069,16 +1073,17 @@ hr {
 
     }
 
-    .detail{
+    .detail {
         border-radius: 2.5rem;
     }
 
-    .detail__feature{
+    .detail__feature {
         width: 100%;
         border-top-left-radius: 0rem;
         border-radius: 2.5rem;
     }
-    .detail__feature_wrapper{
+
+    .detail__feature_wrapper {
         width: 100%;
     }
 }
