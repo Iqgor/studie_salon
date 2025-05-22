@@ -24,7 +24,7 @@ $conn = getDBConnection();
 $url = $_SERVER['REQUEST_URI'];
 $urlParts = explode('?', $url, 2);
 $urlParts = explode('/', trim($urlParts[0], '/'));
-$resource = $urlParts[1] ?? null;
+$resource = $urlParts[2] ?? null;
 
 $publicRoutes = [
     'login',
@@ -219,9 +219,27 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
 
     case 'POST':
-
-
         switch ($resource) {
+            case 'sendLikes':
+                $userId = $_POST['userId']; // Get userId from POST data
+                $likes = $_POST['likes'] ?? null; // Get link from POST data
+                $tegel = $_POST['slug'] ?? null; // Get slug from POST data
+                $likes = json_decode($likes, true);
+                if (is_array($likes)) {
+                    foreach ($likes as $like) {
+                        $link = $like['slug'] ?? null;
+                        if ($userId && $tegel && $link) {
+                            $stmt = $conn->prepare("INSERT INTO user_likes (user_id, tegel, link) VALUES (?, ?, ?)");
+                            $stmt->bind_param("iss", $userId, $tegel, $link);
+                            if ($stmt->execute()) {
+                                jsonResponse(['success' => 'Like added successfully'], 201);
+                            } else {
+                                jsonResponse(['error' => 'Failed to add like'], 500);
+                            }
+                        }
+                    }
+                }
+                break;
             case 'editCarouselLink':
                 $id = $_POST['id'] ?? null; // Get id from POST data
                 $title = $_POST['title'] ?? null; // Get name from POST data

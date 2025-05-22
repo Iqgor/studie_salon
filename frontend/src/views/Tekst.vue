@@ -1,8 +1,8 @@
 <template>
   <main v-if="succes" class="main">
     <div class="link">
-      <a class="waterFallLink" :href="('/' + firstSlug)">
-        < Terug naar {{ firstSlug }}</a>
+      <RouterLink class="waterFallLink" :to="('/' + firstSlug)">
+        < Terug naar {{ firstSlug }}</RouterLink>
           <!-- <button @click="playTekst">Speel teksts af</button>
       <button @click="stopSpeech">Stop</button>
       <button @click="changeSpeed(0.5)">0.5x</button>
@@ -21,8 +21,8 @@
         <i @click="isEditClicked = false, editedContent = tekst" class="fa-regular fa-circle-xmark"></i>
       </div>
     </div>
-    <a class="waterFallLink" :href="('/' + firstSlug)">
-      < Terug naar {{ firstSlug }}</a>
+    <RouterLink class="waterFallLink" :to="('/' + firstSlug)">
+      < Terug naar {{ firstSlug }}</RouterLink>
   </main>
   <main class="main" v-else-if="!isAdmin && !loading">
     <div class="adminText">
