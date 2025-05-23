@@ -244,7 +244,7 @@
 </template>
 <script>
 import vakken from '../assets/vakken.json'
-import { auth } from '../auth.js'
+import { auth } from '@/auth';
 import { toastService } from '@/services/toastService';
 
 export default {

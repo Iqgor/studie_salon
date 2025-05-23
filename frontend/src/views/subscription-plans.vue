@@ -72,10 +72,12 @@
                             @click="changePeriod('maandelijks')">
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
-                                <p class="detail__sale_p">{{ selectedPlan.sale }}{{ selectedPlan.sale_type }}</p>
+                                <p class="detail__sale_p">{{ Math.round(selectedPlan.sale) }}{{ selectedPlan.sale_type
+                                }}</p>
                             </div>
                             <h4 class="detail__button_period">Maandelijks</h4>
-                            <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
+                            <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{
+                                selectedPlan.price
                             }}</h3>
                             <h5 class="detail__button_description"></h5>
                         </button>
@@ -85,11 +87,11 @@
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
                                 <p class="detail__sale_p">{{ selectedPlan.sale_type == '$' ? selectedPlan.sale * 12 :
-                                    selectedPlan.sale }}{{ selectedPlan.sale_type }}</p>
+                                    Math.round(selectedPlan.sale) }}{{ selectedPlan.sale_type }}</p>
                             </div>
                             <h4 class="detail__button_period">jaarlijks</h4>
-                            <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ selectedPlan.price
-                                * 12 }}</h3>
+                            <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{ (selectedPlan.price
+                                * 12).toFixed(2) }}</h3>
                             <h5 class="detail__button_description"></h5>
                         </button>
                     </div>
@@ -98,7 +100,7 @@
                             <div class="detail__pricing_name">Subtotaal</div>
                             <div class="detail__pricing_price" v-if="selectedperiode == 'maandelijks'">{{
                                 selectedPlan.price }}</div>
-                            <div class="detail__pricing_price" v-else>{{ selectedPlan.price * 12 }}</div>
+                            <div class="detail__pricing_price" v-else>{{ (selectedPlan.price * 12).toFixed(2) }}</div>
                         </div>
                         <div class="detail__pricing_wrapper">
                             <div class="detail__pricing_name">korting</div>
@@ -117,15 +119,15 @@
                         neem een tijdelijk abbonement van 3 dagen
                     </p>
                     <hr>
-                    <div class="detail__feature">
-                        <div class="detail__feature_wrapper" v-for="feature in selectedPlan.features"
-                            :key="feature.name">
-                            <div class="detail__feature_icon" v-html="feature.icon"></div>
-                            <div class="detail__feature_name">{{ feature.name }}</div>
-                        </div>
 
-                    </div>
                 </article>
+                <div class="detail__feature">
+                    <div class="detail__feature_wrapper" v-for="feature in selectedPlan.features" :key="feature.name">
+                        <div class="detail__feature_icon" v-html="feature.icon"></div>
+                        <div class="detail__feature_name">{{ feature.name }}</div>
+                    </div>
+
+                </div>
             </section>
 
 
@@ -136,7 +138,7 @@
                 <div v-for="plan in subscription" :key="plan.id" class="plan__card">
 
                     <div class="plan__sale" v-if="plan.sale && plan.sale_type">
-                        <p class="plan__sale_p">{{ plan.sale }}{{ plan.sale_type }}</p>
+                        <p class="plan__sale_p">{{ Math.round(plan.sale) }}{{ plan.sale_type }}</p>
                     </div>
 
                     <div class="card__header">
@@ -161,18 +163,60 @@
                             (plan.price - plan.sale).toFixed(2) }}</span>
                     </p>
                     <hr>
-
+                    <button class="btn" @click="choosePlan(plan)">Neem Abonemment</button>
 
                     <ul class="card__list">
-                        <li v-for="feature in plan.features" :key="feature.name" v-show="feature.display">
+                        <li v-for="feature in plan.features" :key="feature.name" class="card__list-item">
                             <div class="feature__icon" v-html="feature.icon"></div>
                             <span>
                                 <p class="card__list-titel">{{ feature.name }}</p>
-                                <p class="card__list-description">{{ feature.description }}</p>
                             </span>
                         </li>
                     </ul>
-                    <button class="btn" @click="choosePlan(plan)">Neem Abonemment</button>
+
+
+                </div>
+
+                <div class="plan__card">
+
+
+                    <div class="card__header">
+                        <span>
+                            <i class="fa-solid fa-school"></i>
+                            <h2>Voor scholen</h2>
+                        </span>
+                        <span class="rank">School</span>
+                    </div>
+
+                    <p class="description">
+                        Abonnementen voor scholen gaan in overleg met de Studie Salon. Neem contact op met ons via <a
+                            href="mailto:studiesalon.lerenlerentool@gmail.com">studiesalon.lerenlerentool@gmail.com</a>
+                    </p>
+                    <!-- <p class="price__container">
+                        <span class="price" v-if="plan.sale && plan.sale_type"
+                            :class="{ 'price__inactive': plan.sale && plan.sale_type }"><i
+                                class="fa-solid fa-euro-sign"></i> {{ plan.price }}</span>
+
+                        <span class="price" v-if="plan.sale && plan.sale_type === '%'"><i
+                                class="fa-solid fa-euro-sign"></i>{{
+                                    (plan.price - (plan.price * plan.sale / 100)).toFixed(2) }}</span>
+
+                        <span class="price" v-else><i class="fa-solid fa-euro-sign"></i>{{
+                            (plan.price - plan.sale).toFixed(2) }}</span>
+                    </p> -->
+                    <hr>
+                    <a href="mailto:studiesalon.lerenlerentool@gmail.com" class="btn">Neem contact</a>
+
+                    <!-- <ul class="card__list">
+                        <li v-for="feature in plan.features" :key="feature.name" class="card__list-item">
+                            <div class="feature__icon" v-html="feature.icon"></div>
+                            <span>
+                                <p class="card__list-titel">{{ feature.name }}</p>
+                            </span>
+                        </li>
+                    </ul> -->
+
+
                 </div>
             </section>
         </div>
@@ -234,6 +278,7 @@ export default {
 
         changePeriod(period) {
             this.selectedperiode = period;
+
         },
 
         checkForm() {
@@ -281,7 +326,7 @@ export default {
                 }
 
             } catch (err) {
-                // error handling hier
+                console.error('Error logging in:', err)
             }
 
         },
@@ -304,7 +349,7 @@ export default {
                     this.checkhowToSub()
                 }
             } catch (err) {
-                // error handling hier
+                console.error('Error verifying otp:', err)
             }
         },
         async createAccount() {
@@ -321,7 +366,7 @@ export default {
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
                 this.donthaveAccount = false
             } catch (err) {
-                // error handling hier
+                console.error('Error registering:', err)
             }
         },
         checkhowToSub() {
@@ -334,6 +379,9 @@ export default {
                 } else if (this.paymentChoice == 'creditcard') {
                     this.subscribeToCreditCard()
                 }
+                else {
+                    toastService.addToast('Geen betaal methode', 'Kies een betaal methode', 'error')
+                }
             }
         },
         async subscribeToTrial() {
@@ -343,8 +391,12 @@ export default {
                     method: 'POST',
                     body: JSON.stringify({
                         plan_id: this.selectedPlan.id,
-                        user_id: auth.user.id,
-                    })
+                        auth_id: auth.user.id
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: auth.bearerToken
+                    }
                 });
 
                 let incommingdata = await response.json();
@@ -410,6 +462,8 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .subscription__container {
@@ -434,6 +488,7 @@ export default {
     gap: 1rem;
     max-width: 30rem;
     position: relative;
+    height: max-content;
 }
 
 .card__header {
@@ -454,8 +509,15 @@ export default {
 }
 
 .card__header span i {
-    font-size: 2rem;
-    color: var(--color-secondary-500);
+    font-size: 1.8rem;
+    width: 4rem;
+    aspect-ratio: 1/1;
+    background: var(--color-primary-500);
+    color: var(--color-text);
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .card__header .rank {
@@ -484,13 +546,14 @@ export default {
 }
 
 .feature__icon {
-    max-width: max-content;
-    max-height: max-content;
+    min-width: 4rem;
     aspect-ratio: 1/1;
     border-radius: 100%;
-    padding: 1rem;
     margin-right: 0.5rem;
     background: var(--color-secondary-500);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .card__list-titel {
@@ -498,11 +561,7 @@ export default {
     font-weight: bold;
 }
 
-.card__list-description {
-    font-size: 1.2rem;
-    color: var(--color-text);
-    font-weight: bold;
-}
+
 
 
 .plan__card li span {
@@ -511,9 +570,29 @@ export default {
     flex-direction: column;
 }
 
+.card__list {
+    max-height: 18rem;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.plan__card:hover .card__list {
+    max-height: 1000px;
+    /* a large enough value to show all items */
+}
+
+.card__list-item {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.plan__card:not(:hover) .card__list-item:nth-child(n + 4) {
+    opacity: 0;
+}
+
 .btn {
     background-color: var(--color-primary-500);
-    color: var(--color-text);
+    color: var(--color-card-500);
     padding: 1rem 2rem;
     border-radius: 0.4rem;
     border: none;
@@ -522,10 +601,12 @@ export default {
     font-weight: bold;
     transition: all 0.3s ease-in-out;
     margin-top: auto;
+    text-align: center;
 }
 
 .btn:hover {
-    background-color: var(--color-primary-600);
+    background-color: var(--color-background-500);
+    color: var(--color-primary-500);
 }
 
 .btn:active {
@@ -540,6 +621,11 @@ export default {
 
 .description {
     font-size: 1.25rem;
+}
+
+.description a {
+    color: var(--color-primary-500);
+    text-decoration: underline;
 }
 
 .price {
@@ -574,12 +660,14 @@ export default {
 }
 
 .getplan {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: start;
-    gap: 2rem;
-    margin-bottom: 2rem;
+    display: grid;
+    grid-template-areas:
+        'form detail'
+        'feature feature'
+    ;
+    grid-template-columns: auto auto;
+    border-radius: 1.5rem;
+    background: radial-gradient(var(--color-card-500) 20%, var(--color-background-500) 10%);
 }
 
 .plan__sale {
@@ -604,7 +692,10 @@ export default {
     flex-direction: column;
     gap: 2rem;
     height: 100%;
-    width: max-content;
+    grid-area: form;
+    padding: 2rem;
+    background: var(--color-background-500);
+    border-bottom-right-radius: 2.5rem;
 }
 
 .getplan__subject {
@@ -619,17 +710,17 @@ export default {
 
 .getplan__subject_btn {
 
-    color: var(--color-secondary-500);
+    color: var(--color-primary-500);
     cursor: pointer;
     transition: all 0.3s ease-in-out;
 }
 
 .getplan__subject_btn:hover {
-    color: var(--color-secondary-600);
+    color: var(--color-primary-600);
 }
 
 .getplan__subject_btn:focus {
-    color: var(--color-secondary-700);
+    color: var(--color-primary-700);
 }
 
 .getplan__input_wrapper {
@@ -754,7 +845,6 @@ export default {
 .getplan__button i {
     font-size: 3.5rem;
     overflow: hidden;
-    color: var(--color-primary-500);
 }
 
 .getplan__button p {
@@ -810,11 +900,14 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    max-width: max-content;
+    max-width: 100%;
     height: 100%;
-    background: var(--color-primary-500);
+    background: var(--color-card-500);
     border-radius: 2.5rem;
+    border-bottom-right-radius: 0rem;
+    border-bottom-left-radius: 0rem;
     padding: 2rem;
+    grid-area: detail;
 }
 
 .detail__name {
@@ -839,7 +932,7 @@ export default {
     gap: 1rem;
     padding: 2rem;
     border-radius: 1.5rem;
-    background-color: var(--color-card-500);
+    background-color: var(--color-secondary-500);
     color: var(--color-text);
     font-size: 1.5rem;
     font-weight: bold;
@@ -859,6 +952,7 @@ export default {
     color: var(--color-text);
     padding: 1rem;
     border-radius: 0.4rem;
+    outline: solid var(--color-card-500) 0.3rem;
 }
 
 .detail__button:hover {
@@ -866,16 +960,11 @@ export default {
     color: var(--color-text);
 }
 
-.detail__button:focus {
-    background-color: var(--color-card-600);
-    border: none;
-    outline: none;
-    color: var(--color-text);
-}
+
 
 .detail__button_active {
-    background-color: var(--color-primary-700);
-    color: var(--color-background-100);
+    background-color: var(--color-primary-500);
+    color: var(--color-background-500);
 }
 
 .detail__button_period {
@@ -923,8 +1012,17 @@ export default {
 
 .detail__feature {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 80rem;
     gap: 1rem;
+    grid-area: feature;
+    padding: 2rem;
+    background: var(--color-card-500);
+    border-radius: 2.5rem;
+    border-top-right-radius: 0rem;
+    justify-content: space-between;
+
 }
 
 .detail__feature_wrapper {
@@ -933,17 +1031,24 @@ export default {
     justify-content: space-between;
     align-items: center;
     gap: 2rem;
+    width: 40%;
 }
 
 .detail__feature_icon {
-    font-size: 3.5rem;
+    width: 4rem;
+    aspect-ratio: 1/1;
+    background: var(--color-secondary-500);
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
 }
 
 .detail__feature_name {
-    font-size: 2rem;
-    font-weight: bold;
+    font-size: 1.8rem;
     color: var(--color-text);
+    text-align: end;
 }
 
 .small_txt {
@@ -954,5 +1059,32 @@ export default {
 hr {
     border: 1px solid var(--color-text);
     width: 100%;
+}
+
+@media screen and (max-width: 830px) {
+    .getplan {
+        grid-template-areas:
+            'detail'
+            'form'
+            'feature'
+        ;
+        grid-template-columns: auto;
+        width: 40rem;
+
+    }
+
+    .detail {
+        border-radius: 2.5rem;
+    }
+
+    .detail__feature {
+        width: 100%;
+        border-top-left-radius: 0rem;
+        border-radius: 2.5rem;
+    }
+
+    .detail__feature_wrapper {
+        width: 100%;
+    }
 }
 </style>

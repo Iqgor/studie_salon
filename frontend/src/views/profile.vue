@@ -24,6 +24,8 @@ import router from '@/router';
 import PrivacyVerklaring from './privacyVerklaring.vue';
 import GebruikersVoorwaarden from './gebruikersVoorwaarden.vue';
 import Changecolor from '@/components/profile/changecolor.vue';
+import { auth } from '@/auth';
+import DeleteUser from '@/components/profile/deleteUser.vue';
 
 export default {
     name: "profile",
@@ -36,7 +38,7 @@ export default {
                 { name: 'Wachtwoord wijzigen', slug: 'wachtwoord-wijzigen', component: Changepassword },
                 { name: 'Privacy verklaring', slug: 'privacy-verklaring', component: PrivacyVerklaring },
                 { name: 'Gebruikers voorwaarden', slug: 'gebruikersvoorwaarden', component: GebruikersVoorwaarden },
-                { name: 'Profiel verwijderen', slug: 'profiel-verwijderen', component: '' },
+                { name: 'Profiel verwijderen', slug: 'profiel-verwijderen', component: DeleteUser },
 
             ],
             active: '',

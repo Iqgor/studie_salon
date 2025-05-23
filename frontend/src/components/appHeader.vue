@@ -40,8 +40,10 @@
           </div>
         </div>
 
-      </div>
+        
 
+      </div>
+<i class="fa-solid fa-right-from-bracket" v-if="auth.isLoggedIn" @click="auth.logout"></i>
     </div>
   </header>
 </template>
@@ -147,7 +149,7 @@ export default {
 
 .figTopMenu {
   font-size: 2rem;
-  color: var(--color-background-100);
+  color: white;
   text-align: center;
   font-weight: bold;
   text-transform: uppercase;
@@ -186,9 +188,11 @@ export default {
 }
 
 .icons {
-  width: 12rem;
+  width: max-content;
   height: 10rem;
   font-size: 150%;
+  gap: 1rem;
+  padding: 2rem;
   display: flex;
   top: 0;
   right: 0;
@@ -196,11 +200,19 @@ export default {
   justify-content: space-evenly;
   align-items: center;
   z-index: 4;
-  color: var(--color-text);
+  color: white;
+  background: linear-gradient(235deg, var(--color-secondary-500) 10%, var(--color-primary-500) 90%);
+  border-bottom-left-radius: 5rem;
+
 }
 
 .icons>i {
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  color: white;
+}
+
+.icons a{
+  color: white;
 }
 
 .iconsClick i {
