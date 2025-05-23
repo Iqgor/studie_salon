@@ -285,73 +285,70 @@ export default {
 
             if (this.donthaveAccount) {
                 this.createAccount()
-            } else if (this.showOtp) {
-                this.sendOtp()
-            }
-            else {
-                this.checkAccount()
+            } else {
+                this.checkhowToSub()
             }
         },
-        async checkAccount() {
+        // async checkAccount() {
 
-            try {
-                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        email: this.email,
-                        password: this.password,
-                        gettingSub: true
-                    })
-                })
+        //     try {
+        //         const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
+        //             method: 'POST',
+        //             body: JSON.stringify({
+        //                 email: this.email,
+        //                 password: this.password,
+        //                 gettingSub: true
+        //             })
+        //         })
 
-                let incommingdata = await response.json()
-                if (incommingdata?.title && incommingdata?.message) {
-                    toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
-                }
-
-
-                if (incommingdata?.token) {
-                    auth.setAuth(true, incommingdata?.token)
-                    this.checkhowToSub()
-
-                }
-                else if (incommingdata?.otp_required) {
-                    this.showOtp = true
-
-                }
-
-                if (incommingdata?.temp_used == true) {
-                    auth.temp_used = true
-                    localStorage.setItem('temp_used', true)
-                }
-
-            } catch (err) {
-                console.error('Error logging in:', err)
-            }
-
-        },
-        async sendOtp() {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/verify_otp`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        email: this.email,
-                        otp: this.otp
-                    })
-                })
-
-                let incommingdata = await response.json()
-                toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+        //         let incommingdata = await response.json()
+        //         if (incommingdata?.title && incommingdata?.message) {
+        //             toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+        //         }
 
 
-                if (incommingdata?.token) {
-                    auth.setAuth(true, incommingdata?.token)
-                    this.checkhowToSub()
-                }
-            } catch (err) {
-                console.error('Error verifying otp:', err)
-            }
-        },
+        //         if (incommingdata?.token) {
+        //             auth.setAuth(true, incommingdata?.token)
+        //             this.checkhowToSub()
+
+        //         }
+        //         else if (incommingdata?.otp_required) {
+        //             this.showOtp = true
+
+        //         }
+
+        //         if (incommingdata?.temp_used == true) {
+        //             auth.temp_used = true
+        //             localStorage.setItem('temp_used', true)
+        //         }
+
+        //     } catch (err) {
+        //         console.error('Error logging in:', err)
+        //     }
+
+        // },
+        // async sendOtp() {
+        //     try {
+        //         const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/verify_otp`, {
+        //             method: 'POST',
+        //             body: JSON.stringify({
+        //                 email: this.email,
+        //                 otp: this.otp
+        //             })
+        //         })
+
+        //         let incommingdata = await response.json()
+        //         toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
+
+
+        //         if (incommingdata?.token) {
+        //             auth.setAuth(true, incommingdata?.token)
+        //             this.checkhowToSub()
+        //         }
+        //     } catch (err) {
+        //         console.error('Error verifying otp:', err)
+        //     }
+        // },
         async createAccount() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/register`, {
@@ -369,6 +366,7 @@ export default {
                 console.error('Error registering:', err)
             }
         },
+
         checkhowToSub() {
 
             if (this.selectedPlan.is_trial) {
@@ -385,26 +383,33 @@ export default {
             }
         },
         async subscribeToTrial() {
-
             try {
                 const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/subscribeTrial`, {
                     method: 'POST',
                     body: JSON.stringify({
                         plan_id: this.selectedPlan.id,
-                        auth_id: auth.user.id
+                        email: this.email,
+                        password: this.password
                     }),
                     headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: auth.bearerToken
+                        'Content-Type': 'application/json'
                     }
                 });
 
                 let incommingdata = await response.json();
-                auth.checkAction(incommingdata?.action)
+
                 toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
-                if (incommingdata?.type == 'success') {
+
+                if (incommingdata?.temp_used == true) {
+                    auth.temp_used = true
+                    localStorage.setItem('temp_used', true)
+                }
+
+                if (incommingdata?.token) {
+                    auth.setAuth(true, incommingdata.token)
                     this.$router.push('/')
                 }
+
             } catch (err) {
                 console.error('Error subscribing to trial:', err);
             }
