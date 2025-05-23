@@ -31,11 +31,7 @@ export const auth = reactive({
     setAuth(logged, token) {
         if (logged === true) {
 
-            //* Meld dat je bent ingelogd
             this.isLoggedIn = logged
-
-
-            //* Krijgt je tokens binnen en word het leesbaar
             if (this.isLoggedIn) {
                 this.token = token
                 localStorage.setItem('token', token)
@@ -43,7 +39,7 @@ export const auth = reactive({
             }
         } else if (token) {
             this.token = token
-            this.check()
+            this.bearerToken = `Bearer ${this.token}`
         }
         else {
             this.isLoggedIn = false
