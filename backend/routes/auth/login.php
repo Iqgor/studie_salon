@@ -1,4 +1,7 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 //^ JSON input uitlezen
 $data = json_decode(file_get_contents('php://input'), true);
 $email = $data['email'] ?? null;
@@ -155,14 +158,14 @@ if ($user['active'] === 0) {
     try {
         $mail->isSMTP();
 
-        $mail->Host = $config['MAIL_HOST'];
+        $mail->Host = $mail_host;
         $mail->SMTPAuth = true;
-        $mail->Username = $config['MAIL_USERNAME'];
-        $mail->Password = $config['MAIL_PASSWORD'];
+        $mail->Username = $mail_username;
+        $mail->Password = $mail_password;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        $mail->setFrom($config['MAIL_USERNAME'], 'StudieSalon');
+        $mail->setFrom($mail_username, 'StudieSalon');
         $mail->addAddress($user['email']);  // Ontvanger
 
         $mail->isHTML(true);

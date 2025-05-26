@@ -31,11 +31,7 @@ function jsonResponse($data, $status = 200) {
     exit;
 }
 
-return [
-    'MAIL_PASSWORD' => 'ksjd ymnj rwom pkjx',
-    'MAIL_USERNAME' => 'bilalelkoudadi526@gmail.com',
-    'MAIL_HOST' => 'smtp.gmail.com',
-];
+
 
 //! betaalings service
 // require_once 'vendor/autoload.php';

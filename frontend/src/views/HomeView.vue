@@ -200,7 +200,8 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          Authorization: auth.bearerToken
+          Authorization: auth.bearerToken,
+          'Content-Type': 'application/json'
         }
 
       })

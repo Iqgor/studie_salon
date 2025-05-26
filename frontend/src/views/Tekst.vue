@@ -268,7 +268,7 @@ export default {
 
 .jodit-workplace {
   height: 40vh !important;
-
+}
 
 @media screen and (max-width: 768px) {
   .containerTekst {
