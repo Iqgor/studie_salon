@@ -1,6 +1,6 @@
 <template>
       <div class="carousel-top">
-        <div   class="carousel-titel">
+        <div  class="carousel-titel">
             <h2 >
               <span @click="changeIsClicked(indexNumber)" v-if="!isEditClicked[index]">{{ index }}</span>
               <input v-else type="text" v-model="lastTitle" class="editLink" />

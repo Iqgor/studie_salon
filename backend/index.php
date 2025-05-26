@@ -24,7 +24,7 @@ $conn = getDBConnection();
 $url = $_SERVER['REQUEST_URI'];
 $urlParts = explode('?', $url, 2);
 $urlParts = explode('/', trim($urlParts[0], '/'));
-$resource = $urlParts[2] ?? null;
+$resource = $urlParts[1] ?? null;
 
 $publicRoutes = [
     'login',
@@ -224,20 +224,46 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 $likes = $_POST['likes'] ?? null; // Get link from POST data
                 $tegel = $_POST['slug'] ?? null; // Get slug from POST data
                 $likes = json_decode($likes, true);
-                if (is_array($likes)) {
-                    foreach ($likes as $like) {
-                        $link = $like['slug'] ?? null;
-                        if ($userId && $tegel && $link) {
-                            $stmt = $conn->prepare("INSERT INTO user_likes (user_id, tegel, link) VALUES (?, ?, ?)");
-                            $stmt->bind_param("iss", $userId, $tegel, $link);
-                            if ($stmt->execute()) {
-                                jsonResponse(['success' => 'Like added successfully'], 201);
-                            } else {
-                                jsonResponse(['error' => 'Failed to add like'], 500);
-                            }
-                        }
-                    }
+                if ($userId && $tegel) {
+                  // Delete all existing likes for this user and tegel
+                  $stmt = $conn->prepare("DELETE FROM user_likes WHERE user_id = ? AND tegel = ?");
+                  $stmt->bind_param("is", $userId, $tegel);
+                  $stmt->execute();
                 }
+
+                $success = true;
+                if (is_array($likes)) {
+                  foreach ($likes as $like) {
+                    $link = $like['slug'] ?? null;
+                    if ($userId && $tegel && $link) {
+                      $stmt = $conn->prepare("INSERT INTO user_likes (user_id, tegel, link) VALUES (?, ?, ?)");
+                      $stmt->bind_param("iss", $userId, $tegel, $link);
+                      if (!$stmt->execute()) {
+                        $success = false;
+                      }
+                    }
+                  }
+                }
+
+                if ($success) {
+                  jsonResponse(['success' => 'Likes updated successfully'], 201);
+                } else {
+                  jsonResponse(['error' => 'Failed to update likes'], 500);
+                }
+                break;
+            case 'getLikes':
+                $userId = $currentUser['id'] ?? null;
+                $slug = $_POST['slug'];
+                $stmt = $conn->prepare('SELECT link FROM user_likes where user_id = ? AND tegel = ?');
+                $stmt->bind_param('is', $userId, $slug);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $likes = [];
+                while ($row = $result->fetch_assoc()) {
+                    $likes[] = $row['link'];
+                }
+                jsonResponse(['likes' => $likes], 200);
+              
                 break;
             case 'editCarouselLink':
                 $id = $_POST['id'] ?? null; // Get id from POST data
@@ -1080,6 +1106,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
             case 'editTekst':
                 $slug = $_POST['slug'] ?? null; // Get slug from POST data
                 $text = $_POST['editedContent'] ?? null; // Get text from POST data
+                $text = preg_replace('/style="[^"]*"/i', '', $text);
                 if (!$slug || !$text) {
                     jsonResponse(['error' => 'slug and text are required'], 400);
                     exit;

@@ -8,7 +8,7 @@
           <ul>
             <li><RouterLink to="/">Home</RouterLink></li>
             <li><RouterLink to="/abonnementen">Abonnementen</RouterLink></li>
-            <li><RouterLink to="/">Disclaimer</RouterLink></li>
+            <li><RouterLink to="/privacy-verklaring">Disclaimer</RouterLink></li>
           </ul>
         </nav>
         <div style="width: 14.2rem; height: 100%;"></div>
@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        
+
 
       </div>
 <i class="fa-solid fa-right-from-bracket" v-if="auth.isLoggedIn" @click="auth.logout"></i>

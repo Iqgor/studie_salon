@@ -3,8 +3,17 @@
     <p class="typewriter" :style="typewriterStyle">
     </p>
     <Calander />
-    <h2 class="appsTitle">Quotes & zoeken & wekkers</h2>
-    <div class="apps">
+    <div class="appsHeader">
+        <h2 class="appsTitle"><span>Quotes & zoeken & wekkers</span>
+          <i @click="isClickedout = !isClickedout;"  class="fa-solid fa-arrow-down" :class="!isClickedout ? 'rotate': ''"></i>
+        </h2>
+        <div class="views">
+          <i @click="changeView('table')" :class="{'isActive' : view == 'table'}" class="fa-solid fa-table"></i>
+          <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
+        </div>
+    </div>
+
+    <div class="apps" :class="{ 'isClickedout': isClickedout , 'show' : view === 'list' && isClickedout || view === 'table'}" >
       <div class="quote_container">
         <p class="quote" :class="quote.quote ? 'quoteSlash' : ''">
           {{ quote.quote }}
@@ -69,15 +78,33 @@ export default {
       searchCarousel: '',
       CarouselData: [],
       updatedCarouselData: [],
+      isClickedout: false,
+      view: 'table', // Default view
     };
   },
   mounted() {
+    document.title = 'Studie Salon - Home';
     this.getDay();
     this.getQuote();
     this.getWeer();
     this.getCarouselData();
+    this.changeView();
   },
   methods: {
+    changeView(view = '' , index = 'app') {
+      if(view.length !== 0){
+        this.view = view;
+        localStorage.setItem('viewPreference', JSON.stringify({ index, view }));
+      }else{
+        const savedView = JSON.parse(localStorage.getItem('viewPreference'));
+        if (savedView && savedView.index === index) {
+          this.view = savedView.view;
+        } else {
+          this.view = 'list';
+        }
+      }
+
+    },
     getCarouselData() {
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/getCarouselItems`,{
         method: 'POST',
@@ -127,11 +154,11 @@ export default {
       const date = new Date();
       const hours = date.getHours();
       if (hours >= 5 && hours < 12) {
-        this.typeofDay = 'Goede morgen';
+        this.typeofDay = 'Goedemorgen';
       } else if (hours >= 12 && hours < 18) {
-        this.typeofDay = 'Goede middag';
+        this.typeofDay = 'Goedemiddag';
       } else {
-        this.typeofDay = 'Goede avond';
+        this.typeofDay = 'Goedeavond';
       }
     },
     calculateTextLength() {
@@ -139,7 +166,6 @@ export default {
         const img = document.createElement('img');
         img.src = 'https://openweathermap.org/img/wn/' + this.temp.weather[0].icon + '@2x.png';
         const typewriter = document.querySelector('.typewriter');
-        // waar igor staat later de username neerzetten die opgehaald wordt uit de api
         typewriter.innerHTML = `${this.typeofDay} ${auth.user.name ? auth.user.name : 'gebruiker'} ${Math.round(this.temp.main.temp)}°C`;
         typewriter.appendChild(img);
         // Wait for DOM update with this.typeofDay
@@ -235,23 +261,67 @@ export default {
 }
 
 .apps {
-  display: flex;
+  display: none;
   justify-content: space-between;
   align-items: end;
   width: 100%;
 }
 
-.appsTitle {
-  font-size: 3rem;
+.appsHeader{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   color: white;
-  padding: 1rem;
+  padding: 1rem 10rem;
   background-color: var(--color-primary-500);
   margin-left: -10rem;
   margin-right: -10rem;
   margin-bottom: 1rem;
-  padding-left: 10rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
+
+
+.appsTitle {
+  font-size: 3rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.appsTitle i {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  font-size: 75%;
+}
+
+.rotate{
+  transform: rotate(180deg);
+}
+
+.isClickedout{
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+
+.views{
+  display: flex;
+  gap: 1rem;
+  font-size:150%;
+}
+
+.views > i{
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+
+.show{
+  display: flex;
+}
+
 
 .quote_container {
   display: flex;
@@ -446,7 +516,7 @@ export default {
     padding-left: 2rem;
   }
 
-  .appsTitle {
+  .appsHeader {
     margin-left: 0;
     margin-right: 0;
     padding-left: 1rem;

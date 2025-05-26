@@ -472,6 +472,7 @@ select:focus {
 
 .jodit-workplace{
   height: 40vh !important;
+  color: black;
 }
 
 .jodit-workplace ul, .jodit-workplace ol{

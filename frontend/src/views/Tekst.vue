@@ -65,6 +65,7 @@ export default {
     };
   },
   mounted() {
+    document.title = `Studie Salon - Tekst ${this.firstSlug}`;
     this.getTekst();
   },
 
@@ -207,7 +208,6 @@ export default {
   justify-content: center;
   padding: 3rem 20rem;
   font-size: 2rem;
-
 }
 
 .containerTekst p {

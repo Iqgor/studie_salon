@@ -11,8 +11,11 @@
         </div>
         <div v-if="links.l">
           <div class="niveaus">
-            <button :class="{ 'isActive': clickedNiveau === niveau }" @click="changeNiveau(niveau)"
-              v-for="niveau in niveaus">{{ niveau }}</button>
+            <div v-for="niveau in niveaus">
+                <button :class="{ 'isActive': clickedNiveau === niveau }"v-if="links[niveau.toLowerCase()].length > 1"  @click="changeNiveau(niveau)">
+                  {{ niveau }}
+                </button>
+            </div>
           </div>
           <div :key="type" v-for="(link, type) in links">
             <div v-if="link.length !== 0 && type.toUpperCase() === clickedNiveau" class="links">
@@ -20,7 +23,8 @@
               <ul class="view" :class="{ 'tableView': view === 'table' }">
                 <li v-for="(item, index) in link" :key="index">
                   <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
-                  <i @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                  <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
                 </li>
               </ul>
               <div v-if="!isAdmin" class="addLink">
@@ -29,13 +33,24 @@
                 <button @click="addLink">Voeg link toe</button>
               </div>
             </div>
+            <div v-else-if="link.length !== 0 && type === 'anders'" class="links">
+              <h3>Links naar:</h3>
+              <ul class="view" :class="{ 'tableView': view === 'table' }">
+                <li v-for="(item, index) in link" :key="index">
+                  <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
+                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                  <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         <div v-else-if="links.length <= 4" class="links">
           <ul class="view" :class="{ 'tableView': view === 'table' }">
             <li v-for="(item, index) in links" :key="index">
               <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
-              <i @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
             </li>
           </ul>
           <div v-if="!isAdmin" class="addLink">
@@ -86,22 +101,24 @@ export default {
       isAdmin: false,
       newLink: '',
       likes: [],
+      oldLikes: [],
     };
   },
   unmounted() {
     this.sendLikes()
   },
   mounted() {
+    document.title = `Studie Salon - ${this.slug}`;
     this.getTekstLinks()
     this.changeView();
     this.changeNiveau();
+    this.getLikes()
   },
   methods: {
     likeLink(item, event) {
       // Toggle like status in the likes array
       const index = this.likes.findIndex(liked => liked.slug === item.slug);
       if (index !== -1) {
-        console.log('Item already liked:', item);
         // Unlike: remove from likes
         this.likes.splice(index, 1);
         if (event && event.target) {
@@ -110,18 +127,20 @@ export default {
         }
       } else {
         // Like: add to likes
-        this.likes.push(item);
+        this.likes.push({'slug':item.slug});
         if (event && event.target) {
           event.target.classList.remove('fa-regular');
           event.target.classList.add('fa-solid');
         }
       }
-      console.log(this.likes);
     },
     sendLikes() {
-      if(this.likes.length === 0) {
+      // Compare oldLikes and likes arrays deeply
+      if (JSON.stringify(this.oldLikes) === JSON.stringify(this.likes)) {
+        console.log('No changes in likes, skipping send.');
         return;
       }
+
       const formData = new FormData();
 
       formData.append('userId', auth.user.id);
@@ -141,9 +160,7 @@ export default {
           return response.json();
         })
         .then(data => {
-          if (data.success) {
-            toastService.addToast('Likes opgeslagen', 'De likes zijn opgeslagen', 'success');
-          }
+          console.log('Likes sent successfully:', data);
         })
         .catch(error => {
           console.error('There was a problem with the fetch operation:', error);
@@ -168,7 +185,8 @@ export default {
         .then(data => {
           auth.checkAction(data?.action)
           if (data.length !== 0) {
-            this.likes = data;
+            this.likes = data.likes.map(item => ({ slug: item }));
+            this.oldLikes = JSON.parse(JSON.stringify(data.likes.map(item => ({ slug: item })))); // Store the old likes for comparison
           }
         })
         .catch(error => {
@@ -245,13 +263,15 @@ export default {
                 if (['l', 's', 'm'].includes(lastPart)) {
                   categorized[lastPart].push(item);
                 } else {
-                  console.warn(`Slug heeft geen herkenbare categorie: ${item.slug}`);
+                  if (!categorized['anders']) {
+                    categorized['anders'] = [];
+                  }
+                  categorized['anders'].push(item);
                 }
               });
             } else {
               categorized = data;
             }
-
             this.links = categorized;
 
           } else {
@@ -392,7 +412,7 @@ export default {
   justify-content: space-evenly;
 }
 
-.niveaus>button {
+.niveaus button {
   background: none;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -408,7 +428,7 @@ export default {
 
 }
 
-.niveaus>button:hover {
+.niveaus button:hover {
   color: var(--color-primary-400) !important;
 
 }
