@@ -3,6 +3,90 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
+// Require PHPMailer and other configs as you already have
+require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/PHPMailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+$config = require_once __DIR__ . '/config.php';
+$conn = getDBConnection();
+
+// Basic JWT validation here (your code remains)...
+
+// Parse URL and method
+$method = $_SERVER['REQUEST_METHOD'];
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = trim($path, '/');
+$segments = explode('/', $path);
+
+// Assume first segment is API root (e.g. 'api'), second is resource
+// Adjust depending on your URL structure
+$resource = $segments[2] ?? null;
+
+// List of public routes that don't need auth
+$publicRoutes = [
+    'login',
+    'register',
+    'forgot_password',
+    'subscriptions',
+    'verify_otp',
+    'subscribeTrial',
+    'create-payment',
+    'update-payment'
+];
+
+// JWT verification logic here (your code)...
+
+// After auth check, prepare routing table
+$routes = [
+    // Format: 'METHOD resource' => handler file or callable
+    'GET subscriptions' => __DIR__ . '/routes/subscriptions/get.php',
+    'GET activeSubscription' => __DIR__ . '/routes/auth/activeSubscription.php',
+
+    'POST editCarouselLink' => __DIR__ . '/routes/carousel/link.php',
+    'POST getCarouselItems' => __DIR__ . '/routes/carousel/get.php',
+
+    'POST create_activity' => __DIR__ . '/routes/activities/create.php',
+    'POST edit_activity' => __DIR__ . '/routes/activities/edit.php',
+    'POST delete_activity' => __DIR__ . '/routes/activities/delete.php',
+
+    
+
+
+
+    'POST login' => __DIR__ . '/routes/login/post.php',
+    'PUT change-password' => __DIR__ . '/routes/change-password/put.php',
+    'DELETE delete-user' => __DIR__ . '/routes/delete-user/delete.php',
+
+    // Add more routes here as needed
+];
+
+// Build route key
+$routeKey = "$method $resource";
+
+if (isset($routes[$routeKey])) {
+    require $routes[$routeKey];
+} else {
+    http_response_code(404);
+    echo json_encode(['error' => 'Route not found']);
+    exit;
+}
+
+
+
+<?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 // PHPMailer importeren
 require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
 require_once __DIR__ . '/PHPMailer/src/SMTP.php';
