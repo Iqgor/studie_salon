@@ -32,24 +32,8 @@
 
                     </div>
 
-                    <div class="getplan__subject">
-                        <p>{{ selectedPlan.is_trial || donthaveAccount ? '' : 'Betaal gegevens' }}</p>
-                    </div>
-
-                    <div class="getplan__buttons" v-if="!selectedPlan.is_trial && !donthaveAccount">
-                        <button class="getplan__button" type="button" @click="paymentChoice = 'ideal'"
-                            :class="{ 'getplan__button_active': paymentChoice == 'ideal' }">
-                            <i class="fa-brands fa-ideal"></i>
-                            <p>Ideal</p>
-                        </button>
-                        <button class="getplan__button" type="button" @click="paymentChoice = 'creditcard'"
-                            :class="{ 'getplan__button_active': paymentChoice == 'creditcard' }">
-                            <i class="fa-solid fa-credit-card"></i>
-                            <p>Creditcard</p>
-                        </button>
 
 
-                    </div>
 
                     <div class="small_txt">
                         <p v-if="donthaveAccount">
@@ -73,12 +57,12 @@
 
                             <div class="detail__sale" v-if="selectedPlan.sale && selectedPlan.sale_type">
                                 <p class="detail__sale_p">{{ Math.round(selectedPlan.sale) }}{{ selectedPlan.sale_type
-                                }}</p>
+                                    }}</p>
                             </div>
                             <h4 class="detail__button_period">Maandelijks</h4>
                             <h3 class="detail__button_price"><i class="fa-solid fa-euro-sign"></i>{{
                                 selectedPlan.price
-                            }}</h3>
+                                }}</h3>
                             <h5 class="detail__button_description"></h5>
                         </button>
 
@@ -246,7 +230,6 @@ export default {
             email: '',
             password: '',
             repeatPassword: '',
-            paymentChoice: '',
             showOtp: false,
             otp: '',
             canPay: false,
@@ -289,66 +272,7 @@ export default {
                 this.checkhowToSub()
             }
         },
-        // async checkAccount() {
 
-        //     try {
-        //         const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/login`, {
-        //             method: 'POST',
-        //             body: JSON.stringify({
-        //                 email: this.email,
-        //                 password: this.password,
-        //                 gettingSub: true
-        //             })
-        //         })
-
-        //         let incommingdata = await response.json()
-        //         if (incommingdata?.title && incommingdata?.message) {
-        //             toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
-        //         }
-
-
-        //         if (incommingdata?.token) {
-        //             auth.setAuth(true, incommingdata?.token)
-        //             this.checkhowToSub()
-
-        //         }
-        //         else if (incommingdata?.otp_required) {
-        //             this.showOtp = true
-
-        //         }
-
-        //         if (incommingdata?.temp_used == true) {
-        //             auth.temp_used = true
-        //             localStorage.setItem('temp_used', true)
-        //         }
-
-        //     } catch (err) {
-        //         console.error('Error logging in:', err)
-        //     }
-
-        // },
-        // async sendOtp() {
-        //     try {
-        //         const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/verify_otp`, {
-        //             method: 'POST',
-        //             body: JSON.stringify({
-        //                 email: this.email,
-        //                 otp: this.otp
-        //             })
-        //         })
-
-        //         let incommingdata = await response.json()
-        //         toastService.addToast(incommingdata?.title, incommingdata?.message, incommingdata?.type)
-
-
-        //         if (incommingdata?.token) {
-        //             auth.setAuth(true, incommingdata?.token)
-        //             this.checkhowToSub()
-        //         }
-        //     } catch (err) {
-        //         console.error('Error verifying otp:', err)
-        //     }
-        // },
         async createAccount() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/register`, {
@@ -372,14 +296,7 @@ export default {
             if (this.selectedPlan.is_trial) {
                 this.subscribeToTrial()
             } else {
-                if (this.paymentChoice == 'ideal') {
-                    this.subscribeToIdeal()
-                } else if (this.paymentChoice == 'creditcard') {
-                    this.subscribeToCreditCard()
-                }
-                else {
-                    toastService.addToast('Geen betaal methode', 'Kies een betaal methode', 'error')
-                }
+                this.startPayment()
             }
         },
         async subscribeToTrial() {
@@ -414,7 +331,29 @@ export default {
                 console.error('Error subscribing to trial:', err);
             }
         },
+        async startPayment() {
+            const response = await fetch(`${import.meta.env.VITE_APP_API_URL}backend/create-payment`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    price: this.finalPrice,
+                    plan_id: this.selectedPlan.id,
+                    email: this.email,
+                    password: this.password,
+                    periode: this.selectedperiode,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
+            let data = await response.json();
+            console.log(data);
+            if (data && data._links && data._links.checkout && data._links.checkout.href) {
+                window.location.href = data._links.checkout.href; // Leid gebruiker door naar Mollie
+            } else {
+                toastService.addToast(data?.title, data?.message, data?.type);
+            }
+        }
 
 
     },
@@ -597,7 +536,7 @@ export default {
 
 .btn {
     background-color: var(--color-primary-500);
-    color: var(--color-card-500);
+    color: var(--color-text);
     padding: 1rem 2rem;
     border-radius: 0.4rem;
     border: none;

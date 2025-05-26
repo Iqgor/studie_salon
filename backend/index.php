@@ -33,6 +33,8 @@ $publicRoutes = [
     'subscriptions',
     'verify_otp',
     'subscribeTrial',
+    'create-payment',
+    'update-payment'
 ];
 
 // onze secret key //! moet veranderd worden
@@ -979,6 +981,108 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 ], 200);
                 break;
+            case 'create-payment':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $price = $data['price'] ?? null;
+                $currency = 'EUR'; // Naar euro want wij zijn in Nederland
+                $description = 'Betaling voor StudieSalon'; // Standaard beschrijving
+                $redirectUrl = 'http://localhost:5173/login'; // Standaard redirect URL
+                $webhookUrl = 'https://33993.hosts1.ma-cloud.nl/backend/update-payment'; // optioneel
+                $method = 'ideal'; // Standaard betaalmethode
+
+                $data = json_decode(file_get_contents('php://input'), true);
+
+                $userEmail = $data['email'] ?? null;
+                $password = $data['password'] ?? null;
+                $subscriptionId = $data['plan_id'] ?? null;
+                $subscriptionPeriod = $data['periode'] ?? null;
+
+                if (!$password || !$userEmail || !$subscriptionId) {
+                    jsonResponse(["title" => 'Gegevens missen', 'message' => 'we hebben uw inlog gegevens nodig', 'type' => 'error'], 400);
+                    break;
+                }
+
+                // Gebruiker zoeken op email
+                $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+                $stmt->bind_param("s", $userEmail);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+
+                if ($result->num_rows === 0) {
+                    jsonResponse(['title' => 'niet gevonden', 'message' => 'Geen gebruiker gevonden met email: ' . $userEmail, 'type' => 'error'], 401);
+                    exit;
+                }
+                $temp_used = false; // kijken of temp wachtwoord is gebruikt
+                $user = $result->fetch_assoc();
+
+
+                // Wachtwoord controleren
+                // Controleer of er een temp_password is
+                if (isset($user['temp_password']) && isset($user['temp_password_expires_at'])) {
+                    // Controleer of temp_password geldig is en niet verlopen
+                    if (
+                        password_verify($password, $user['temp_password']) &&
+                        strtotime($user['temp_password_expires_at']) > time()
+                    ) {
+                        $temp_used = true; // Temp wachtwoord is gebruikt
+
+                    } elseif (password_verify($password, $user['password'])) {
+                        // Normaal wachtwoord is geldig
+                        $stmt = $conn->prepare("UPDATE users SET temp_password = NULL, temp_password_expires_at = NULL WHERE id = ?");
+                        $stmt->bind_param("i", $user['id']);
+                        $stmt->execute();
+                    } else {
+                        // Temp wachtwoord is ongeldig of verlopen
+                        jsonResponse(['title' => 'tijdelijk wachtwoord', 'message' => 'tijdelijk wachtwoord klopt niet of is vergaan', 'type' => 'error'], 401);
+                        exit;
+                    }
+                } else {
+                    // Geen temp_password, dus controleer het normale wachtwoord
+                    if (!password_verify($password, $user['password'])) {
+                        jsonResponse(['title' => 'verkeerd wachtwoord', 'message' => 'wachtwoord is verkeerd', 'type' => 'error'], 401);
+                        exit;
+                    }
+                }
+
+                $data = [
+                    'amount' => [
+                        'currency' => $currency,
+                        'value' => number_format($price, 2, '.', '') // formateren naar 2 decimalen voor zekerheid
+                    ],
+                    'description' => $description,
+                    'redirectUrl' => $redirectUrl,
+                    'webhookUrl' => $webhookUrl,
+                    'method' => $method,
+                    'metadata' => [
+                        'user_id' => $user['id'],
+                        'user_email' => $userEmail,
+                        'subscription_id' => $subscriptionId,
+                        'subscription_period' => $subscriptionPeriod,
+                        'subscription_price' => $price,
+                    ]
+                ];
+
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, 'https://api.mollie.com/v2/payments');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    //'Authorization: Bearer ' . $apiKey,
+                    'Authorization: Bearer ' . 'test_kVPG44gJnW585v7EcMUNPp9ksfxEAR',
+                    'Content-Type: application/json',
+                ]);
+
+                $response = curl_exec($ch);
+                curl_close($ch);
+
+                $json = json_decode($response, true); // Omzetten naar array (optioneel)
+
+                jsonResponse($json); // Of eventueel: jsonResponse($json, 200);
+
+                break;
 
 
 
@@ -1106,6 +1210,78 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     ], 500);
                 }
 
+                break;
+            case 'update-payment':
+                $apiKey = 'test_kVPG44gJnW585v7EcMUNPp9ksfxEAR';
+                $paymentId = $_POST['id'];
+
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, "https://api.mollie.com/v2/payments/$paymentId");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Authorization: Bearer ' . $apiKey,
+                    'Content-Type: application/json',
+                ]);
+
+                $response = curl_exec($ch);
+                curl_close($ch);
+
+                $payment = json_decode($response, true);
+                $userId = $payment['metadata']['user_id'] ?? null;
+                $userEmail = $payment['metadata']['user_email'] ?? null;
+                $subscriptionId = $payment['metadata']['subscription_id'] ?? null;
+                $subscriptionPeriod = $payment['metadata']['subscription_period'] ?? null;
+                $price = isset($payment['metadata']['subscription_price']) ? (float) $payment['metadata']['subscription_price'] : null;
+
+                if ($payment['status'] === 'paid' && $userId && $price !== null) {
+                    $createdAt = date('Y-m-d H:i:s');
+                    $paymentId = $payment['id'] ?? null; // The Mollie payment ID
+
+                    //check of het al betaald is Geen dubbele betaling
+
+                    $check = $conn->prepare("SELECT id FROM invoices WHERE mollie_payment_id = ?");
+                    $check->bind_param("s", $paymentId);
+                    $check->execute();
+                    $check->store_result();
+
+                    if ($check->num_rows > 0) {
+                        http_response_code(200); // Already handled
+                        exit();
+                    }
+
+                    $stmt = $conn->prepare("INSERT INTO invoices (user_id, user_email, subscription_id, amount, is_trial, created_at, status, mollie_payment_id) VALUES (?, ?, ?, ?, 0, ?, 'paid', ?)");
+                    $stmt->bind_param("issdss", $userId, $userEmail, $subscriptionId, $price, $createdAt, $paymentId);
+                    $stmt->execute();
+
+                    if ($stmt->affected_rows === 0) {
+                        http_response_code(500);
+                        exit();
+                    }
+
+
+
+                    // zet de nieuwe actieve abonnement in de users_subscriptions tabel
+                    if ($subscriptionPeriod === 'maandelijks') {
+                        $expiryDate = date('Y-m-d', strtotime('+1 month'));
+                    } else if ($subscriptionPeriod === 'jaarlijks') {
+                        $expiryDate = date('Y-m-d', strtotime('+1 year'));
+                    }
+
+                    $today = date('Y-m-d');
+                    $stmt = $conn->prepare("INSERT INTO users_subscriptions (user_id, subscription_id, start_date, end_date) VALUES (?, ?, ?, ?)");
+                    $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
+                    $stmt->execute();
+
+
+
+                    if ($stmt->affected_rows === 0) {
+                        http_response_code(500);
+                        exit();
+                    }
+
+
+                }
                 break;
             default:
                 jsonResponse(['error' => 'No PUT request found'], 405);
