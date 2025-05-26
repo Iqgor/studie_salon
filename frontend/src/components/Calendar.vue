@@ -11,8 +11,7 @@
           <i class="fa-solid fa-arrow-left"></i>
         </button>
         <h2>
-          {{ shownDate.toLocaleString('default', { month: 'short' }) }}
-          {{ shownDate.getFullYear() }}
+          <input type="month" @change="selectDate(1,$event.target.value.split('-')[1],$event.target.value.split('-')[0])" :value="`${shownDate.getFullYear()}-${shownDate.getMonth() - 1 < 0 ? '12' : shownDate.getMonth() < 9 ? '0' + (shownDate.getMonth() + 1) : shownDate.getMonth() + 1}`" class="calendar-monthInput">
         </h2>
         <button @click="changeMonth(1)">
           <i class="fa-solid fa-arrow-right"></i>
@@ -748,6 +747,15 @@ export default {
 
     },
     selectDate(day, month, year) {
+      if(!day || !month || !year) {
+        console.error('Invalid date selection:', { day, month, year });
+        return;
+      }
+      if(typeof month === 'string') {
+        month = parseInt(month);
+        year = parseInt(year);
+      }
+
       const isInCurrentWeek = this.getDaysOfWeek().some(weekDay =>
         weekDay.day === day && weekDay.month === month && weekDay.year === year
       );
@@ -795,6 +803,23 @@ export default {
   transition: background-color 0.3s ease;
 
 }
+
+.calendar-header input[type="month"]{
+  background-color: var(--color-background-500);
+  border: none;
+  color: var(--color-primary-500);
+  font-size: 90%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
+}
+
+.calendar-header input[type="month"]:focus {
+  outline: none;
+  background-color: var(--color-secondary-500);
+  color: white;
+}
+
 
 .calendar-grid {
   width: 100%;

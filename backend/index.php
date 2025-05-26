@@ -24,7 +24,7 @@ $conn = getDBConnection();
 $url = $_SERVER['REQUEST_URI'];
 $urlParts = explode('?', $url, 2);
 $urlParts = explode('/', trim($urlParts[0], '/'));
-$resource = $urlParts[1] ?? null;
+$resource = $urlParts[2] ?? null;
 
 $publicRoutes = [
     'login',
@@ -219,6 +219,35 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
     case 'POST':
         switch ($resource) {
+            case'adminInfo':
+                $tables = [];
+                $result = $conn->query("SHOW TABLES");
+                if ($result) {
+                    while ($row = $result->fetch_array()) {
+                        $tables[] = $row[0]; // Naam van de tabel zit in kolom 0
+                    }
+                }
+                $tableData = [];
+                $table = $_POST['table'] ?? null; // Get table name from POST data
+                if (!$table && !empty($tables)) {
+                    $table = $tables[0];
+                }
+                if ($table && in_array($table, $tables)) {
+                    $stmt = $conn->prepare("SELECT * FROM `$table`");
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    while ($row = $result->fetch_assoc()) {
+                        $tableData[] = $row;
+                    }
+                } else {
+                    $tableData  = 'Invalid table name';
+                }
+                jsonResponse([
+                    'tables' => $tables,
+                    'data' => $tableData
+                ], 200);
+
+                break;
             case 'sendLikes':
                 $userId = $_POST['userId']; // Get userId from POST data
                 $likes = $_POST['likes'] ?? null; // Get link from POST data

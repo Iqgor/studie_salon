@@ -344,23 +344,19 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   height: max-content ;
+
 }
 
 .quote_chooser>div:active {
   transform: scale(1.2);
 }
 
-/* .quote_chooser svg{
+
+.quote_chooser svg{
   stroke: var(--color-text);
   stroke-width: 0.125rem;
-} */
-
-
-
-.isActive {
-  transform: scale(1.2);
-  cursor: default !important;
 }
+
 
 .quote {
   display: flex;
