@@ -114,17 +114,7 @@ if ($activeSubscriptionId) {
     ];
 }
 
-
-
-$header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
-$payload_json = json_encode($payload);
-
-$base64UrlHeader = rtrim(strtr(base64_encode($header), '+/', '-_'), '=');
-$base64UrlPayload = rtrim(strtr(base64_encode($payload_json), '+/', '-_'), '=');
-$signature = hash_hmac('sha256', "$base64UrlHeader.$base64UrlPayload", $secret_key, true);
-$base64UrlSignature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
-
-$jwt = "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature";
+$jwt = generate_jwt($payload);
 
 
 //^ kijken of de user laatst 2 weken heeft ingelogd
@@ -151,37 +141,26 @@ if ($user['active'] === 0) {
     $stmt->bind_param("ssi", $otp, $expiry, $user['id']);
     $stmt->execute();
 
+    $email = $user['email'];
+    $subject = 'Jouw logincode';
+    $htmlBody = "Je login code is: <b>$otp</b><br>Deze is 5 minuten geldig.";
+    $altBody = "Je login code is: $otp\nDeze is 5 minuten geldig.";
 
-    // Verstuur OTP naar e-mail
-    $mail = new PHPMailer(true);
-
-    try {
-        $mail->isSMTP();
-
-        $mail->Host = $mail_host;
-        $mail->SMTPAuth = true;
-        $mail->Username = $mail_username;
-        $mail->Password = $mail_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-
-        $mail->setFrom($mail_username, 'StudieSalon');
-        $mail->addAddress($user['email']);  // Ontvanger
-
-        $mail->isHTML(true);
-        $mail->Subject = 'Jouw logincode';
-        $mail->Body = "Je login code is: <b>$otp</b><br>Deze is 5 minuten geldig.";
-        $mail->AltBody = "Je login code is: $otp\nDeze is 5 minuten geldig.";
-
-        $mail->send();
-
-        // Geef aan frontend aan dat OTP vereist is
-        jsonResponse(['title' => 'OTP nodig', 'message' => 'Email verstuurd met een tijdelijke code', 'type' => 'message', 'otp_required' => true], 200);
-
-    } catch (Exception $e) {
-
-        jsonResponse(['title' => 'verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
+    if (sendMail($email, $subject, $htmlBody, $altBody)) {
+        jsonResponse([
+            'title' => 'OTP nodig',
+            'message' => 'Email verstuurd met een tijdelijke code',
+            'type' => 'message',
+            'otp_required' => true
+        ], 200);
+    } else {
+        jsonResponse([
+            'title' => 'Verzenden mislukt',
+            'message' => 'Probeer het later opnieuw',
+            'type' => 'error'
+        ], 500);
     }
+
 }
 
 //^ Succesvolle login, user info teruggeven (zonder wachtwoord!)

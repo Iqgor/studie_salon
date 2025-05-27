@@ -46,33 +46,22 @@ $stmt->bind_param("sssssss", $name, $email, $hashedTempPassword, $expiry, $curre
 $stmt->execute();
 
 
+$subject = 'Jouw logincode';
+$htmlBody = "het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+$altBody = "het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
 
+if (sendMail($email, $subject, $htmlBody, $altBody)) {
+    jsonResponse(['title' => 
+    'Email verzonden',
+    'message' => 'U heeft een tijdelijk wachtwoord gekregen', 
+    'type' => 'success'],
+    200);
 
+} else {
+    jsonResponse(['title' => 
+    'Verzenden mislukt',
+    'message' => 'Probeer het later opnieuw', 
+    'type' => 'error'],
+    500);
 
-$mail = new PHPMailer(true);
-
-try {
-    $mail->isSMTP();
-    $mail->Host = $mail_host;
-    $mail->SMTPAuth = true;
-    $mail->Username = $mail_username;
-    $mail->Password = $mail_password;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port = 587;
-
-    $mail->setFrom($mail_username, 'StudieSalon');
-    $mail->addAddress($email);  // Ontvanger
-
-    $mail->isHTML(true);
-    $mail->Subject = 'Jouw tijdelijke wachtwoord';
-    $mail->Body = "Het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
-    $mail->AltBody = "Het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
-
-    $mail->send();
-
-    // Geef aan frontend aan dat tijdelijk wachtwoord is verzonden
-    jsonResponse(['title' => 'Email verzonden', 'message' => 'U heeft een tijdelijk wachtwoord gekregen', 'type' => 'message'], 200);
-
-} catch (Exception $e) {
-    jsonResponse(['title' => 'Verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
 }

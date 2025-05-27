@@ -33,30 +33,22 @@ $stmt = $conn->prepare("UPDATE users SET temp_password = ?, temp_password_expire
 $stmt->bind_param("ssi", $hashedTempPassword, $expiry, $user['id']);
 $stmt->execute();
 
-$mail = new PHPMailer(true);
+$subject = 'Jouw logincode';
+$htmlBody = "het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
+$altBody = "het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
 
-try {
-    $mail->isSMTP();
-    $mail->Host = $mail_host;
-    $mail->SMTPAuth = true;
-    $mail->Username = $mail_username;
-    $mail->Password = $mail_password;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port = 587;
+if (sendMail($email, $subject, $htmlBody, $altBody)) {
+    jsonResponse(['title' => 
+    'Email verzonden',
+    'message' => 'U heeft een tijdelijk wachtwoord gekregen', 
+    'type' => 'success'],
+    200);
 
-    $mail->setFrom($mail_username, 'StudieSalon');
-    $mail->addAddress($email);  // Ontvanger
+} else {
+    jsonResponse(['title' => 
+    'Verzenden mislukt',
+    'message' => 'Probeer het later opnieuw', 
+    'type' => 'error'],
+    500);
 
-    $mail->isHTML(true);
-    $mail->Subject = 'Jouw tijdelijke wachtwoord';
-    $mail->Body = "het wachtwoord is: <b>$tempPasswordPlain</b><br>Deze is 30 minuten geldig.";
-    $mail->AltBody = "het wachtwoord is: $tempPasswordPlain\nDeze is 30 minuten geldig.";
-
-    $mail->send();
-
-    // Geef aan frontend aan dat tijdelijk wachtwoord is verzonden
-    jsonResponse(['title' => 'Email verzonden', 'message' => 'U heeft een tijdelijk wachtwoord gekregen', 'type' => 'success'], 200);
-
-} catch (Exception $e) {
-    jsonResponse(['title' => 'Verzenden mislukt', 'message' => 'Probeer het later opnieuw', 'type' => 'error'], 500);
 }
