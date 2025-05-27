@@ -31,9 +31,9 @@
             "name": "Blauw",
             "value": "blue",
             "primary": "#0e788a",
-            "background": "#c6eae6",
+            "background": "#fffbde",
             "secondary": "#1bb9b3",
-            "card": "#8dcca2",
+            "card": "#90d1ca",
             "text": "#000000"
         },
         {
@@ -41,8 +41,8 @@
             "value": "pink",
             "primary": "#ca7a79",
             "background": "#7d494a",
-            "secondary": "#e9c3c1",
-            "card": "#9d7373",
+            "secondary": "#be5b50",
+            "card": "#ca8787",
             "text": "#000000"
         }
         ,

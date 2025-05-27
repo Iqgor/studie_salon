@@ -172,7 +172,7 @@ export default {
             }
 
             this.slideIndex++;
-            setTimeout(this.showSlides, 5000); // Change image every 5 seconds
+            setTimeout(this.showSlides, 5000);
         },
         validateInput() {
             if (this.email === '' && this.password === '') {
@@ -301,7 +301,7 @@ export default {
 }
 
 .card {
-    background: var(--color-primary-500);
+    background: var(--color-card-500);
     padding: 2rem;
     width: 100%;
     height: 100%;
@@ -317,13 +317,13 @@ export default {
     align-items: start;
     padding: 1rem;
     flex-direction: column;
-    background-image: url("/Placeholder.svg");
+    background-image: url("/login-img.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 1rem;
 
-    box-shadow: inset 0 -10rem 10rem rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 -15rem 10rem var(--color-card-500);
 }
 
 .slideshow {
@@ -336,7 +336,7 @@ export default {
 }
 
 .slidetext {
-    color: white;
+    color: var(--color-text);
     width: 75%;
     text-align: start;
     display: block;
@@ -368,14 +368,14 @@ export default {
 .bar {
     height: 1.5rem;
     width: 5rem;
-    background-color: #D9D9D9;
+    background-color: var(--color-background-500);
     border-radius: 0.25rem;
     display: inline-block;
     transition: background-color 0.6s ease;
 }
 
 .active {
-    background-color: var(--color-primary-300);
+    background-color: var(--color-primary-500);
 }
 
 /**login form */
@@ -418,7 +418,7 @@ export default {
 
 .title {
     font-size: 2rem;
-    color: white;
+    color: var(--color-text);
     text-align: start;
 }
 
@@ -441,7 +441,7 @@ export default {
 .input-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 2rem;
     width: 100%;
 }
 
@@ -451,12 +451,14 @@ export default {
     border: none;
     outline: none;
     width: 100%;
-    background-color: var(--color-card-300);
+    background-color: var(--color-background-500);
+    outline: solid 0.5rem var(--color-background-500);
+    color: var(--color-text);
+    transition: all 0.3s ease-in-out; 
 }
 
 .input:focus {
-    background-color: var(--color-primary-200);
-    color: white;
+    outline: solid 0.5rem var(--color-primary-500);
 }
 
 .input::placeholder {
@@ -506,7 +508,7 @@ export default {
     border: none;
     outline: none;
     width: 100%;
-    background-color: var(--color-card-500);
+    background-color: var(--color-primary-500);
     color: white;
     font-size: 1.25rem;
 
@@ -517,7 +519,7 @@ export default {
 }
 
 .btn:hover {
-    background-color: var(--color-card-700);
+    background-color: var(--color-primary-500);
 }
 
 .link {
