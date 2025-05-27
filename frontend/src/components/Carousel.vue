@@ -29,7 +29,7 @@ export default {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap:2rem;
   padding: 2rem 0;
+  gap: 1rem;
 }
 </style>

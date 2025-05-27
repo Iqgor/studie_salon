@@ -1,11 +1,12 @@
 <template>
     <RouterLink v-if="!isEditClicked" :to="`${slug}/${item.slug}`">{{ item.name }}</RouterLink>
     <input v-else type="text" v-model="item.name" class="editLink" />
-    <i v-if="!isAdmin" @click="isEditClicked = !isEditClicked" class="fa-solid fa-pen"></i>
+    <i v-if="isAdmin" @click="isEditClicked = !isEditClicked" class="fa-solid fa-pen"></i>
     <i v-if="isEditClicked" @click="editLink" class="fa-regular fa-circle-check"></i>
 </template>
 <script>
 import { toastService } from '@/services/toastService';
+import { auth } from '@/auth';
 export default {
   name: "VoorAfLinks",
   props: {
@@ -35,6 +36,9 @@ export default {
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/editLink`, {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
       })
         .then(response => response.json())
         .then(() => {

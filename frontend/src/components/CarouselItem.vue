@@ -5,7 +5,7 @@
               <span @click="changeIsClicked(indexNumber)" v-if="!isEditClicked[index]">{{ index }}</span>
               <input v-else type="text" v-model="lastTitle" class="editLink" />
               <span>
-                <i v-if="!isAdmin" @click="isEditClicked[index] = !isEditClicked[index], lastTitle = index" class="fa-solid fa-pen"></i>
+                <i v-if="isAdmin" @click="isEditClicked[index] = !isEditClicked[index], lastTitle = index" class="fa-solid fa-pen"></i>
                 <i v-if="isEditClicked[index]" @click="editLink(index)" class="fa-regular fa-circle-check"></i>
               </span>
             </h2>
@@ -24,7 +24,7 @@
           </router-link>
           <input v-else type="text" v-model="lastTitle" class="editLink" />
           <span>
-            <i v-if="!isAdmin" @click="isEditClicked[i] = !isEditClicked[i], lastTitle = text.title" class="fa-solid fa-pen"></i>
+            <i v-if="isAdmin" @click="isEditClicked[i] = !isEditClicked[i], lastTitle = text.title" class="fa-solid fa-pen"></i>
             <i v-if="isEditClicked[i]" @click="editLink(i)" class="fa-regular fa-circle-check"></i>
           </span>
         </p>
@@ -54,6 +54,7 @@ export default {
     this.changeIsClicked()
     this.checkOverflowing()
     this.initOverflowing()
+    this.isAdmin = auth.user.role === 'admin'
   },
   watch:{
     carouselData: {
@@ -255,7 +256,10 @@ export default {
 }
 
 
-
+.isActive{
+  transform: scale(1.2);
+  cursor: default !important;
+}
 
 .carousel-inhoud {
   text-align: center;
@@ -264,7 +268,6 @@ export default {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 1rem;
   height: 13rem;
   width: 23rem;
   font-size: 2rem;
@@ -281,13 +284,21 @@ export default {
   transition: background-color 0.4s ease;
 }
 
+.carousel-inhoud > a {
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 .carousel  span{
   display: flex;
   gap: 1rem;
   align-items: center;
   justify-content: center;
-
 }
 .carousel  span > i{
   font-size: 75%;

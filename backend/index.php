@@ -221,6 +221,21 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
     case 'POST':
         switch ($resource) {
+            case 'editTitleLink':
+                $slug = $_POST['slug'] ?? null; // Get slug from POST data
+                $tegel_naam = $_POST['tegel_naam'] ?? null; // Get tegelNaam from POST data
+                if(!$slug || !$tegel_naam) {
+                    jsonResponse(['error' => 'slug and tegel_naam are required'], 400);
+                    exit;
+                }
+                $stmt = $conn->prepare("UPDATE teksten SET tegel_naam = ? WHERE tegel = ?");
+                $stmt->bind_param("ss", $tegel_naam, $slug);
+                if ($stmt->execute()) {
+                    jsonResponse(['success' => 'Link updated successfully'], 200);
+                } else {
+                    jsonResponse(['error' => 'Failed to update link'], 500);
+                }
+                break;
             case'adminInfo':
                 $tables = [];
                 $result = $conn->query("SHOW TABLES");
@@ -235,7 +250,16 @@ switch ($_SERVER['REQUEST_METHOD']) {
                     $table = $tables[0];
                 }
                 if ($table && in_array($table, $tables)) {
-                    $stmt = $conn->prepare("SELECT * FROM `$table`");
+                    // Get all columns except 'created_at' and 'updated_at'
+                    $columnsResult = $conn->query("SHOW COLUMNS FROM `$table`");
+                    $columns = [];
+                    while ($col = $columnsResult->fetch_assoc()) {
+                        if ($col['Field'] !== 'created_at' && $col['Field'] !== 'updated_at') {
+                            $columns[] = "`" . $col['Field'] . "`";
+                        }
+                    }
+                    $columnsList = implode(', ', $columns);
+                    $stmt = $conn->prepare("SELECT $columnsList FROM `$table`");
                     $stmt->execute();
                     $result = $stmt->get_result();
                     while ($row = $result->fetch_assoc()) {
@@ -246,7 +270,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 jsonResponse([
                     'tables' => $tables,
-                    'data' => $tableData
+                    'data' => $tableData,
+                    'table' => $table 
                 ], 200);
 
                 break;
@@ -446,10 +471,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 }
                 $slug = strtolower(trim($link));
                 $slug = str_replace(' ', '-', $slug);
+                $tegelNaam = str_replace('-', ' ', $tegel);
                 if ($link !== '') {
                     $link = "➔ " . $link;
-                    $stmt = $conn->prepare("INSERT INTO teksten (tegel,name,slug ) VALUES (?, ?, ?)");
-                    $stmt->bind_param("sss", $tegel, $link, $slug);
+                    $stmt = $conn->prepare("INSERT INTO teksten (tegel,tegel_naam,name,slug ) VALUES (?, ?, ?, ?)");
+                    $stmt->bind_param("ssss", $tegel, $tegelNaam,$link, $slug);
                     $stmt->execute();
                 }
                 jsonResponse(['success' => 'Links added successfully'], 200);
@@ -1266,9 +1292,6 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
                 }
                 break;
-
-
-
             case 'quote':
                 $language = $_POST['language'] ?? null; // Get language from query parameters
                 $stmt = $conn->prepare("SELECT * FROM quotes WHERE language = ? ORDER BY RAND() LIMIT 1");
@@ -1284,7 +1307,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 break;
             case 'getTekstLinks':
                 $tegel = $_POST['slug'] ?? null;
-                $stmt = $conn->prepare("SELECT slug, name FROM teksten WHERE tegel = ?");
+                $stmt = $conn->prepare("SELECT slug, name, tegel_naam FROM teksten WHERE tegel = ?");
                 $stmt->bind_param("s", $tegel);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -1292,7 +1315,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
                 while ($row = $result->fetch_assoc()) {
                     $links[] = [
                         'slug' => $row['slug'],
-                        'name' => $row['name']
+                        'name' => $row['name'],
+                        'tegel_naam' => $row['tegel_naam']
                     ];
                 }
                 jsonResponse($links, 200);

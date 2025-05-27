@@ -11,7 +11,7 @@
       <button @click="changeSpeed(2)">2x</button>
       <button @click="skipBackward"><<</button>
       <button @click="skipForward">>></button> -->
-        <i v-if="!isAdmin && !isEditClicked" @click="isEditClicked = !isEditClicked" class="fa-solid fa-pen"></i>
+        <i v-if="isAdmin && !isEditClicked" @click="isEditClicked = !isEditClicked" class="fa-solid fa-pen"></i>
     </div>
     <div v-if="!isEditClicked" class="containerTekst" v-html="tekst"></div>
     <div class="adminText" v-else>
@@ -24,7 +24,7 @@
     <RouterLink class="waterFallLink" :to="('/' + firstSlug)">
       < Terug naar {{ firstSlug }}</RouterLink>
   </main>
-  <main class="main" v-else-if="!isAdmin && !loading">
+  <main class="main" v-else-if="isAdmin && !loading">
     <div class="adminText">
       <h2>Geen tekst gevonden</h2>
       <p>Je kan deze tekst aanmaken door tekst toe te voegen via dit tekst veld en op de knop er onder te klikken</p>
@@ -67,6 +67,7 @@ export default {
   mounted() {
     document.title = `Studie Salon - Tekst ${this.firstSlug}`;
     this.getTekst();
+    this.isAdmin = auth.user.role === 'admin';
   },
 
   methods: {

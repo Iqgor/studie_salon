@@ -752,7 +752,7 @@ export default {
         return;
       }
       if(typeof month === 'string') {
-        month = parseInt(month);
+        month = parseInt(month) - 1;
         year = parseInt(year);
       }
 
