@@ -1,44 +1,61 @@
 <template>
   <main v-if="succes" class="main">
-    <a class="waterFallLink" :href="('/')">
-      < Terug naar Home</a>
+    <RouterLink class="waterFallLink" :to="('/')">
+      < Terug naar Home</RouterLink>
         <div class="title-views">
           <h2>{{ capitalizeWords(slug.replaceAll('-', ' ')) }}</h2>
-          <span class="views"><i
-              @click="changeView('table')" :class="{'isActive' : view == 'table'}" class="fa-solid fa-table"></i>
-              <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
+          <span class="views"><i @click="changeView('table')" :class="{ 'isActive': view == 'table' }"
+              class="fa-solid fa-table"></i>
+            <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
           </span>
         </div>
         <div v-if="links.l">
           <div class="niveaus">
-            <button :class="{ 'isActive': clickedNiveau === niveau }" @click="changeNiveau(niveau)"
-              v-for="niveau in niveaus">{{ niveau }}</button>
+            <div v-for="niveau in niveaus">
+                <button :class="{ 'isActive': clickedNiveau === niveau }"v-if="links[niveau.toLowerCase()].length > 1"  @click="changeNiveau(niveau)">
+                  {{ niveau }}
+                </button>
+            </div>
           </div>
           <div :key="type" v-for="(link, type) in links">
             <div v-if="link.length !== 0 && type.toUpperCase() === clickedNiveau" class="links">
               <h3>Teksten voor niveau {{ type.toUpperCase() }}</h3>
-              <ul class="view" :class="{'tableView': view === 'table'}">
+              <ul class="view" :class="{ 'tableView': view === 'table' }">
                 <li v-for="(item, index) in link" :key="index">
-                  <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin"/>
+                  <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
+                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                  <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
                 </li>
               </ul>
               <div v-if="!isAdmin" class="addLink">
                 <h4>Voeg meer links toe</h4>
-                <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link"/>
+                <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
                 <button @click="addLink">Voeg link toe</button>
               </div>
+            </div>
+            <div v-else-if="link.length !== 0 && type === 'anders'" class="links">
+              <h3>Links naar:</h3>
+              <ul class="view" :class="{ 'tableView': view === 'table' }">
+                <li v-for="(item, index) in link" :key="index">
+                  <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
+                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                  <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
         <div v-else-if="links.length <= 4" class="links">
-          <ul class="view" :class="{'tableView': view === 'table'}">
+          <ul class="view" :class="{ 'tableView': view === 'table' }">
             <li v-for="(item, index) in links" :key="index">
-              <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin"/>
+              <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
+                <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+                <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
             </li>
           </ul>
           <div v-if="!isAdmin" class="addLink">
             <h4>Voeg meer links toe</h4>
-            <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link"/>
+            <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
             <button @click="addLink">Voeg link toe</button>
           </div>
         </div>
@@ -47,8 +64,11 @@
   <main class="main" v-else-if="!isAdmin && !loading">
     <div class="adminText">
       <h2>Geen links gevonden</h2>
-      <p>Je kan hieronder een link toevoegen naar een tekst, wanneer je dat hebt gedaan kan je er altijd nog meer plaatsen. Sluit elke link af met een -s of -m, etc. (In de editor zie je als placeholder een voorbeeld). Al is de tekst alleen op één niveau klik dan <button @click="makeSinglefile">hier</button> Wanneer je de links wil plaatsen druk je op de knop hieronder</p>
-      <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link"/>
+      <p>Je kan hieronder een link toevoegen naar een tekst, wanneer je dat hebt gedaan kan je er altijd nog meer
+        plaatsen. Sluit elke link af met een -s of -m, etc. (In de editor zie je als placeholder een voorbeeld). Al is
+        de tekst alleen op één niveau klik dan <button @click="makeSinglefile">hier</button> Wanneer je de links wil
+        plaatsen druk je op de knop hieronder</p>
+      <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
       <button @click="addLink">Voeg link toe</button>
     </div>
   </main>
@@ -80,20 +100,105 @@ export default {
       view: 'table',
       isAdmin: false,
       newLink: '',
+      likes: [],
+      oldLikes: [],
     };
   },
+  unmounted() {
+    this.sendLikes()
+  },
   mounted() {
+    document.title = `Studie Salon - ${this.slug}`;
     this.getTekstLinks()
     this.changeView();
     this.changeNiveau();
+    this.getLikes()
   },
   methods: {
+    likeLink(item, event) {
+      // Toggle like status in the likes array
+      const index = this.likes.findIndex(liked => liked.slug === item.slug);
+      if (index !== -1) {
+        // Unlike: remove from likes
+        this.likes.splice(index, 1);
+        if (event && event.target) {
+          event.target.classList.remove('fa-solid');
+          event.target.classList.add('fa-regular');
+        }
+      } else {
+        // Like: add to likes
+        this.likes.push({'slug':item.slug});
+        if (event && event.target) {
+          event.target.classList.remove('fa-regular');
+          event.target.classList.add('fa-solid');
+        }
+      }
+    },
+    sendLikes() {
+      // Compare oldLikes and likes arrays deeply
+      if (JSON.stringify(this.oldLikes) === JSON.stringify(this.likes)) {
+        console.log('No changes in likes, skipping send.');
+        return;
+      }
+
+      const formData = new FormData();
+
+      formData.append('userId', auth.user.id);
+      formData.append('slug', this.slug);
+      formData.append('likes', JSON.stringify(this.likes));
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/sendLikes`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Likes sent successfully:', data);
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    },
+    getLikes() {
+      const formData = new FormData();
+      formData.append('slug', this.slug);
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/getLikes`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          auth.checkAction(data?.action)
+          if (data.length !== 0) {
+            this.likes = data.likes.map(item => ({ slug: item }));
+            this.oldLikes = JSON.parse(JSON.stringify(data.likes.map(item => ({ slug: item })))); // Store the old likes for comparison
+          }
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    },
     changeNiveau(niveau = '') {
-      if(niveau.length !== 0){
+      if (niveau.length !== 0) {
         this.clickedNiveau = niveau;
         localStorage.setItem('niveauPreference', JSON.stringify({ slug: this.slug, niveau }));
 
-      }else{
+      } else {
         const niveauPreference = localStorage.getItem('niveauPreference');
         if (niveauPreference !== null) {
           const parsedPreference = JSON.parse(niveauPreference);
@@ -104,10 +209,10 @@ export default {
       }
     },
     changeView(view = 'table') {
-      if(view.length !== 0){
+      if (view.length !== 0) {
         localStorage.setItem('viewPreference', JSON.stringify({ slug: this.slug, view }));
         this.view = view;
-      }else{
+      } else {
         const viewPreference = localStorage.getItem('viewPreference');
         if (viewPreference !== null) {
           const parsedPreference = JSON.parse(viewPreference);
@@ -131,7 +236,6 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'application/json',
           Authorization: auth.bearerToken
         }
       })
@@ -142,31 +246,32 @@ export default {
           return response.json();
         })
         .then(data => {
-          auth.checkAction(data?.action)
           if (data.length !== 0) {
             this.succes = true;
             this.loading = false;
             let categorized;
             if (data.length > 4) {
               categorized = {
-              l: [],
-              m: [],
-              s: []
+                l: [],
+                m: [],
+                s: []
               };
               data.forEach(item => {
-              const parts = item.slug.split("-");
-              const lastPart = parts[parts.length - 1];
-              // Controleer of laatste onderdeel precies één letter is (s, l, m)
-              if (['l', 's', 'm'].includes(lastPart)) {
-                categorized[lastPart].push(item);
-              } else {
-                console.warn(`Slug heeft geen herkenbare categorie: ${item.slug}`);
-              }
+                const parts = item.slug.split("-");
+                const lastPart = parts[parts.length - 1];
+                // Controleer of laatste onderdeel precies één letter is (s, l, m)
+                if (['l', 's', 'm'].includes(lastPart)) {
+                  categorized[lastPart].push(item);
+                } else {
+                  if (!categorized['anders']) {
+                    categorized['anders'] = [];
+                  }
+                  categorized['anders'].push(item);
+                }
               });
             } else {
               categorized = data;
             }
-
             this.links = categorized;
 
           } else {
@@ -180,7 +285,7 @@ export default {
           console.error('There was a problem with the fetch operation:', error);
         });
     },
-    addLink(){
+    addLink() {
       const formData = new FormData();
       formData.append('slug', this.slug);
       formData.append('link', this.newLink);
@@ -196,7 +301,6 @@ export default {
           return response.json();
         })
         .then(data => {
-          console.log(data);
           if (data.success) {
             this.succes = true;
             this.loading = false;
@@ -263,7 +367,7 @@ export default {
   list-style: none;
 }
 
-.view > li{
+.view>li {
   display: flex;
   gap: 1rem;
   align-items: center;
@@ -279,7 +383,7 @@ export default {
 }
 
 .tableView>li {
-  flex-shrink: 0;
+  position: relative;
   white-space: normal;
   word-wrap: break-word;
   background-color: var(--color-card-500);
@@ -288,7 +392,15 @@ export default {
   border-radius: 1.5rem;
   padding: 1rem;
   transition: background-color 0.4s ease;
+}
 
+.tableView>li>i {
+  position: absolute;
+  top: -0.75rem;
+  right: -0.75rem;
+  cursor: pointer;
+  font-size: 175%;
+  transition: all 0.3s ease;
 }
 
 .niveaus {
@@ -300,7 +412,7 @@ export default {
   justify-content: space-evenly;
 }
 
-.niveaus>button {
+.niveaus button {
   background: none;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -311,24 +423,25 @@ export default {
   color: var(--color-text);
 }
 
-.isActive{
+.isActive {
   color: var(--color-primary-400) !important;
 
 }
-.niveaus>button:hover {
+
+.niveaus button:hover {
   color: var(--color-primary-400) !important;
 
 }
 
 
 .addLink {
-  display:inline-flex;
+  display: inline-flex;
   gap: 1rem;
   margin-top: 2rem;
   flex-direction: column;
 }
 
-.addLink > button{
+.addLink>button {
   width: max-content;
   background: var(--color-primary-500);
   color: white;
@@ -340,7 +453,7 @@ export default {
   transition: all 0.3s ease;
 }
 
-.addLink > button:hover {
+.addLink>button:hover {
   background: var(--color-primary-700);
 }
 

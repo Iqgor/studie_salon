@@ -318,7 +318,7 @@
                     Jouw privacy is belangrijk voor ons. Daarom worden jouw persoonsgegevens zorgvuldig verwerkt en
                     beveiligd. SS/SS verwerkt je persoonsgegevens in
 
-                    overeenstemming met haar <a href="/privacy-verklaring" class="link">privacyverklaring</a>, die je kunt vinden in de SS/SS -website/-app. Door
+                    overeenstemming met haar <RouterLink to="/privacy-verklaring" class="link">privacyverklaring</RouterLink>, die je kunt vinden in de SS/SS -website/-app. Door
                     akkoord te gaan met deze gebruikersvoorwaarden stem je ook in met de verwerking van jouw
                     persoonsgegevens zoals omschreven in de privacyverklaring. In de privacyverklaring van SS/SS kun je
                     lezen hoe SS/SS omgaat met jouw persoonsgegevens.

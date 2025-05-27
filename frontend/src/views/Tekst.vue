@@ -1,8 +1,8 @@
 <template>
   <main v-if="succes" class="main">
-    <div>
-      <a class="waterFallLink" :href="('/' + firstSlug)">
-        < Terug naar {{ firstSlug }}</a>
+    <div class="link">
+      <RouterLink class="waterFallLink" :to="('/' + firstSlug)">
+        < Terug naar {{ firstSlug }}</RouterLink>
           <!-- <button @click="playTekst">Speel teksts af</button>
       <button @click="stopSpeech">Stop</button>
       <button @click="changeSpeed(0.5)">0.5x</button>
@@ -11,16 +11,24 @@
       <button @click="changeSpeed(2)">2x</button>
       <button @click="skipBackward"><<</button>
       <button @click="skipForward">>></button> -->
+        <i v-if="!isAdmin && !isEditClicked" @click="isEditClicked = !isEditClicked" class="fa-solid fa-pen"></i>
     </div>
-    <div class="containerTekst" v-html="tekst"></div>
-    <a class="waterFallLink" :href="('/' + firstSlug)">
-      < Terug naar {{ firstSlug }}</a>
+    <div v-if="!isEditClicked" class="containerTekst" v-html="tekst"></div>
+    <div class="adminText" v-else>
+      <jodit-editor  v-model="editedContent" ></jodit-editor>
+      <div class="buttonsTekst">
+        <button @click="sendEdit">Verander tekst</button>
+        <i @click="isEditClicked = false, editedContent = tekst" class="fa-regular fa-circle-xmark"></i>
+      </div>
+    </div>
+    <RouterLink class="waterFallLink" :to="('/' + firstSlug)">
+      < Terug naar {{ firstSlug }}</RouterLink>
   </main>
   <main class="main" v-else-if="!isAdmin && !loading">
     <div class="adminText">
       <h2>Geen tekst gevonden</h2>
       <p>Je kan deze tekst aanmaken door tekst toe te voegen via dit tekst veld en op de knop er onder te klikken</p>
-      <jodit-editor class="textEditor" v-model="content" />
+      <jodit-editor v-model="content" />
       <button @click="addTekst">Voeg tekst toe</button>
     </div>
   </main>
@@ -51,17 +59,43 @@ export default {
       isSpeaking: false,
       utterance: null,
       content: '',
+      editedContent: '',
+      isEditClicked: false,
+      isAdmin: false,
     };
   },
   mounted() {
+    document.title = `Studie Salon - Tekst ${this.firstSlug}`;
     this.getTekst();
   },
 
   methods: {
+    sendEdit(){
+      const formData = new FormData();
+      formData.append('editedContent', this.editedContent);
+      formData.append('slug', this.slug.replace('/', '-'));
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/editTekst`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => response.json())
+        .then(() => {
+          this.isEditClicked = false;
+          toastService.addToast('Tekst aangepast',`Tekst is zojuist aangepast door ${auth.user.name} `, 'success');
+          this.getTekst();
+        })
+        .catch(error => {
+          console.error('Error creating activity:', error);
+        });
+    },
     addTekst() {
       const formData = new FormData();
       formData.append('slug', this.slug.replace('/', '-'));
       formData.append('tekst', this.content);
+      formData.append('carouselName',window.location.pathname.split('/')[1])
       if (this.content.length === 0) {
         toastService.addToast('Geen tekst toegevoegd', 'Vul eers tekst in om te verzenden', 'error');
         return;
@@ -70,13 +104,11 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'application/json',
           Authorization: auth.bearerToken
         }
       })
         .then(response => response.json())
         .then(() => {
-          auth.checkAction(response?.action)
           this.getTekst();
           this.loading = false;
         })
@@ -85,7 +117,6 @@ export default {
         });
     },
     stopSpeech() {
-      console.log('stopSpeech');
       window.speechSynthesis.cancel();
       this.isSpeaking = false;
     },
@@ -139,7 +170,6 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'application/json',
           Authorization: auth.bearerToken
         }
       })
@@ -155,6 +185,7 @@ export default {
             this.succes = true;
             this.loading = false;
             this.tekst = data.tekst;
+            this.editedContent = data.tekst;
           } else {
             this.succes = false;
             this.loading = false;
@@ -177,7 +208,6 @@ export default {
   justify-content: center;
   padding: 3rem 20rem;
   font-size: 2rem;
-
 }
 
 .containerTekst p {
@@ -235,32 +265,28 @@ export default {
 }
 
 
-.adminText {
+.jodit-workplace {
+  height: 40vh !important;
+}
+
+.link {
   display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 1rem;
 }
 
-.adminText h2 {
-  font-size: 200%;
-  margin-bottom: 1rem;
-}
-
-.adminText>button {
-  width: max-content;
-  background: var(--color-primary-500);
-  color: white;
-  border: none;
-  border-radius: 0.25rem;
-  padding: 1rem 2rem;
-  font-size: 120%;
+.link > i{
+  font-size: 2.5rem;
   cursor: pointer;
+  color: var(--color-primary-500);
   transition: all 0.3s ease;
 }
 
-.adminText>button:hover {
-  background: var(--color-primary-400);
+.link > i:hover{
+  color: var(--color-primary-400);
 }
+
 
 .adminText>button:active {
   transform: translateY(2px);
@@ -268,6 +294,12 @@ export default {
 
 .jodit-workplace {
   height: 40vh !important;
+}
+
+
+.jodit-container{
+  margin: 2rem 0;
+
 }
 
 @media screen and (max-width: 768px) {

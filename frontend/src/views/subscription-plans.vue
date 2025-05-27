@@ -26,8 +26,8 @@
 
                         <label v-if="donthaveAccount" for="terms" class="getplan__input_label">
                             <input type="checkbox" name="terms" id="terms" v-model="acceptTerms" required>
-                            <p>Ik ga akkoord met de <a href="/privacy-verklaring" target="_blank">privacy verklaring</a>
-                                en <a target="_blank" href="/gebruikers-voorwaarden">gebruikersvoorwaarden</a></p>
+                            <p>Ik ga akkoord met de <RouterLink to="/privacy-verklaring" target="_blank">privacy verklaring</RouterLink>
+                                en <RouterLink target="_blank" to="/gebruikers-voorwaarden">gebruikersvoorwaarden</RouterLink></p>
                         </label>
 
                     </div>
@@ -394,7 +394,7 @@ export default {
             }
         },
     }
-}      
+}
 </script>
 
 <style scoped lang="css">

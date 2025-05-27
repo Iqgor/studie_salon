@@ -41,7 +41,7 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Inloggen</button>
-                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a>
+                    <p class="text">Nog geen account? <RouterLink to="/abonnementen" class="link">Neem eerst een abonnement</RouterLink>
                     </p>
                     <p class="text">Wachtwoord vergeten? <span @click="showForm = 'forgot'" class="link">Krijg een
                             tijdelijk wachtwoord</span></p>
@@ -84,7 +84,7 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Stuur wachtwoord</button>
-                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a>
+                    <p class="text">Nog geen account? <RouterLink href="/abonnementen" class="link">Neem eerst een abonnement</RouterLink>
                     </p>
                 </div>
             </form>

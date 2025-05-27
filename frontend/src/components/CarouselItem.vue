@@ -1,10 +1,15 @@
 <template>
       <div class="carousel-top">
-        <div @click="changeIsClicked(indexNumber)"  class="carousel-titel">
+        <div  class="carousel-titel">
             <h2 >
-              {{ index }}
+              <span @click="changeIsClicked(indexNumber)" v-if="!isEditClicked[index]">{{ index }}</span>
+              <input v-else type="text" v-model="lastTitle" class="editLink" />
+              <span>
+                <i v-if="!isAdmin" @click="isEditClicked[index] = !isEditClicked[index], lastTitle = index" class="fa-solid fa-pen"></i>
+                <i v-if="isEditClicked[index]" @click="editLink(index)" class="fa-regular fa-circle-check"></i>
+              </span>
             </h2>
-            <i v-if="isOverflowing"  class="fa-solid fa-arrow-down" :class="!isClickedout ? 'rotate': ''"></i>
+            <i v-if="isOverflowing" @click="changeIsClicked(indexNumber)"  class="fa-solid fa-arrow-down" :class="!isClickedout ? 'rotate': ''"></i>
         </div>
 
         <div v-if="isOverflowing" class="views">
@@ -27,6 +32,7 @@
 </template>
 <script>
 import { toastService } from '@/services/toastService';
+import { auth } from '@/auth';
 export default {
   name: "CarouselItem",
   props: {
@@ -49,6 +55,16 @@ export default {
     this.checkOverflowing()
     this.initOverflowing()
   },
+  watch:{
+    carouselData: {
+      handler(newValue) {
+        this.$nextTick(() => {
+          this.checkOverflowing();
+        });
+      },
+      deep: true
+    },
+  },
   data() {
     return {
       view: 'table',
@@ -61,15 +77,24 @@ export default {
   },
   methods: {
     editLink(index) {
-      const item = this.info[index];
-      console.log(item);
       const formData = new FormData();
-      formData.append('id', item.id);
-      formData.append('title', this.lastTitle);
+
+      if(typeof index !== 'string'){
+        const item = this.info[index];
+        formData.append('id', item.id);
+        formData.append('title', this.lastTitle);
+      }else{
+        const carouselName = index;
+        formData.append('carouselName', carouselName);
+        formData.append('newCarouselName', this.lastTitle);
+      }
 
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/editCarouselLink`,{
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
       }).then(response => {
         if (response.ok) {
           this.$emit('getCarouselData');
@@ -143,6 +168,18 @@ export default {
 };
 </script>
 <style scoped>
+.carousel input[type="text"]{
+  padding-bottom: 0.25rem;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: white;
+}
+
+.carousel input[type="text"]:focus{
+  padding-bottom: 0.5rem;
+  outline: none;
+}
 .carousel-container {
   display: flex;
   flex-direction: row;
@@ -203,13 +240,22 @@ export default {
 
 .carousel-titel h2 {
   font-size: 3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
 }
 
-.carousel-top:hover {
-  cursor: pointer;
-  background-color: var(--color-primary-400);
-  transition: background-color 0.4s ease;
+.carousel-titel h2 > span{
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
 }
+
+
+
 
 .carousel-inhoud {
   text-align: center;
@@ -236,19 +282,20 @@ export default {
 }
 
 
-.carousel-inhoud > span{
+.carousel  span{
   display: flex;
   gap: 1rem;
   align-items: center;
   justify-content: center;
-  width: 100%;
+
 }
-.carousel-inhoud >span > i{
+.carousel  span > i{
   font-size: 75%;
   cursor: pointer;
   transition: transform 0.4s ease;
+  color: white;
 }
-.carousel-inhoud >span > i:hover{
+.carousel span > i:hover{
   transform: scale(1.2);
 }
 

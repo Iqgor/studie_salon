@@ -165,7 +165,6 @@ export default {
         } else {
           this.alarmTime = "Alarm gezet voor " + this.alarmInputTime;
           this.alarmSet = true;
-          console.log('Alarm ingesteld voor:', this.alarmTime);
         }
       }
     },

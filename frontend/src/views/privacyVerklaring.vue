@@ -164,7 +164,7 @@
                     opgeslagen via de instellingen van uw browser verwijderen. Zie voor een toelichting:
                 </p>
                 <p class="text"><a class="link" target="_blank"
-                        href="https://veiliginternetten.nl/themes/situatie/wat-zijn-cookies/">https://veiliginternetten.nl/themes/situatie/wat-zijn-cookies/</a>
+                        href="https://veiliginternetten.nl/wat-zijn-cookies/">https://veiliginternetten.nl/wat-zijn-cookies/</a>
                 </p>
                 <p class="text">Op onze website worden ook cookies geplaatst door derden. Dit zijn bijvoorbeeld
                     adverteerders en/of sociale media bedrijven.</p>
@@ -177,7 +177,7 @@
                     bepaalde cookies uitschakelt.</p>
                 <p class="text">Dit privacy statement is niet van toepassing op websites, webapps of apps van derden</p>
             </article>
-            
+
             <article class="card">
 
                 <h2 class="section-title">Worden je gegevens gedeeld met andere partijen?</h2>

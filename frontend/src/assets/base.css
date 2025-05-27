@@ -425,12 +425,28 @@ select:focus {
   gap: 2rem;
 }
 
+
 .adminText h2 {
+
   font-size: 200%;
   margin-bottom: 1rem;
 }
 
-.adminText>button {
+
+.buttonsTekst>i{
+  font-size: 200%;
+
+}
+
+.buttonsTekst{
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.adminText > button, .buttonsTekst >  button{
+
   width: max-content;
   background: var(--color-primary-500);
   color: white;
@@ -440,6 +456,7 @@ select:focus {
   font-size: 110%;
   cursor: pointer;
   transition: all 0.3s ease;
+
 }
 
 
@@ -461,6 +478,7 @@ select:focus {
 
 .jodit-workplace {
   height: 40vh !important;
+  color: black;
 }
 
 .jodit-workplace ul,
@@ -493,18 +511,4 @@ select:focus {
   transition: all 0.3s ease;
 }
 
-input[type="text"] {
-  border: none;
-  border-bottom: 0.125rem solid var(--color-text);
-  padding-bottom: 0.25rem;
-  font-size: 2rem;
-  transition: all 0.3s ease;
-  background: transparent;
-  color: var(--color-text);
-}
 
-input[type="text"]:focus {
-  padding-bottom: 0.5rem;
-  outline: none;
-  border-bottom: 0.25rem solid var(--color-primary-500);
-}
