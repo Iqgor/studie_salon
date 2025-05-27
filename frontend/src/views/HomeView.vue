@@ -228,7 +228,8 @@ export default {
         method: 'POST',
         body: formData,
         headers: {
-          Authorization: auth.bearerToken
+          Authorization: auth.bearerToken,
+          'Content-Type': 'application/json'
         }
 
       })
@@ -239,6 +240,9 @@ export default {
           return response.json();
         })
         .then(data => {
+
+          auth.checkAction(data?.action)
+
           this.loading = false;
           if (data) {
             this.quote = data.quote;
