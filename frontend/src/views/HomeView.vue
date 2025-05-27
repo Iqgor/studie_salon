@@ -212,7 +212,7 @@ export default {
           return response.json();
         })
         .then(data => {
-          auth.checkAction(response?.action)
+          auth.checkAction(data?.action)
           this.loading = false;
           if (data) {
             this.quote = data.quote;
