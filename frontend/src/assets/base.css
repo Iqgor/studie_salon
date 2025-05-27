@@ -71,15 +71,15 @@
   --color-primary-900: #281818;
 
 
-  --color-secondary-100: #fbf3f3;
-  --color-secondary-200: #f6e7e6;
-  --color-secondary-300: #f2dbda;
-  --color-secondary-400: #edcfcd;
-  --color-secondary-500: #e9c3c1;
-  --color-secondary-600: #ba9c9a;
-  --color-secondary-700: #8c7574;
-  --color-secondary-800: #5d4e4d;
-  --color-secondary-900: #2f2727;
+  --color-secondary-100: #f2dedc;
+  --color-secondary-200: #e5bdb9;
+  --color-secondary-300: #d89d96;
+  --color-secondary-400: #cb7c73;
+  --color-secondary-500: #be5b50;
+  --color-secondary-600: #984940;
+  --color-secondary-700: #723730;
+  --color-secondary-800: #4c2420;
+  --color-secondary-900: #261210;
 
   --color-background-100: #e5dbdb;
   --color-background-200: #cbb6b7;
@@ -91,15 +91,16 @@
   --color-background-800: #321d1e;
   --color-background-900: #190f0f;
 
-  --color-card-100: #e8d7d7;
-  --color-card-200: #d5bebe;
-  --color-card-300: #c3a5a5;
-  --color-card-400: #b08c8c;
-  --color-card-500: #9d7373;
-  --color-card-600: #795959;
-  --color-card-700: #594040;
-  --color-card-800: #3b2828;
-  --color-card-900: #1d1212;
+
+  --color-card-100: #f4e7e7;
+  --color-card-200: #eacfcf;
+  --color-card-300: #dfb7b7;
+  --color-card-400: #d59f9f;
+  --color-card-500: #ca8787;
+  --color-card-600: #a26c6c;
+  --color-card-700: #795151;
+  --color-card-800: #513636;
+  --color-card-900: #281b1b;
 
 
   --color-text: #f1f1f1;
@@ -130,25 +131,27 @@
   --color-secondary-900: #04190e;
 
 
-  --color-background-100: #f4fbfa;
-  --color-background-200: #e8f7f5;
-  --color-background-300: #ddf2f0;
-  --color-background-400: #d1eeeb;
-  --color-background-500: #c6eae6;
-  --color-background-600: #9ebbb8;
-  --color-background-700: #778c8a;
-  --color-background-800: #4f5e5c;
-  --color-background-900: #282f2e;
 
-  --color-card-100: #e9f5ec;
-  --color-card-200: #d2ebd9;
-  --color-card-300: #bbe1c7;
-  --color-card-400: #a4d7b4;
-  --color-card-500: #8dcca2;
-  --color-card-600: #6fa382;
-  --color-card-700: #527a61;
-  --color-card-800: #345140;
-  --color-card-900: #1a2920;
+      --color-background-100: #fffef8;
+      --color-background-200: #fffdf2;
+      --color-background-300: #fffdeb;
+      --color-background-400: #fffce5;
+      --color-background-500: #fffbde;
+      --color-background-600: #ccc9b2;
+      --color-background-700: #999785;
+      --color-background-800: #666459;
+      --color-background-900: #33322c;
+
+
+      --color-card-100: #e9f6f4;
+      --color-card-200: #d3edea;
+      --color-card-300: #bce3df;
+      --color-card-400: #a6dad5;
+      --color-card-500: #90d1ca;
+      --color-card-600: #73a7a2;
+      --color-card-700: #567d79;
+      --color-card-800: #3a5451;
+      --color-card-900: #1d2a28;
 
 
 
@@ -156,8 +159,6 @@
 
   --color-text: #1f1f1f;
 }
-
-
 
 /* THEMA: Dark */
 .theme-dark {
@@ -191,15 +192,15 @@
   --color-background-800: #0c0c0c;
   --color-background-900: #060606;
 
-      --color-card-100: #e0dee7;
-      --color-card-200: #c1bdce;
-      --color-card-300: #a19bb6;
-      --color-card-400: #827a9d;
-      --color-card-500: #635985;
-      --color-card-600: #4f476a;
-      --color-card-700: #3b3550;
-      --color-card-800: #282435;
-      --color-card-900: #14121b;
+  --color-card-100: #e0dee7;
+  --color-card-200: #c1bdce;
+  --color-card-300: #a19bb6;
+  --color-card-400: #827a9d;
+  --color-card-500: #635985;
+  --color-card-600: #4f476a;
+  --color-card-700: #3b3550;
+  --color-card-800: #282435;
+  --color-card-900: #14121b;
 
 
   --color-text: #f1f1f1;
@@ -418,16 +419,19 @@ select:focus {
   background: var(--color-secondary-500);
 }
 
-.adminText{
+.adminText {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.adminText  h2{
+
+.adminText h2 {
+
   font-size: 200%;
   margin-bottom: 1rem;
 }
+
 
 .buttonsTekst>i{
   font-size: 200%;
@@ -442,6 +446,7 @@ select:focus {
 }
 
 .adminText > button, .buttonsTekst >  button{
+
   width: max-content;
   background: var(--color-primary-500);
   color: white;
@@ -455,7 +460,7 @@ select:focus {
 }
 
 
-.adminText > p > button{
+.adminText>p>button {
   background: none;
   border: none;
   font-size: inherit;
@@ -463,19 +468,21 @@ select:focus {
   cursor: pointer;
 }
 
-.adminText > button:hover{
+.adminText>button:hover {
   background: var(--color-primary-400);
 }
-.adminText > button:active{
+
+.adminText>button:active {
   transform: translateY(2px);
 }
 
-.jodit-workplace{
+.jodit-workplace {
   height: 40vh !important;
   color: black;
 }
 
-.jodit-workplace ul, .jodit-workplace ol{
+.jodit-workplace ul,
+.jodit-workplace ol {
   padding-left: 2rem !important;
 }
 
@@ -486,21 +493,22 @@ select:focus {
   border: 1px solid #ccc;
   transition: 0.25s all;
 }
+
 .editLink:focus {
   outline: none;
   border-color: #007bff;
 }
 
-.fa-circle-xmark{
+.fa-circle-xmark {
   color: var(--color-error);
   cursor: pointer;
   transition: all 0.3s ease;
 }
-.fa-circle-check{
+
+.fa-circle-check {
   color: var(--color-primary-600);
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 
 

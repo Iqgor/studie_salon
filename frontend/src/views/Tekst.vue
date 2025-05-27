@@ -289,8 +289,18 @@ export default {
 }
 
 
+.adminText>button:active {
+  transform: translateY(2px);
+}
+
+.jodit-workplace {
+  height: 40vh !important;
+}
+
+
 .jodit-container{
   margin: 2rem 0;
+
 }
 
 @media screen and (max-width: 768px) {

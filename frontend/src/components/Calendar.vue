@@ -631,13 +631,14 @@ export default {
 
       });
       if (!response.ok) {
+        auth.checkAction('logout')
         this.loading = false;
         console.error('Failed to fetch activities:', response.statusText);
         return;
       }
       this.loading = false;
       const data = await response.json();
-      auth.checkAction(data?.action)
+      
       data.activities.forEach(activity => {
         const dayIndex = this.getDaysOfWeek().findIndex(day =>
           activity.start_datetime && `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === activity.start_datetime.split(' ')[0]

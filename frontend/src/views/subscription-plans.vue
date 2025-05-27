@@ -456,7 +456,7 @@ export default {
     font-size: 1.8rem;
     width: 4rem;
     aspect-ratio: 1/1;
-    background: var(--color-primary-500);
+    background: var(--color-background-500);
     color: var(--color-text);
     border-radius: 100%;
     display: flex;

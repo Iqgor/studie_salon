@@ -7,6 +7,7 @@ import Landingspage from '@/views/Landingspage.vue'
 import GebruikersVoorwaarden from '@/views/gebruikersVoorwaarden.vue'
 import Profile from '@/views/profile.vue'
 import { auth } from '@/auth'
+import Disclaimer from '@/views/disclaimer.vue'
 
 
 const router = createRouter({
@@ -42,6 +43,11 @@ const router = createRouter({
       path: '/gebruikers-voorwaarden',
       name: 'gebruikers-voorwaarden',
       component: GebruikersVoorwaarden
+    },
+        {
+      path: '/disclaimer',
+      name: 'disclaimer',
+      component: Disclaimer
     },
     {
       path: '/profiel',

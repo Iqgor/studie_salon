@@ -6,9 +6,12 @@
         <img @click="$router.push('/')" src="/logo.png" alt="">
         <nav class="topMenuNav">
           <ul>
-            <li><RouterLink to="/">Home</RouterLink></li>
-            <li><RouterLink to="/abonnementen">Abonnementen</RouterLink></li>
-            <li><RouterLink to="/privacy-verklaring">Disclaimer</RouterLink></li>
+
+            <li><a href="/">Home</a></li>
+            <li><a href="/abonnementen">Abonnementen</a></li>
+            <li><a href="/disclaimer">Disclaimer</a></li>
+            <li v-if="auth.isLoggedIn"><a href="/">Teksten</a></li>
+
           </ul>
         </nav>
         <div style="width: 14.2rem; height: 100%;"></div>
