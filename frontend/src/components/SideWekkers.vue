@@ -39,6 +39,8 @@
                  <option :value="600">10 minuten</option>
                  <option :value="900">15 minuten</option>
                  <option :value="1200">20 minuten</option>
+                 <option :value="1500">25 minuten</option>
+                 <option :value="1800">30 minuten</option>
                 </select>
               </div>
 
@@ -73,15 +75,15 @@
               <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
           </div>
         <div class="alarm-setter">
-          <label class="alarm-label">Voeg alarm toe:
-          <input type="time" v-model="alarmInputTime" />
-        </label>
+          <label class="alarm-label">Voeg alarm toe: <input type="time" v-model="alarmInputTime"/></label>
         <button class="alarm-button" @click="setAlarm" >Toevoegen</button>
-        <ul class="timer-alarm-ul" v-if="alarmTimes.length > 0 && !alarmRinging">
-          <li v-for="(time, index) in alarmTimes" :key="index">Alarm gezet voor {{ time }}
-          <button @click="removeAlarm(index)" class="wekker-remove-button"><i class="fa-solid fa-x"></i></button>
-          </li>
-        </ul>
+        <div class="alarm-list-container" v-if="alarmTimes.length">
+          <ul class="alarm-list" v-if="alarmTimes.length > 0 && !alarmRinging">
+            <li v-for="(time, index) in alarmTimes" :key="index">Alarm gezet voor {{ time }}
+            <button @click="removeAlarm(index)" class="wekker-remove-button"><i class="fa-solid fa-x"></i></button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -441,14 +443,25 @@ export default {
   flex-direction: column;
 }
 
-.timer-alarm, .timer-alarm-ul{
+.timer-alarm{
   font-size: 2rem;
   margin-top: 2rem;
   text-align: center;
 }
 
-.timer-alarm-ul{
+.alarm-list-container {
+  max-height: 10rem;
+  overflow-y: auto;
+  width: 100%;
+  background-color: var(--color-background-400);
+}
+
+.alarm-list{
   list-style: none;
+  font-size: 2rem;
+  text-align: center;
+
+
 }
 
 .wekker-remove-button{

@@ -50,14 +50,36 @@
         </div>
         <!-- stemmen sectie -->
         <div v-else-if="selectedTab === 'stemmen'" class="stem-sectie">
-          <p class="muziek-tekst">Hier komt de stem sectie</p>
+          <div>
+           <p>Inspirerende text komt hier</p>
+          </div>
+          <div class="stemmen-keuzes">
+            <div class="stemmen-keuze stemmen-keuze-active">
+              <img src="../assets/iphone-app-hand.webp" alt="Man oud"/>
+              <p>Man oud</p>
+            </div>
+            <div class="stemmen-keuze">
+              <img src="../assets/iphone-app-hand.webp" alt="Man jong"/>
+              <p>Man jong</p>
+            </div>
+            <div class="stemmen-keuze">
+              <img src="../assets/iphone-app-hand.webp" alt="Vrouw oud"/>
+              <p>Vrouw oud</p>
+            </div>
+            <div class="stemmen-keuze">
+              <img src="../assets/iphone-app-hand.webp" alt="Vrouw jong"/>
+              <p>Vrouw jong</p>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import {loadAllAudio} from "@/utils/loadAudio.js";
 export default {
   name: "MuziekPlayer",
   data() {
@@ -66,27 +88,7 @@ export default {
       selectedTab: 'muziek',
       selectedCategory: 'Concentratie',
       trackStates: [],
-      muziekTracks: {
-        Concentratie: [
-          { title: "Concentratie 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-          { title: "Concentratie 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 6", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-
-        ],
-        Ontspanning: [
-          { title: "Ontspanning 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-        ],
-        Slaap: [
-          { title: "Slaap 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
-        ],
-      },
+      muziekTracks: [],
     };
   },
   computed: {
@@ -99,8 +101,16 @@ export default {
       this.initTrackStates();
     },
   },
-  mounted() {
+  async mounted() {
     this.initTrackStates();
+    this.muziekTracks = await loadAllAudio();
+    if (this.muziekTracks) {
+      const filtered = {};
+      console.log(this.muziekTracks);
+    }
+
+
+
   },
   methods: {
     toggleMuziek() {
@@ -341,4 +351,41 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   border: 1px solid black;
 }
+
+
+/* stemmen */
+.stemmen-keuzes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  justify-items: center;
+  padding: 2rem;
+}
+
+.stemmen-keuze  {
+  text-align: center;
+}
+
+.stemmen-keuze > img {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: 0.3s ease;
+}
+
+.stemmen-keuze > img:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+}
+
+.stemmen-keuze-active img {
+  box-shadow: 0 0 10px 4px rgba(255, 255, 255, 0.5);
+}
+
+.stemmen-keuze > p {
+  margin-top: 0.5rem;
+}
+
 </style>
