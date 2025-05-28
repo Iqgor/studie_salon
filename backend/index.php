@@ -14,8 +14,8 @@ require_once __DIR__ . '/PHPMailer/src/SMTP.php';
 require_once __DIR__ . '/PHPMailer/src/Exception.php';
 require_once 'load_env.php';
 loadEnv(__DIR__ . '/.env');
-require_once __DIR__ . './jwt_helper.php';
-require_once __DIR__ . './mail_helper.php';
+require_once __DIR__ . '/jwt_helper.php';
+require_once __DIR__ . '/mail_helper.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
