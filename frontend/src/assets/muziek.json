@@ -1,14 +1,11 @@
 {
-    "Concentratie": [
-      {
-        "title": "Lofi Hip Hop Radio",
-        "url": "muziek/concentratie/blij"
-      },
-      {
-      }
-    ],
-    "Ontspanning": [
-    ],
-    "Slaap": [
-    ]
+  "Concentratie": [
+    {
+      "title": "blij leren",
+      "filename": "golf.mp3"
+    },
+    {}
+  ],
+  "Ontspanning": [],
+  "Slaap": []
 }
