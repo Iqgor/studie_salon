@@ -4,8 +4,8 @@
       < Terug naar Home</RouterLink>
         <div class="title-views">
           <h2>
-            <span v-if="!isTitleEditClicked">{{ this.links[0].tegel_naam && this.links[0].tegel_naam.length > 0 ? this.links[0].tegel_naam : capitalizeWords(slug.replaceAll('-', ' ')) }}</span>
-            <input v-else type="text" @change="titleEdited = $event.target.value" :value="this.links[0].tegel_naam && this.links[0].tegel_naam.length > 0 ? this.links[0].tegel_naam : capitalizeWords(slug.replaceAll('-', ' '))" class="editLink" />
+            <span v-if="!isTitleEditClicked">{{  tegelTitle.length>0  ? tegelTitle : capitalizeWords(slug.replaceAll('-', ' ')) }}</span>
+            <input v-else type="text" @change="titleEdited = $event.target.value" :value="tegelTitle.length>0  ? tegelTitle : capitalizeWords(slug.replaceAll('-', ' '))" class="editLink" />
             <i v-if="isAdmin" @click="isTitleEditClicked = !isTitleEditClicked" class="fa-solid fa-pen"></i>
             <i v-if="isTitleEditClicked" @click="editTitleLink" class="fa-regular fa-circle-check"></i>
           </h2>
@@ -108,7 +108,8 @@ export default {
       likes: [],
       oldLikes: [],
       isTitleEditClicked: false,
-      titleEdited: ''
+      titleEdited: '',
+      tegelTitle: '',
     };
   },
   unmounted() {
@@ -280,6 +281,7 @@ export default {
           if (data.length !== 0) {
             this.succes = true;
             this.loading = false;
+            this.tegelTitle = data[0].tegel_naam;
             let categorized;
             if (data.length > 4) {
               categorized = {

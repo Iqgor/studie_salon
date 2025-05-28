@@ -228,7 +228,6 @@ export default {
         body: formData,
         headers: {
           Authorization: auth.bearerToken,
-          'Content-Type': 'application/json'
         }
 
       })

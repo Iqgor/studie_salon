@@ -5,14 +5,13 @@ if (!$tegel || !$link) {
     jsonResponse(['error' => 'slug and links are required'], 400);
     exit;
 }
-$tegelNaam = str_replace('-', ' ', $tegel);
-
 $slug = strtolower(trim($link));
 $slug = str_replace(' ', '-', $slug);
+$tegelNaam = str_replace('-', ' ', $tegel);
 if ($link !== '') {
     $link = "➔ " . $link;
     $stmt = $conn->prepare("INSERT INTO teksten (tegel,tegel_naam,name,slug ) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $tegel, $tegelNaam,$link, $slug);
+    $stmt->bind_param("ssss", $tegel, $tegelNaam, $link, $slug);
     $stmt->execute();
 }
 jsonResponse(['success' => 'Links added successfully'], 200);
