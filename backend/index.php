@@ -151,7 +151,7 @@ $routes = [
     'POST getTekst' => __DIR__ . '/routes/teksten/gettekst.php',
     'POST editTekst'=> __DIR__ . '/routes/teksten/editTekst.php',
     'POST getTekstLinks' => __DIR__ . '/routes/teksten/getTekstLinks.php',
-    'POST editeTitleLinks' => __DIR__ . '/routes/teksten/editTitleLinks.php',
+    'POST editTitleLink' => __DIR__ . '/routes/teksten/editTitleLinks.php',
     'POST getLikes' => __DIR__ . '/routes/teksten/getLikes.php',
     'POST sendLikes' => __DIR__ . '/routes/teksten/sendLikes.php',
 
