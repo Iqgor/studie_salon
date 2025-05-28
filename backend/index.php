@@ -133,6 +133,7 @@ $routes = [
     'POST create-payment' => __DIR__ . '/routes/auth/create-payment.php',
     'POST update-payment' => __DIR__ . '/routes/auth/update-payment.php',
     'PUT change_password' => __DIR__ . '/routes/auth/change-password.php',	
+    'PUT update_user' => __dir__ . '/routes/auth/update-user.php',
     'DELETE Delete_account' => __DIR__ . '/routes/delete-user/delete.php',
 
     // Carousel routes
