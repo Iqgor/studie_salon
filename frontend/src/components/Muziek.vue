@@ -7,6 +7,7 @@
 
   <div class="achtergrondblur" v-if="muziekClicked">
     <div class="muziek-stemmen-popup">
+
       <div class="muziek-stemmen-header">
         <div class="muziek-stemmen-buttons">
           <p class="muziek-stemmen-button" :class="{ active: selectedTab === 'muziek' }" @click="selectedTab = 'muziek'">Muziek</p>
@@ -54,25 +55,12 @@
            <p>Inspirerende text komt hier</p>
           </div>
           <div class="stemmen-keuzes">
-            <div class="stemmen-keuze stemmen-keuze-active">
-              <img src="../assets/iphone-app-hand.webp" alt="Man oud"/>
-              <p>Man oud</p>
-            </div>
-            <div class="stemmen-keuze">
-              <img src="../assets/iphone-app-hand.webp" alt="Man jong"/>
-              <p>Man jong</p>
-            </div>
-            <div class="stemmen-keuze">
-              <img src="../assets/iphone-app-hand.webp" alt="Vrouw oud"/>
-              <p>Vrouw oud</p>
-            </div>
-            <div class="stemmen-keuze">
-              <img src="../assets/iphone-app-hand.webp" alt="Vrouw jong"/>
-              <p>Vrouw jong</p>
+            <div v-for="(keuze, index) in stemmenKeuzes" :key="index" class="stemmen-keuze" :class="{ 'stemmen-keuze-active': selectedKeuzeIndex === index }" @click="selecteerKeuze(index)">
+              <img :src="keuze.img" :alt="keuze.naam" />
+              <p>{{ keuze.naam }}</p>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -89,6 +77,13 @@ export default {
       selectedCategory: 'Concentratie',
       trackStates: [],
       muziekTracks: [],
+      stemmenKeuzes: [
+      { naam: "Man oud", img: "../assets/iphone-app-hand.webp" },
+      { naam: "Man jong", img: "../assets/iphone-app-hand.webp" },
+      { naam: "Vrouw oud", img: "../assets/iphone-app-hand.webp" },
+      { naam: "Vrouw jong", img: "../assets/iphone-app-hand.webp" },
+    ],
+    selectedKeuzeIndex: 0,
     };
   },
   computed: {
@@ -105,7 +100,7 @@ export default {
     this.initTrackStates();
     this.muziekTracks = await loadAllAudio();
     if (this.muziekTracks) {
-      const filtered = {};
+      //const filtered = {};
       console.log(this.muziekTracks);
     }
 
@@ -116,6 +111,9 @@ export default {
     toggleMuziek() {
       this.muziekClicked = !this.muziekClicked;
     },
+    selecteerKeuze(index) {
+    this.selectedKeuzeIndex = index;
+  },
     initTrackStates() {
       this.trackStates = this.currentTracks.map(() => ({
         isPlaying: false,
