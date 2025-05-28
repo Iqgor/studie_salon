@@ -145,10 +145,11 @@ $routes = [
     'POST activities' => __DIR__ . '/routes/activities/get.php',
 
     // teksten routes
-    'POST addText' => __DIR__ . '/routes/teksten/add.php',
+    'POST addText' => __DIR__ . '/routes/teksten/addText.php',
     'POST addLinks' => __DIR__ . '/routes/teksten/addLinks.php',
-    'POST editLink' => __DIR__ . '/routes/teksten/edit.php',
+    'POST editLink' => __DIR__ . '/routes/teksten/editLink.php',
     'POST getTekst' => __DIR__ . '/routes/teksten/gettekst.php',
+    'POST editTekst'=> __DIR__ . '/routes/teksten/editTekst.php',
     'POST getTekstLinks' => __DIR__ . '/routes/teksten/getTekstLinks.php',
     'POST editeTitleLinks' => __DIR__ . '/routes/teksten/editTitleLinks.php',
     'POST getLikes' => __DIR__ . '/routes/teksten/getLikes.php',
