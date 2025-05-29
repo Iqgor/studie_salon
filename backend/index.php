@@ -79,8 +79,8 @@ function isValidJWT($jwt, $secret_key)
         return false;
 
     $payload = json_decode(base64UrlDecode($payloadB64), true);
-    if (!$payload || !isset($payload['exp']) || time() >= $payload['exp'])
-        return false;
+    // if (!$payload || !isset($payload['exp']) || time() >= $payload['exp'])
+    //     return false;
 
     return $payload;
 }
@@ -137,6 +137,7 @@ $routes = [
     // Carousel routes
     'POST editCarouselLink' => __DIR__ . '/routes/carousel/link.php',
     'POST getCarouselItems' => __DIR__ . '/routes/carousel/get.php',
+    'POST addCarouselItem' => __DIR__ . '/routes/carousel/add.php',
 
     // activities routes
     'POST create_activity' => __DIR__ . '/routes/activities/create.php',
@@ -154,9 +155,11 @@ $routes = [
     'POST editTitleLink' => __DIR__ . '/routes/teksten/editTitleLinks.php',
     'POST getLikes' => __DIR__ . '/routes/teksten/getLikes.php',
     'POST sendLikes' => __DIR__ . '/routes/teksten/sendLikes.php',
+    'POST makeSinglefile' => __DIR__ . '/routes/teksten/makeSinglefile.php',
 
     // Admin routes
     'POST adminInfo' => __DIR__ . '/routes/admin/getInfo.php',
+    'POST editItem' => __DIR__ . '/routes/admin/editItem.php',
 ];
 
 

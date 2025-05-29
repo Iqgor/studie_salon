@@ -27,16 +27,25 @@
         <tbody>
             <tr v-for="(row, rowIndex) in allData.data && allData.data.slice(beginLimit - 1, endLimit)" :key="rowIndex + beginLimit">
               <td v-for="(value, key, cellIndex) in row" :key="cellIndex">
-                {{ value }}
+                <span v-if="!isEditClicked[row.id]">{{ value }}</span>
+                <input v-else-if="typeof value === 'string'" type="text" v-model="newData[key]" :placeholder="key" />
+                <input v-else-if="typeof value === 'number'" type="number" v-model="newData[key]" :placeholder="key" />
               </td>
               <td>
-                <span @click="editItem(table,row.id)"><i class="fa-solid fa-pen"></i></span>
+                <span title="edit item" @click="editItem(row)"><i class="fa-solid fa-pen"></i></span>
               </td>
-              <td v-if="Object.keys(allData.data[0]).includes('deleted')">
-                <span @click="deleteItem(table,row.id)"><i class="fa-solid fa-trash"></i></span>
+              <td v-if="Object.keys(allData.data[0]).includes('deleted') && !isEditClicked[row.id]">
+                <span title="verwijder item" @click="itemAction('delete',table,row.id)"><i class="fa-solid fa-trash"></i></span>
               </td>
-              <td>
-                <span @click="hideItem(table,row.id)"><i class="fa-solid fa-eye"></i></span>
+              <td v-if="Object.keys(allData.data[0]).includes('weergeven') && !isEditClicked[row.id]">
+                <span v-if="row.weergeven === 1" title="verberg item" @click="itemAction('hide',table,row.id)"><i class="fa-solid fa-eye"></i></span>
+                <span v-if="row.weergeven === 0" title="toon item" @click="itemAction('hide',table,row.id)"><i class="fa-solid fa-eye-slash"></i></span>
+              </td>
+              <td class="save" v-if="isEditClicked[row.id]">
+                <span title="opslaan" @click="itemAction('edit',table,row.id)"><i class="fa-solid fa-check"></i></span>
+              </td>
+              <td class="save" v-if="isEditClicked[row.id]">
+                <span title="annuleer" @click="isEditClicked[row.id] = false"><i class="fa-solid fa-xmark"></i></span>
               </td>
             </tr>
         </tbody>
@@ -68,6 +77,8 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
         beginLimit: 1,
         endLimit: 20,
         nameHeaderClicked: '',
+        newData: {},
+        isEditClicked: {}
       };
     },
     methods: {
@@ -121,6 +132,47 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
             return 0;
           }
         });
+      },
+      itemAction(action, table, id) {
+        const formData = new FormData();
+        if(action === 'delete'){
+          if (!confirm('Weet je zeker dat je dit item wilt verwijderen?')) {
+            return; // Stop the action if the user cancels
+          }
+        }
+        formData.append('table', table);
+        formData.append('id', id);
+        formData.append('action', action);
+        formData.append('data', JSON.stringify(this.newData));
+
+        fetch(`${import.meta.env.VITE_APP_API_URL}backend/editItem`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Authorization: auth.bearerToken
+          }
+        })
+          .then(response => {
+            if (response.ok) {
+              this.fetchData(); // Refresh data after action
+              if( action === 'edit') {
+                this.isEditClicked[id] = false; // Exit edit mode after saving
+                this.newData = {}; // Clear newData after saving
+              }
+            } else {
+              console.error(`Error performing ${action} on item:`, response.statusText);
+            }
+          })
+          .catch(error => {
+            console.error(`Error performing ${action} on item:`, error);
+          });
+      },
+      editItem(row) {
+        // Handle edit item action
+        this.isEditClicked[row.id] = !this.isEditClicked[row.id]; // Toggle edit mode for the row
+        this.newData = { ...row }; // Copy the row data to newData for editing
+        // You can implement a modal or form for editing here
+        console.log('Editing item:', this.newData);
       }
     },
     watch: {
@@ -198,6 +250,25 @@ td, th {
 
 tr:nth-child(even) {
   background-color: var(--color-card-500);
+}
+
+td i{
+  cursor: pointer;
+  color: var(--color-text);
+  transition: 0.2s all;
+}
+
+td i:hover {
+  color: var(--color-secondary-500);
+}
+
+td input[type="number"]{
+  width: 5rem
+}
+
+.save{
+  font-size: 100%;
+  text-align: center;
 }
 
 .pagination {

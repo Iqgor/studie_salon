@@ -127,6 +127,7 @@ export default {
             }
             grouped[key].push(item);
             });
+            console.log(grouped);
             this.CarouselData = grouped;
             this.updatedCarouselData = grouped;
         })

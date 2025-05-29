@@ -7,6 +7,7 @@
               <span>
                 <i v-if="isAdmin" @click="isEditClicked[index] = !isEditClicked[index], lastTitle = index" class="fa-solid fa-pen"></i>
                 <i v-if="isEditClicked[index]" @click="editLink(index)" class="fa-regular fa-circle-check"></i>
+                <i title="Voeg item toe" v-if="isEditClicked[index]" @click="makeNewItem = !makeNewItem" class="fa-solid fa-plus"></i>
               </span>
             </h2>
             <i v-if="isOverflowing" @click="changeIsClicked(indexNumber)"  class="fa-solid fa-arrow-down" :class="!isClickedout ? 'rotate': ''"></i>
@@ -18,6 +19,13 @@
         </div>
       </div>
       <div v-if="isClickedout && view === 'list' || view === 'table'" :class="{'clickedOut':isClickedout && view === 'table' }" :id="`carousel-${indexNumber}`"  class="carousel-container">
+        <p v-if="makeNewItem" class="carousel-inhoud">
+          <input type="text" v-model="newItemName" placeholder="Voeg nieuwe item toe" class="editLink" />
+          <span>
+            <i @click="addItem(index)" class="fa-solid fa-check"></i>
+            <i @click="makeNewItem = false, newItemName= ''" class="fa-solid fa-xmark"></i>
+          </span>
+        </p>
         <p v-for="(text,i) in info" class="carousel-inhoud">
           <router-link v-if="!isEditClicked[i]"  :to="text.url"  class="carousel-informatie">
             <span >{{ text.title }}</span>
@@ -74,9 +82,34 @@ export default {
       isEditClicked: [],
       isAdmin: false,
       lastTitle:'',
+      newItemName: '',
+      makeNewItem: false,
     };
   },
   methods: {
+    addItem(index){
+      const formData = new FormData();
+      formData.append('carouselName', index);
+      formData.append('itemName', this.newItemName);
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/addCarouselItem`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      }).then(response => {
+        if (response.ok) {
+          this.$emit('getCarouselData');
+          this.newItemName = '';
+          this.makeNewItem = false;
+          toastService.addToast('Item toegevoegd',`Item is zojuist toegevoegd`, 'success');
+        } else {
+          console.error('Error adding item:', response.statusText);
+        }
+      }).catch(error => {
+        console.error('Error:', error);
+      });
+    },
     editLink(index) {
       const formData = new FormData();
 
@@ -274,7 +307,7 @@ export default {
   background-color: var(--color-primary-300);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   margin-bottom: 1rem;
-  color: var(--color-text);
+  gap: 1rem;
   border-radius: 1.5rem;
   padding: 1rem;
 }
@@ -291,6 +324,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+    color: black;
+
 }
 
 

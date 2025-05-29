@@ -124,6 +124,26 @@ export default {
     this.isAdmin = auth.user.role === 'admin';
   },
   methods: {
+    makeSinglefile(){
+      const formData = new FormData();
+      formData.append('slug', this.slug);
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/makeSinglefile`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.new_url) {
+            window.location.href = data.new_url;
+          }
+          })
+        .catch(error => {
+          console.error('Error sending text', error);
+        });
+    },
     editTitleLink() {
       console.log('hoi')
       const formData = new FormData();
