@@ -44,7 +44,7 @@ unset($user['otp_expires_at']);
 
 // JWT genereren
 $issuedAt = time();
-$expirationTime = $issuedAt + 3600; // 1 uur geldig
+$expirationTime = $issuedAt + 10800; // 3 uur geldig
 
 $payload = [
     'iat' => $issuedAt,

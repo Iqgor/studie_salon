@@ -88,7 +88,7 @@ if ($user['role'] !== 'admin') {
 
 //^ Token genereren (JWT)
 $issuedAt = time();
-$expirationTime = $issuedAt + 3600; // 1 uur waard
+$expirationTime = $issuedAt + 10800; // 3 uur waard
 
 unset(
     $user['password'],

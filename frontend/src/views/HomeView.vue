@@ -130,6 +130,7 @@ export default {
             });
             this.CarouselData = grouped;
             this.updatedCarouselData = grouped;
+            auth.checkAction(data?.action)
         })
         .catch(error => {
           console.error('There was a problem with the fetch operation:', error);
@@ -277,7 +278,7 @@ export default {
   align-items: center;
   color: white;
   padding: 1rem 10rem;
-  background-color: var(--color-primary-500);
+  background: var(--color-primary-500);
   margin-left: -10rem;
   margin-right: -10rem;
   margin-bottom: 1rem;

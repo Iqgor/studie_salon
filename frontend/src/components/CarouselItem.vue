@@ -268,7 +268,7 @@ export default {
   height: 13rem;
   width: 23rem;
   font-size: 2rem;
-  background-color: var(--color-primary-300);
+  background-color: var(--color-card-500);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   margin-bottom: 1rem;
   color: var(--color-text);
