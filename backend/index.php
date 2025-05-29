@@ -79,8 +79,8 @@ function isValidJWT($jwt, $secret_key)
         return false;
 
     $payload = json_decode(base64UrlDecode($payloadB64), true);
-    // if (!$payload || !isset($payload['exp']) || time() >= $payload['exp'])
-    //     return false;
+    if (!$payload || !isset($payload['exp']) || time() >= $payload['exp'])
+        return false;
 
     return $payload;
 }
