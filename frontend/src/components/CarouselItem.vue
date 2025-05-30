@@ -4,7 +4,7 @@
             <h2 >
               <span @click="changeIsClicked(indexNumber)" v-if="!isEditClicked[index]">{{ index }}</span>
               <input v-else type="text" v-model="lastTitle" class="editLink" />
-              <span>
+              <span v-if="isAdmin">
                 <i v-if="isAdmin" @click="isEditClicked[index] = !isEditClicked[index], lastTitle = index" class="fa-solid fa-pen"></i>
                 <i v-if="isEditClicked[index]" @click="editLink(index)" class="fa-regular fa-circle-check"></i>
                 <i title="Voeg item toe" v-if="isEditClicked[index]" @click="makeNewItem = !makeNewItem" class="fa-solid fa-plus"></i>
@@ -35,6 +35,8 @@
             <i v-if="isAdmin" @click="isEditClicked[i] = !isEditClicked[i], lastTitle = text.title" class="fa-solid fa-pen"></i>
             <i v-if="isEditClicked[i]" @click="editLink(i)" class="fa-regular fa-circle-check"></i>
           </span>
+          <!-- <i v-if="!likes.find(liked => liked.slug === item.slug)" "  @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
+          <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i> -->
         </p>
       </div>
 </template>
@@ -221,6 +223,7 @@ export default {
   margin-right: -10rem;
   margin-left: -10rem;
   padding-left:10rem;
+  padding-top: 1rem;
 
 }
 
@@ -261,7 +264,6 @@ export default {
   background-color: var(--color-primary-500);
   margin-left: -10rem;
   margin-right: -10rem;
-  margin-bottom: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 .carousel-titel{
@@ -295,6 +297,7 @@ export default {
 }
 
 .carousel-inhoud {
+  position: relative;
   text-align: center;
   flex-shrink: 0;
   display: flex;
@@ -328,12 +331,24 @@ export default {
 
 }
 
+.carousel-inhoud > i {
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  color: var(--color-primary-700);
+  font-size: 150%;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
 
 .carousel  span{
   display: flex;
   gap: 1rem;
   align-items: center;
   justify-content: center;
+  text-wrap: pretty;
+
 }
 .carousel  span > i{
   font-size: 75%;
@@ -368,8 +383,7 @@ export default {
   .carousel-titel {
     margin-left: 0;
     margin-right: 0;
-    padding-left: 1rem;
-  }
+    padding-left: 1rem;  }
     .carousel-container::-webkit-scrollbar {
     display: none;
   }
@@ -377,6 +391,13 @@ export default {
     margin-right: 0;
     margin-left: 0;
     padding: 1rem 1rem;
+  }
+  .carousel-titel> h2{
+    gap: 1rem;
+  }
+
+  .carousel-titel >h2 > span {
+    font-size: 2rem;
   }
 }
 </style>

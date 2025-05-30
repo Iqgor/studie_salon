@@ -145,7 +145,6 @@ export default {
         });
     },
     editTitleLink() {
-      console.log('hoi')
       const formData = new FormData();
       formData.append('slug', this.slug);
       formData.append('tegel_naam', this.titleEdited);
@@ -532,6 +531,10 @@ export default {
 @media screen and (max-width: 768px) {
   .links {
     padding: 2rem 1rem;
+  }
+
+  .tableView{
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 
 }

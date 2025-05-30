@@ -127,7 +127,6 @@ export default {
             }
             grouped[key].push(item);
             });
-            console.log(grouped);
             this.CarouselData = grouped;
             this.updatedCarouselData = grouped;
         })
@@ -399,12 +398,12 @@ export default {
   font-family: 'Courier New', Courier, monospace;
   display: inline-flex;
   overflow: hidden;
-  white-space: nowrap;
+  /* white-space: nowrap; */
   position: relative;
   font-size: 300%;
   gap: 1rem;
   align-items: center;
-
+  text-wrap: wrap;
 }
 
 
@@ -517,7 +516,12 @@ export default {
   .appsHeader {
     margin-left: 0;
     margin-right: 0;
-    padding-left: 1rem;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .appsTitle > span {
+    font-size: 1.75rem;
   }
 
   .search {
