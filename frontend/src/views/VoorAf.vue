@@ -464,6 +464,13 @@ export default {
   border-radius: 1.5rem;
   padding: 1rem;
   transition: background-color 0.4s ease;
+  height: 13rem;
+  width: 23rem;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .tableView>li>i {

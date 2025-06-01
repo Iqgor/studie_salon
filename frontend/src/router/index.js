@@ -84,9 +84,21 @@ const router = createRouter({
       component: () => import('@/views/404.vue')
     }
   ],
+  scrollBehavior(to, from, savedPosition) {
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (savedPosition) {
+            resolve({ left: savedPosition.left, top: savedPosition.top, behavior: 'smooth' });
+        } else {
+          resolve(false); // Don't change scroll position
+        }
+      }, 300); // Adjust delay (ms) as needed
+    });
+  }
 })
 
-// Admin route guard
+// Admin route beveiliging
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAdmin)) {
     if (!auth.isLoggedIn || !auth.user || auth.user.role !== 'admin') {

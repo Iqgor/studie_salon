@@ -16,6 +16,13 @@
         </div>
         Items {{ beginLimit + 1 }} - {{ endLimit < allData.data.length ? endLimit : allData.data.length }} van {{ allData.data ? allData.data.length : 0 }}
       </div>
+      <div class="addItem">
+        <h3>Item toevoegen:</h3>
+        <div class="addIteminputs">
+          <input v-for="value in allData.data && allData.data.length ? Object.keys(allData.data[0]).filter(key => key !== 'id') : []" :key="value" type="text"  :placeholder="value" />
+        </div>
+        <button @click="itemAction('add', table, null)">Toevoegen</button>
+      </div>
       <table>
         <thead>
           <tr>
@@ -34,7 +41,7 @@
               <td>
                 <span title="edit item" @click="editItem(row)"><i class="fa-solid fa-pen"></i></span>
               </td>
-              <td v-if="Object.keys(allData.data[0]).includes('deleted') && !isEditClicked[row.id]">
+              <td v-if="!isEditClicked[row.id]">
                 <span title="verwijder item" @click="itemAction('delete',table,row.id)"><i class="fa-solid fa-trash"></i></span>
               </td>
               <td v-if="Object.keys(allData.data[0]).includes('weergeven') && !isEditClicked[row.id]">
@@ -59,7 +66,9 @@
       </div>
     </div>
   </main>
+  <div class="EditAddmodal">
 
+  </div>
 </template>
 <script>
 import { auth } from '@/auth';
@@ -101,7 +110,6 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
             throw new Error('Network response was not ok');
           }
           this.allData = await response.json();
-          this.allData = this.allData // Assuming the data is in a 'data' property
           this.table = this.allData.table || '';
         } catch (error) {
           console.error('There has been a problem with your fetch operation:', error);
@@ -177,7 +185,7 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
     },
     watch: {
       // Watch for route changes to fetch data again
-      '$route'(to, from) {
+      '$route'() {
       this.fetchData();
       this.beginLimit = 1; // Reset pagination on route change
       this.endLimit = 20; // Reset pagination on route change
@@ -219,6 +227,35 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
 .isClicked {
   background-color: var(--color-secondary-500) !important;
   color: black;
+}
+
+.addItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.addIteminputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.addIteminputs input {
+  flex: 1;
+  min-width: 10rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-secondary-500);
+  border-radius: 0.25rem;
+}
+.addItem button {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-secondary-500);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  width: max-content;
 }
 
 table {
