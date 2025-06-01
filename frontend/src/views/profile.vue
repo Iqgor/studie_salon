@@ -26,6 +26,7 @@ import GebruikersVoorwaarden from './gebruikersVoorwaarden.vue';
 import Changecolor from '@/components/profile/changecolor.vue';
 import { auth } from '@/auth';
 import DeleteUser from '@/components/profile/deleteUser.vue';
+import ProfileInfo from '@/components/profile/profileInfo.vue';
 
 export default {
     name: "profile",
@@ -33,7 +34,7 @@ export default {
     data() {
         return {
             options: [
-                { name: 'Profiel', slug: 'profiel', component: 'profiel' },
+                { name: 'Profiel', slug: 'profiel', component: ProfileInfo },
                 { name: 'Kleuren wijzigen', slug: 'kleur-wijzigen', component: Changecolor },
                 { name: 'Wachtwoord wijzigen', slug: 'wachtwoord-wijzigen', component: Changepassword },
                 { name: 'Privacy verklaring', slug: 'privacy-verklaring', component: PrivacyVerklaring },

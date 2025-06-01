@@ -15,57 +15,78 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 $payment = json_decode($response, true);
+
+$status = $payment['status'] ?? null;
 $userId = $payment['metadata']['user_id'] ?? null;
 $userEmail = $payment['metadata']['user_email'] ?? null;
 $subscriptionId = $payment['metadata']['subscription_id'] ?? null;
 $subscriptionPeriod = $payment['metadata']['subscription_period'] ?? null;
 $price = isset($payment['metadata']['subscription_price']) ? (float) $payment['metadata']['subscription_price'] : null;
 
-if ($payment['status'] === 'paid' && $userId && $price !== null) {
-    $createdAt = date('Y-m-d H:i:s');
-    $paymentId = $payment['id'] ?? null; // The Mollie payment ID
+switch ($status) {
+    case 'paid':
+        if (!$userId || $price === null) {
+            http_response_code(400);
+            exit();
+        }
 
-    //check of het al betaald is Geen dubbele betaling
+        $createdAt = date('Y-m-d H:i:s');
+        $paymentId = $payment['id'] ?? null;
 
-    $check = $conn->prepare("SELECT id FROM invoices WHERE mollie_payment_id = ?");
-    $check->bind_param("s", $paymentId);
-    $check->execute();
-    $check->store_result();
+        // Check for duplicate payment
+        $check = $conn->prepare("SELECT id FROM invoices WHERE mollie_payment_id = ?");
+        $check->bind_param("s", $paymentId);
+        $check->execute();
+        $check->store_result();
 
-    if ($check->num_rows > 0) {
-        http_response_code(200); // Already handled
-        exit();
-    }
+        if ($check->num_rows > 0) {
+            http_response_code(200);
+            exit();
+        }
 
-    $stmt = $conn->prepare("INSERT INTO invoices (user_id, user_email, subscription_id, amount, is_trial, created_at, status, mollie_payment_id) VALUES (?, ?, ?, ?, 0, ?, 'paid', ?)");
-    $stmt->bind_param("issdss", $userId, $userEmail, $subscriptionId, $price, $createdAt, $paymentId);
-    $stmt->execute();
+        // Insert invoice
+        $stmt = $conn->prepare("INSERT INTO invoices (user_id, user_email, subscription_id, amount, is_trial, created_at, status, mollie_payment_id) VALUES (?, ?, ?, ?, 0, ?, 'paid', ?)");
+        $stmt->bind_param("issdss", $userId, $userEmail, $subscriptionId, $price, $createdAt, $paymentId);
+        $stmt->execute();
 
-    if ($stmt->affected_rows === 0) {
-        http_response_code(500);
-        exit();
-    }
+        if ($stmt->affected_rows === 0) {
+            http_response_code(500);
+            exit();
+        }
 
+        // Insert subscription
+        if ($subscriptionPeriod === 'maandelijks') {
+            $expiryDate = date('Y-m-d', strtotime('+1 month'));
+        } elseif ($subscriptionPeriod === 'jaarlijks') {
+            $expiryDate = date('Y-m-d', strtotime('+1 year'));
+        } else {
+            http_response_code(400);
+            exit();
+        }
 
+        $today = date('Y-m-d');
+        $stmt = $conn->prepare("INSERT INTO users_subscriptions (user_id, subscription_id, start_date, end_date) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
+        $stmt->execute();
 
-    // zet de nieuwe actieve abonnement in de users_subscriptions tabel
-    if ($subscriptionPeriod === 'maandelijks') {
-        $expiryDate = date('Y-m-d', strtotime('+1 month'));
-    } else if ($subscriptionPeriod === 'jaarlijks') {
-        $expiryDate = date('Y-m-d', strtotime('+1 year'));
-    }
+        if ($stmt->affected_rows === 0) {
+            http_response_code(500);
+            exit();
+        }
 
-    $today = date('Y-m-d');
-    $stmt = $conn->prepare("INSERT INTO users_subscriptions (user_id, subscription_id, start_date, end_date) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("iiss", $userId, $subscriptionId, $today, $expiryDate);
-    $stmt->execute();
+        break;
 
+    case 'open':
+    case 'pending':
+    case 'authorized':
+    case 'canceled':
+    case 'expired':
+    case 'failed':
+        // Log or handle these statuses as needed
+        http_response_code(200);
+        break;
 
-
-    if ($stmt->affected_rows === 0) {
-        http_response_code(500);
-        exit();
-    }
-
-
+    default:
+        http_response_code(400);
+        break;
 }
