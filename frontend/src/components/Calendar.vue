@@ -413,7 +413,7 @@ export default {
     },
     deleteAcitivity(){
       const formData = new FormData();
-      formData.append('activity_id', JSON.stringify(this.activityClickedInfo.activity_id));
+      formData.append('activity_id', JSON.stringify(this.activityClickedInfo.id));
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/delete_activity`, {
         method: 'POST',
         body: formData,
@@ -638,7 +638,7 @@ export default {
       }
       this.loading = false;
       const data = await response.json();
-      
+
       data.activities.forEach(activity => {
         const dayIndex = this.getDaysOfWeek().findIndex(day =>
           activity.start_datetime && `${day.year}-${day.month < 9 ? '0' + (day.month + 1) : day.month + 1}-${day.day < 10 ? '0' + day.day : day.day}` === activity.start_datetime.split(' ')[0]

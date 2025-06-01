@@ -454,7 +454,7 @@ export default {
     background-color: var(--color-background-500);
     outline: solid 0.5rem var(--color-background-500);
     color: var(--color-text);
-    transition: all 0.3s ease-in-out; 
+    transition: all 0.3s ease-in-out;
 }
 
 .input:focus {
@@ -565,10 +565,11 @@ export default {
 
     .slidetext {
         font-size: 1.5rem;
+        width: 100%;
     }
 
     .bars {
-        justify-content: start;
+        justify-content: space-evenly;
     }
 
     .bar {
