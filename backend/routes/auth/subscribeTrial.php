@@ -111,7 +111,7 @@ if ($stmt->affected_rows === 0) {
 
 //^ Token genereren (JWT)
 $issuedAt = time();
-$expirationTime = $issuedAt + 10800; // 3 uur waard
+$expirationTime = $issuedAt + (7 * 24 * 60 * 60); // 1 week geldig
 
 unset(
     $user['password'],
