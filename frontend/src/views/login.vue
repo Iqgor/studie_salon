@@ -113,7 +113,7 @@ export default {
             slideIndex: 0,
             slides: [
                 "Wat voor leerder ben jij? Vind leerstrategieën, tips & tricks voor elk vak, op elk niveau en in elke denkbare taal.",
-                "Je gaf overigens een prima voorzet! Ontdek tips om tijdens de les te leren, thuis snel en zonder afleiding huiswerk te maken, en goede cijfers te halen, zodat je tijd overhoudt voor jezelf!",
+                "Ontdek tips om tijdens de les te leren, thuis snel en zonder afleiding huiswerk te maken, en goede cijfers te halen, zodat je tijd overhoudt voor jezelf!",
                 "Snel en eenvoudig je huiswerk noteren, zodat je je dag en week plant, organiseert en prioriteiten stelt.",
                 "In 20% van je tijd voor 80% van je cijfer leren."
             ],
@@ -454,7 +454,7 @@ export default {
     background-color: var(--color-background-500);
     outline: solid 0.5rem var(--color-background-500);
     color: var(--color-text);
-    transition: all 0.3s ease-in-out; 
+    transition: all 0.3s ease-in-out;
 }
 
 .input:focus {
@@ -565,10 +565,11 @@ export default {
 
     .slidetext {
         font-size: 1.5rem;
+        width: 100%;
     }
 
     .bars {
-        justify-content: start;
+        justify-content: space-evenly;
     }
 
     .bar {

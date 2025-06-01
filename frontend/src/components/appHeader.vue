@@ -297,13 +297,11 @@ export default {
 @media screen and (max-width: 768px) {
 
   .header {
-    height: 8rem;
     padding-right: 0;
   }
 
   .figTop {
-    height: 8rem;
-    width: 8rem;
+    z-index: 5;
   }
 
   .headerTitle {
@@ -315,7 +313,8 @@ export default {
   }
 
   .icons {
-    height: 8rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>

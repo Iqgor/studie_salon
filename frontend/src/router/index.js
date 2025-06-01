@@ -66,7 +66,7 @@ const router = createRouter({
       path:'/admin',
       name: 'admin',
       component: () => import('@/views/Admin.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
       path: '/:slug',
@@ -84,6 +84,16 @@ const router = createRouter({
       component: () => import('@/views/404.vue')
     }
   ],
+})
+
+// Admin route guard
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    if (!auth.isLoggedIn || !auth.user || auth.user.role !== 'admin') {
+      return next('/login')
+    }
+  }
+  next()
 })
 
 

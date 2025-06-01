@@ -15,9 +15,10 @@
                     </div>
 
                     <div class="getplan__input_wrapper">
+                        <input type="email" placeholder="Email" required v-model="email">
                         <input v-if="donthaveAccount" type="text" placeholder="Naam" :required="donthaveAccount"
                             v-model="name">
-                        <input type="email" placeholder="Email" required v-model="email">
+                        
                         <input type="password" placeholder="Wachtwoord" required v-model="password"
                             v-if="!donthaveAccount">
                         <input v-if="showOtp" type="text" placeholder="OTP code" :required="showOtp" v-model="otp">

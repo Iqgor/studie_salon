@@ -14,8 +14,8 @@ require_once __DIR__ . '/PHPMailer/src/SMTP.php';
 require_once __DIR__ . '/PHPMailer/src/Exception.php';
 require_once 'load_env.php';
 loadEnv(__DIR__ . '/.env');
-require_once __DIR__ . './jwt_helper.php';
-require_once __DIR__ . './mail_helper.php';
+require_once __DIR__ . '/jwt_helper.php';
+require_once __DIR__ . '/mail_helper.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -65,7 +65,6 @@ function isValidJWT($jwt, $secret_key)
         return false;
 
     list($headerB64, $payloadB64, $signatureB64) = $parts;
-
     if (empty($headerB64) || empty($payloadB64) || empty($signatureB64))
         return false;
 
@@ -88,17 +87,16 @@ function isValidJWT($jwt, $secret_key)
 
 if (!in_array($resource, $publicRoutes)) {
     $headers = getallheaders();
-
     if (!isset($headers['Authorization'])) {
         http_response_code(401);
         echo json_encode(['error' => 'Ontbrekende autorisatieheader', 'action' => 'logout']);
 
         exit;
     }
-
     if (preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
         $jwt = $matches[1];
         $payload = isValidJWT($jwt, $secret_key);
+
         if (!$payload) {
             http_response_code(401);
             echo json_encode(['error' => 'Ongeldige of verlopen token', 'action' => 'logout']);
@@ -133,11 +131,13 @@ $routes = [
     'POST create-payment' => __DIR__ . '/routes/auth/create-payment.php',
     'POST update-payment' => __DIR__ . '/routes/auth/update-payment.php',
     'PUT change_password' => __DIR__ . '/routes/auth/change-password.php',	
+    'PUT update_user' => __dir__ . '/routes/auth/update-user.php',
     'DELETE Delete_account' => __DIR__ . '/routes/delete-user/delete.php',
 
     // Carousel routes
     'POST editCarouselLink' => __DIR__ . '/routes/carousel/link.php',
     'POST getCarouselItems' => __DIR__ . '/routes/carousel/get.php',
+    'POST addCarouselItem' => __DIR__ . '/routes/carousel/add.php',
 
     // activities routes
     'POST create_activity' => __DIR__ . '/routes/activities/create.php',
@@ -145,12 +145,21 @@ $routes = [
     'POST delete_activity' => __DIR__ . '/routes/activities/delete.php',
     'POST activities' => __DIR__ . '/routes/activities/get.php',
 
-    // texts routes
-    'POST addText' => __DIR__ . '/routes/texts/add.php',
-    'POST addLinks' => __DIR__ . '/routes/texts/addLinks.php',
-    'POST editLink' => __DIR__ . '/routes/texts/edit.php',
-    'POST getTekst' => __DIR__ . '/routes/texts/get.php',
-    'POST getTekstLinks' => __DIR__ . '/routes/texts/getTekstLinks.php',
+    // teksten routes
+    'POST addText' => __DIR__ . '/routes/teksten/addText.php',
+    'POST addLinks' => __DIR__ . '/routes/teksten/addLinks.php',
+    'POST editLink' => __DIR__ . '/routes/teksten/editLink.php',
+    'POST getTekst' => __DIR__ . '/routes/teksten/gettekst.php',
+    'POST editTekst'=> __DIR__ . '/routes/teksten/editTekst.php',
+    'POST getTekstLinks' => __DIR__ . '/routes/teksten/getTekstLinks.php',
+    'POST editTitleLink' => __DIR__ . '/routes/teksten/editTitleLinks.php',
+    'POST getLikes' => __DIR__ . '/routes/teksten/getLikes.php',
+    'POST sendLikes' => __DIR__ . '/routes/teksten/sendLikes.php',
+    'POST makeSinglefile' => __DIR__ . '/routes/teksten/makeSinglefile.php',
+
+    // Admin routes
+    'POST adminInfo' => __DIR__ . '/routes/admin/getInfo.php',
+    'POST editItem' => __DIR__ . '/routes/admin/editItem.php',
 ];
 
 
