@@ -135,4 +135,23 @@
 .landingspage-box h2, .landingspage-box p {
   color: var(--color-text-500);
 }
+
+@media screen and (max-width: 768px) {
+  .sectie-index {
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    height: auto;
+  }
+  .sectie-links {
+    width: 100%;
+  }
+
+  .sectie-midden-img {
+    width: 100%;
+    height: auto;
+    margin-top: 2rem;
+  }
+
+}
 </style>

@@ -7,10 +7,13 @@ if (!$tegel || !$link) {
 }
 $slug = strtolower(trim($link));
 $slug = str_replace(' ', '-', $slug);
+$slug = str_replace('/', '', $slug);
+
+$tegelNaam = str_replace('-', ' ', $tegel);
 if ($link !== '') {
     $link = "➔ " . $link;
-    $stmt = $conn->prepare("INSERT INTO teksten (tegel,name,slug ) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $tegel, $link, $slug);
+    $stmt = $conn->prepare("INSERT INTO teksten (tegel,tegel_naam,name,slug ) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $tegel, $tegelNaam, $link, $slug);
     $stmt->execute();
 }
 jsonResponse(['success' => 'Links added successfully'], 200);

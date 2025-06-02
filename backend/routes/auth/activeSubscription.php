@@ -51,4 +51,6 @@ $subscription['features'] = $features;
     jsonResponse($subscription, 200);
 } else {
     jsonResponse(['title' => 'Geen abonnement', 'message' => 'U heeft geen geldig abonnement', 'type' => 'error'], 404);
+
 }
+

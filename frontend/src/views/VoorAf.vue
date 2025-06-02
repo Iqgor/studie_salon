@@ -3,7 +3,12 @@
     <RouterLink class="waterFallLink" :to="('/')">
       < Terug naar Home</RouterLink>
         <div class="title-views">
-          <h2>{{ capitalizeWords(slug.replaceAll('-', ' ')) }}</h2>
+          <h2>
+            <span v-if="!isTitleEditClicked">{{  tegelTitle.length>0  ? tegelTitle : capitalizeWords(slug.replaceAll('-', ' ')) }}</span>
+            <input v-else type="text" @change="titleEdited = $event.target.value" :value="tegelTitle.length>0  ? tegelTitle : capitalizeWords(slug.replaceAll('-', ' '))" class="editLink" />
+            <i v-if="isAdmin" @click="isTitleEditClicked = !isTitleEditClicked" class="fa-solid fa-pen"></i>
+            <i v-if="isTitleEditClicked" @click="editTitleLink" class="fa-regular fa-circle-check"></i>
+          </h2>
           <span class="views"><i @click="changeView('table')" :class="{ 'isActive': view == 'table' }"
               class="fa-solid fa-table"></i>
             <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
@@ -27,7 +32,7 @@
                   <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
                 </li>
               </ul>
-              <div v-if="!isAdmin" class="addLink">
+              <div v-if="isAdmin" class="addLink">
                 <h4>Voeg meer links toe</h4>
                 <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
                 <button @click="addLink">Voeg link toe</button>
@@ -53,7 +58,7 @@
                 <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
             </li>
           </ul>
-          <div v-if="!isAdmin" class="addLink">
+          <div v-if="isAdmin" class="addLink">
             <h4>Voeg meer links toe</h4>
             <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
             <button @click="addLink">Voeg link toe</button>
@@ -61,7 +66,7 @@
         </div>
   </main>
 
-  <main class="main" v-else-if="!isAdmin && !loading">
+  <main class="main" v-else-if="isAdmin && !loading">
     <div class="adminText">
       <h2>Geen links gevonden</h2>
       <p>Je kan hieronder een link toevoegen naar een tekst, wanneer je dat hebt gedaan kan je er altijd nog meer
@@ -74,8 +79,8 @@
   </main>
   <div v-else-if="!loading && !succes" class="not-found">
     <h1>404</h1>
-    <p>Oops! The page you are looking for does not exist.</p>
-    <router-link to="/">Go back to Home</router-link>
+    <p>Oops! Die pagina die je wil bezoeken bestaat niet</p>
+    <router-link to="/">Ga terug naar de home pagina</router-link>
   </div>
 </template>
 <script>
@@ -102,6 +107,9 @@ export default {
       newLink: '',
       likes: [],
       oldLikes: [],
+      isTitleEditClicked: false,
+      titleEdited: '',
+      tegelTitle: '',
     };
   },
   unmounted() {
@@ -113,8 +121,50 @@ export default {
     this.changeView();
     this.changeNiveau();
     this.getLikes()
+    this.isAdmin = auth.user.role === 'admin';
   },
   methods: {
+    makeSinglefile(){
+      const formData = new FormData();
+      formData.append('slug', this.slug);
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/makeSinglefile`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.new_url) {
+            window.location.href = data.new_url;
+          }
+          })
+        .catch(error => {
+          console.error('Error sending text', error);
+        });
+    },
+    editTitleLink() {
+      const formData = new FormData();
+      formData.append('slug', this.slug);
+      formData.append('tegel_naam', this.titleEdited);
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/editTitleLink`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => response.json())
+        .then(() => {
+          toastService.addToast('Titel aangepast', 'De titel is aangepast', 'success');
+          this.isTitleEditClicked = false;
+          this.getTekstLinks(); // Refresh the links to reflect the new title
+        })
+        .catch(error => {
+          console.error('Error sending text', error);
+        });
+    },
     likeLink(item, event) {
       // Toggle like status in the likes array
       const index = this.likes.findIndex(liked => liked.slug === item.slug);
@@ -227,7 +277,8 @@ export default {
       }
     },
     capitalizeWords(str) {
-      return str.replace(/\b\w/g, char => char.toUpperCase());
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1);
     },
     async getTekstLinks() {
       const formData = new FormData();
@@ -249,6 +300,7 @@ export default {
           if (data.length !== 0) {
             this.succes = true;
             this.loading = false;
+            this.tegelTitle = data[0].tegel_naam;
             let categorized;
             if (data.length > 4) {
               categorized = {
@@ -293,6 +345,9 @@ export default {
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/addLinks`, {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
       })
         .then(response => {
           if (!response.ok) {
@@ -305,6 +360,7 @@ export default {
             this.succes = true;
             this.loading = false;
             this.getTekstLinks();
+            this.newLink = ''; // Clear the input field after adding the link
             toastService.addToast('Links toegevoegd', 'De links zijn toegevoegd', 'success');
           } else {
             this.succes = false;
@@ -333,6 +389,22 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
+
+.title-views >  h2 {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.title-views >  h2 > i{
+  color: var(--color-primary-400);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.title-views >  h2 > i:hover {
+  color: var(--color-primary-700);
+}
+
 
 .views {
   display: flex;
@@ -425,7 +497,6 @@ export default {
 
 .isActive {
   color: var(--color-primary-400) !important;
-
 }
 
 .niveaus button:hover {
@@ -460,6 +531,10 @@ export default {
 @media screen and (max-width: 768px) {
   .links {
     padding: 2rem 1rem;
+  }
+
+  .tableView{
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 
 }
