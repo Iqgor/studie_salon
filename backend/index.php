@@ -25,7 +25,7 @@ $conn = getDBConnection();
 
 
 //global env variables
-$secret_key = getenv('SECRET_KEY');
+$secret_key = getenv('jwt_KEY');
 $mail_host = getenv('MAIL_HOST');
 $mail_username = getenv('MAIL_USERNAME');
 $mail_password = getenv('MAIL_PASSWORD');
@@ -36,7 +36,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = trim($path, '/');
 $segments = explode('/', $path);
-$resource = $segments[2] ?? null;
+$resource = $segments[1] ?? null;
 
 // List of public routes that don't need auth
 $publicRoutes = [

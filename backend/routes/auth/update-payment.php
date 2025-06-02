@@ -1,5 +1,5 @@
 <?php
-$apiKey = 'test_kVPG44gJnW585v7EcMUNPp9ksfxEAR';
+$apiKey = getenv('mollie_KEY');
 $paymentId = $_POST['id'];
 
 $ch = curl_init();
