@@ -5,7 +5,7 @@
     </div>
   </div>
 
-  <div class="achtergrondblur" v-if="muziekClicked">
+  <div class="achtergrondblur" v-show="muziekClicked">
     <div class="muziek-stemmen-popup">
       <div class="muziek-stemmen-header">
         <div class="muziek-stemmen-buttons">
@@ -22,51 +22,29 @@
         <!-- muziek sectie -->
         <div v-if="selectedTab === 'muziek'" class="muziek-sectie">
           <div class="muziek-buttons">
-            <p
-              v-for="category in Object.keys(muziekTracks)"
-              :key="category"
-              class="muziek-button"
-              :class="{ active: selectedCategory === category }"
-              @click="selectedCategory = category"
-            >
+            <p v-for="category in Object.keys(muziekTracks)" :key="category" class="muziek-button" :class="{ active: selectedCategory === category }" @click="selectedCategory = category">
               {{ category }}
             </p>
           </div>
 
           <div class="muziek-tracklist">
-            <div
-              class="muziek-track"
-              v-for="(track, index) in currentTracks"
-              :key="index"
-              @click="selectTrack(index)"
-            >
+            <div class="muziek-track" v-for="(track, index) in currentTracks" :key="index" @click="selectTrack(index)" >
+              <img :src="`/img/${selectedCategory}/${track.img}`" alt="img" class="track-icon" />
               <p class="track-title">{{ track.title }}</p>
             </div>
           </div>
           <div class="muziek-balk">
-  <audio
-    ref="audioPlayer"
-    v-if="currentTrack"
-    :src="currentTrack.url"
-    @timeupdate="updateProgress"
-    @loadedmetadata="setDuration"
-    @ended="handleEnded"
-  ></audio>
+  <audio ref="audioPlayer" v-if="currentTrack" :src="currentTrack.url" @timeupdate="updateProgress" @loadedmetadata="setDuration" @ended="handleEnded"></audio>
+    <div v-if="currentTrack" class="now-playing">
+    <p class="now-playing-title">{{ currentTrack.title }}</p>
+    </div>
 
   <div v-if="currentTrack" class="controls">
     <button @click="togglePlay">
       {{ isPlaying ? '❚❚' : '▶' }}
     </button>
     <span>{{ formatTime(currentTime) }}</span>
-    <input
-      type="range"
-      min="0"
-      :max="duration"
-      step="0.1"
-      v-model="currentTime"
-      @input="seek"
-      class="progress-bar"
-    />
+    <input type="range" min="0" :max="duration" step="0.1" v-model="currentTime" @input="seek" class="progress-bar"/>
     <span>{{ formatTime(duration) }}</span>
   </div>
 
@@ -76,15 +54,7 @@
 
   <div class="volume">
     <span>{{ Math.round(volume * 100) }}</span>
-    <input
-      type="range"
-      min="0"
-      max="1"
-      step="0.01"
-      v-model="volume"
-      @input="changeVolume"
-      class="volume-bar"
-    />
+    <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume" class="volume-bar"/>
     <span>🔊</span>
   </div>
 </div>
@@ -97,13 +67,7 @@
             <p class="stemmen-text">Kies de stem waarnaar je graag luistert.</p>
           </div>
           <div class="stemmen-keuzes">
-            <div
-              v-for="(keuze, index) in stemmenKeuzes"
-              :key="index"
-              class="stemmen-keuze"
-              :class="{ 'stemmen-keuze-active': selectedKeuzeIndex === index }"
-              @click="selecteerKeuze(index)"
-            >
+            <div v-for="(keuze, index) in stemmenKeuzes" :key="index" class="stemmen-keuze" :class="{ 'stemmen-keuze-active': selectedKeuzeIndex === index }" @click="selecteerKeuze(index)">
               <img :src="keuze.img" :alt="keuze.naam" />
               <p>{{ keuze.naam }}</p>
             </div>
@@ -204,9 +168,31 @@ export default {
       }
     },
     handleEnded() {
-      this.isPlaying = false;
-      this.currentTime = 0;
-    },
+  const currentIndex = this.currentTracks.findIndex(
+    track => track.title === this.currentTrack.title
+  );
+
+  const nextIndex = currentIndex + 1;
+  const nextTrack = this.currentTracks[nextIndex];
+
+  if (nextTrack) {
+    this.currentTrack = nextTrack;
+    this.$nextTick(() => {
+      const audio = this.$refs.audioPlayer;
+      if (audio) {
+        audio.currentTime = 0;
+        audio.volume = this.volume;
+        audio.play();
+        this.isPlaying = true;
+      }
+    });
+  } else {
+    // Laatste nummer: stop met afspelen
+    this.isPlaying = false;
+    this.currentTime = 0;
+  }
+}
+,
     formatTime(time) {
       if (!time) return "0:00";
       const minutes = Math.floor(time / 60);
@@ -408,6 +394,10 @@ input[type="range"]::-moz-range-thumb {
   border: 1px solid black;
 }
 
+.now-playing-title{
+  text-align: center;
+}
+
 .muziek-balk {
   bottom: 0;
   padding: 1rem;
@@ -422,6 +412,11 @@ input[type="range"]::-moz-range-thumb {
   gap: 1rem;
 }
 
+.track-icon {
+  width: 100%;
+  height: 15rem;
+  padding-bottom: 1rem;
+}
 
 
 /* stemmen */

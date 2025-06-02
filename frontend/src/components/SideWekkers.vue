@@ -10,7 +10,7 @@
   </div>
 
   <!-- pomodoro -->
-  <div class="achtergrondblur" v-if="pomodoroClicked">
+  <div class="achtergrondblur" v-show="pomodoroClicked">
     <div class="pomodoro">
       <div class="pomodoro-header">
         <div class="pomodoro-header-top">
@@ -63,7 +63,7 @@
   </div>
 
   <!-- wekker -->
-  <div class="achtergrondblur" v-if="alarmClicked">
+  <div class="achtergrondblur" v-show="alarmClicked">
     <div class="alarm">
       <div class="alarm-header">
         <p class="alarm-titel">Wekker</p>
