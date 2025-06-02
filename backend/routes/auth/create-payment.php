@@ -1,7 +1,6 @@
 <?php
 $apiKey = getenv('mollie_KEY');
 
-
 $data = json_decode(file_get_contents('php://input'), true);
 $price = $data['price'] ?? null;
 $currency = 'EUR'; // Naar euro want wij zijn in Nederland

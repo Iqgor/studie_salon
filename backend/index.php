@@ -51,7 +51,6 @@ $publicRoutes = [
 ];
 
 
-
 // JWT verificatie function
 function base64UrlDecode($data)
 {
