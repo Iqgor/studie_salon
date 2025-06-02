@@ -261,6 +261,9 @@ export default {
   watch: {
     alarmClicked(newVal) {
       document.documentElement.style.overflow = newVal ? 'hidden' : 'auto';
+    },
+    pomodoroClicked(newVal) {
+      document.documentElement.style.overflow = newVal ? 'hidden' : 'auto';
     }
   },
   mounted() {
@@ -309,7 +312,6 @@ export default {
   ;
 }
 
-
 .wekkers .fa-clock, .wekkers .fa-stopwatch{
   color: var(--color-primary-800);
   margin: 10px;
@@ -349,7 +351,7 @@ export default {
   z-index: 100;
   min-height: 30rem;
   padding: 5rem;
-  min-width: 60rem;
+  width: 65rem;
   border-radius: 5px;
   position: fixed;
   background: var(--color-background-400);

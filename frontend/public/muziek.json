@@ -1,0 +1,166 @@
+{
+  "Concentratie": [
+    {
+      "title": "Blij leren",
+      "filename": "Blij-leren.mp3"
+    },
+    {
+      "title": "Blije vogels",
+      "filename": "Blije-vogels.mp3"
+    },
+    {
+      "title": "Een warm geluid",
+      "filename": "Een-warm-geluid.mp3"
+    },
+    {
+      "title": "Golf",
+      "filename": "Golf.mp3"
+    },
+    {
+      "title": "Hoog en droog",
+      "filename": "Hoog-en-droog.mp3"
+    },
+    {
+      "title": "Ik mis je",
+      "filename": "Ik-mis-je.mp3"
+    },
+    {
+      "title": "Machtige gitaar",
+      "filename": "Machtige-gitaar.mp3"
+    },
+    {
+      "title": "Magische momenten",
+      "filename": "Magische-momenten.mp3"
+    },
+    {
+      "title": "Onderweg naar",
+      "filename": "Onderweg-naar.mp3"
+    },
+    {
+      "title": "Sakuya",
+      "filename": "Sakuya.mp3"
+    },
+    {
+      "title": "Sterrenbeeld",
+      "filename": "Sterrenbeeld.mp3"
+    },
+    {
+      "title": "Verborgen bergen",
+      "filename": "Verborgen-berge.mp3"
+    },
+    {
+      "title": "Vrolijk stromen",
+      "filename": "Vrolijk-stromen.mp3"
+    },
+    {
+      "title": "Winter morgen",
+      "filename": "Winter-morgen.mp3"
+    }
+  ],
+  "Ontspanning": [
+  {
+    "title": "Adembenemend",
+    "filename": "Adembenemend.mp3"
+  },
+  {
+    "title": "Bouwen aan dromen",
+    "filename": "Bouwen-aan-dromen.mp3"
+  },
+  {
+    "title": "De dolfijn het meisje",
+    "filename": "De-dolfijn-het-meisje.mp3"
+  },
+  {
+    "title": "Het verhaal van een instrument",
+    "filename": "Het-verhaal-van-een-instrument.mp3"
+  },
+  {
+    "title": "Kletsende walvissen",
+    "filename": "Kletsende-walvissen.mp3"
+  },
+  {
+    "title": "Pianospel",
+    "filename": "Pianospel.mp3"
+  },
+  {
+    "title": "Rust en zachtheid",
+    "filename": "Rust-en-zachtheid.mp3"
+  },
+  {
+    "title": "Zwemmen met walvissen",
+    "filename": "Zwemmen-met-walvissen.mp3"
+  }
+],
+
+  "Slaap": [
+  {
+    "title": "Alpha gloven",
+    "filename": "Slaap-Alpha-gloven.mp3"
+  },
+  {
+    "title": "Carribische zee",
+    "filename": "Slaap-Carribische-zee.mp3"
+  },
+  {
+    "title": "Golven kabbelen",
+    "filename": "Slaap-Golven-kabbelen.mp3"
+  },
+  {
+    "title": "Golven schelpenstrand",
+    "filename": "Slaap-Golven-schelpenstrand.mp3"
+  },
+  {
+    "title": "Kabbelende golven",
+    "filename": "Slaap-Kabbelende-golven.mp3"
+  },
+  {
+    "title": "Klankschaal",
+    "filename": "Slaap-Klankschaal.mp3"
+  },
+  {
+    "title": "Noordzeegolven",
+    "filename": "Slaap-Noordzeegolven.mp3"
+  },
+  {
+    "title": "Oerwoudgeluiden",
+    "filename": "Slaap-Oerwoudgeluiden.mp3"
+  },
+  {
+    "title": "Oerwoudgeluid Mexico",
+    "filename": "Slaap-Oerwoudgeluid-mexico.mp3"
+  },
+  {
+    "title": "Pacific boomkikker",
+    "filename": "Slaap-Pacific-boomkikker.mp3"
+  },
+  {
+    "title": "Regen in Bangalore",
+    "filename": "Slaap-Regen-in-Bangalore.mp3"
+  },
+  {
+    "title": "Regen in London",
+    "filename": "Slaap-Regen-in-London.mp3"
+  },
+  {
+    "title": "Regen in Vietnam",
+    "filename": "Slaap-Regen-in-Vietnam.mp3"
+  },
+  {
+    "title": "Regenfluit",
+    "filename": "Slaap-Regenfluit.mp3"
+  },
+  {
+    "title": "Speelse groote vis",
+    "filename": "Slaap-Speelse-groote-vis.mp3"
+  },
+  {
+    "title": "Tjilpende vogels",
+    "filename": "Slaap-Tjilpende-vogels.mp3"
+  },
+  {
+    "title": "Regen op palmbladen",
+    "filename": "Sleep-Regen-op-palmbladen.mp3"
+  }
+]
+
+}
