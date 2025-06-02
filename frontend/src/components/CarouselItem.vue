@@ -28,7 +28,7 @@
         </p>
         <p v-for="(text,i) in info" class="carousel-inhoud">
           <router-link v-if="!isEditClicked[i]"  :to="text.url"  class="carousel-informatie">
-            <span >{{ text.title }}</span>
+            <span v-html="text.title"></span>
           </router-link>
           <input v-else type="text" v-model="lastTitle" class="editLink" />
           <span>

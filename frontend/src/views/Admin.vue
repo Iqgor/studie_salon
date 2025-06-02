@@ -14,14 +14,23 @@
           <button v-if="beginLimit !== 0" @click="beginLimit = beginLimit - 20, endLimit = endLimit - 20">Vorige</button>
           <button v-if="endLimit < allData.data.length" @click="endLimit = endLimit + 20, beginLimit = beginLimit + 20">Volgende</button>
         </div>
-        Items {{ beginLimit + 1 }} - {{ endLimit < allData.data.length ? endLimit : allData.data.length }} van {{ allData.data ? allData.data.length : 0 }}
-      </div>
+        Items
+        {{ filteredData.length > 0? '' : beginLimit + 1 }} -
+        {{
+          (filteredData.length > 0
+            ? (endLimit < filteredData.length ? endLimit : filteredData.length)
+            : (endLimit < allData.data.length ? endLimit : allData.data.length))
+        }}
+        van
+        {{
+          filteredData.length > 0
+            ? filteredData.length
+            : (allData.data ? allData.data.length : 0)
+        }}      </div>
       <div class="addItem">
         <h3>Item toevoegen:</h3>
-        <div class="addIteminputs">
-          <input v-for="value in allData.data && allData.data.length ? Object.keys(allData.data[0]).filter(key => key !== 'id') : []" :key="value" type="text"  :placeholder="value" />
-        </div>
-        <button @click="itemAction('add', table, null)">Toevoegen</button>
+        <button @click="editItem(null)">Toevoegen</button>
+        <input @change="changeDB" @input="changeDB" type="text" v-model="zoekDB" :placeholder="`Zoek in de database tabel: ${table} `"  />
       </div>
       <table>
         <thead>
@@ -32,16 +41,14 @@
           </tr>
         </thead>
         <tbody>
-            <tr v-for="(row, rowIndex) in allData.data && allData.data.slice(beginLimit - 1, endLimit)" :key="rowIndex + beginLimit">
+            <tr v-for="(row, rowIndex) in filteredData.length > 0 ? filteredData.slice(beginLimit -1, endLimit)  : allData.data && allData.data.slice(beginLimit - 1, endLimit)" :key="rowIndex + beginLimit">
               <td v-for="(value, key, cellIndex) in row" :key="cellIndex">
-                <span v-if="!isEditClicked[row.id]">{{ value }}</span>
-                <input v-else-if="typeof value === 'string'" type="text" v-model="newData[key]" :placeholder="key" />
-                <input v-else-if="typeof value === 'number'" type="number" v-model="newData[key]" :placeholder="key" />
+                <span>{{ value }}</span>
               </td>
               <td>
                 <span title="edit item" @click="editItem(row)"><i class="fa-solid fa-pen"></i></span>
               </td>
-              <td v-if="!isEditClicked[row.id]">
+              <td>
                 <span title="verwijder item" @click="itemAction('delete',table,row.id)"><i class="fa-solid fa-trash"></i></span>
               </td>
               <td v-if="Object.keys(allData.data[0]).includes('weergeven') && !isEditClicked[row.id]">
@@ -62,21 +69,54 @@
           <button v-if="beginLimit !== 0" @click="beginLimit = beginLimit - 20, endLimit = endLimit - 20">Vorige</button>
           <button v-if="endLimit < allData.data.length" @click="endLimit = endLimit + 20, beginLimit = beginLimit + 20">Volgende</button>
         </div>
-        Items {{ beginLimit + 1 }} - {{ endLimit < allData.data.length ? endLimit : allData.data.length }} van {{ allData.data ? allData.data.length : 0 }}
+        Items
+        {{ filteredData.length > 0? '' : beginLimit + 1 }} -
+        {{
+          (filteredData.length > 0
+            ? (endLimit < filteredData.length ? endLimit : filteredData.length)
+            : (endLimit < allData.data.length ? endLimit : allData.data.length))
+        }}
+        van
+        {{
+          filteredData.length > 0
+            ? filteredData.length
+            : (allData.data ? allData.data.length : 0)
+        }}
       </div>
     </div>
   </main>
-  <div class="EditAddmodal">
-
+  <div v-if="isEditClicked[newData.id] || isEditClicked['add']" class="editAddmodal">
+    <div class="editAddmodalContent">
+      <h2>Item Bewerken</h2>
+      <div class="addIteminputs">
+        <div :key="key" v-for="(data,key) in newData">
+          <label :for="key">{{ key }}</label>
+          <input :id="key" v-if="allData.columnTypes[key].includes('int')" type="number" v-model="newData[key]" :placeholder="key" />
+          <input :id="key" v-else-if="allData.columnTypes[key].includes('char')" type="text" v-model="newData[key]" :placeholder="key" />
+          <input :id="key" v-else-if="allData.columnTypes[key].includes('datetime')" type="datetime-local" v-model="newData[key]" :placeholder="key" />
+          <textarea :id="key" v-else-if="allData.columnTypes[key] == 'text'" v-model="newData[key]" :placeholder="key" />
+          <jodit-editor v-else-if="allData.columnTypes[key] =='longtext'" v-model="newData[key]" :placeholder="key" />
+        </div>
+      </div>
+      <div>
+        <button @click="isEditClicked['add'] ? itemAction('add',table,newData.id) :itemAction('edit', table, newData.id)">Opslaan</button>
+        <button @click="isEditClicked['add'] ? editItem(null) : editItem(newData)">Annuleren</button>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 import { auth } from '@/auth';
 import AdminTableHead from '@/components/AdminTableHead.vue';
+import 'jodit/build/jodit.min.css'
+import { JoditEditor } from 'jodit-vue'
+import { toastService } from '@/services/toastService';
+
   export default {
     name: 'Admin',
     components: {
-      AdminTableHead
+      AdminTableHead,
+      JoditEditor
     },
     data() {
       return {
@@ -87,10 +127,30 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
         endLimit: 20,
         nameHeaderClicked: '',
         newData: {},
-        isEditClicked: {}
+        isEditClicked: {},
+        zoekDB: '',
+        filteredData: [],
       };
     },
     methods: {
+      changeDB: (() => {
+        // Debounce implementation to avoid lag on fast input changes
+        let timeout = null;
+        return function() {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+        if (this.zoekDB === '') {
+          this.filteredData = []; // Reset filteredData to all data
+          return;
+        }
+        this.filteredData = this.allData.data.filter(item => {
+          return Object.values(item).some(value => {
+            return value && value.toString().toLowerCase().includes(this.zoekDB.toLowerCase());
+          });
+        });
+          }, 250); // 250ms debounce delay
+        };
+      })(),
       // Add any methods if needed
       async fetchData() {
         const formdata = new FormData();
@@ -167,6 +227,12 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
                 this.isEditClicked[id] = false; // Exit edit mode after saving
                 this.newData = {}; // Clear newData after saving
               }
+              if( action === 'add') {
+                this.isEditClicked['add'] = false; // Exit add mode after saving
+                this.newData = {}; // Clear newData after adding
+              }
+              document.body.style.overflow = '';
+              toastService.addToast(`Item ${action}`,`Item is succsesvol ${action}`, 'success');
             } else {
               console.error(`Error performing ${action} on item:`, response.statusText);
             }
@@ -176,9 +242,28 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
           });
       },
       editItem(row) {
+        if(row === null){
+          // If row is null, it means we are adding a new item
+          // Set newData with the keys from allData.data but with empty values
+          this.newData = {};
+          if (this.allData.data && this.allData.data.length) {
+            Object.keys(this.allData.data[0]).forEach(key => {
+              this.newData[key] = '';
+            });
+            // Set the id key to the last item's id
+            const lastItem = this.allData.data[this.allData.data.length - 1];
+            if (lastItem && lastItem.id !== undefined) {
+              this.newData.id = lastItem.id + 1;
+            }
+          }
+          this.isEditClicked['add'] = !this.isEditClicked['add']; // Set add mode
+          document.body.style.overflow = 'hidden'; // Disable scrolling when modal is open
+          return;
+        }
         // Handle edit item action
         this.isEditClicked[row.id] = !this.isEditClicked[row.id]; // Toggle edit mode for the row
         this.newData = { ...row }; // Copy the row data to newData for editing
+        document.body.style.overflow = this.isEditClicked[row.id] ? 'hidden' : '';
         // You can implement a modal or form for editing here
         console.log('Editing item:', this.newData);
       }
@@ -235,6 +320,12 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
   gap: 1rem;
   margin-top: 1rem;
 }
+.addItem input {
+  padding: 0.5rem;
+  border: 1px solid var(--color-secondary-500);
+  border-radius: 0.25rem;
+  width: 100%;
+}
 
 .addIteminputs {
   display: flex;
@@ -247,7 +338,9 @@ import AdminTableHead from '@/components/AdminTableHead.vue';
   padding: 0.5rem;
   border: 1px solid var(--color-secondary-500);
   border-radius: 0.25rem;
+  width: 50%;
 }
+
 .addItem button {
   padding: 0.5rem 1rem;
   background-color: var(--color-secondary-500);
@@ -328,4 +421,66 @@ td input[type="number"]{
   border-radius: 0.25rem;
   cursor: pointer;
 }
+
+.editAddmodal{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.editAddmodalContent {
+  background-color: var(--color-card-500);
+  padding: 2rem;
+  border-radius: 0.25rem;
+  width: 90%;
+  max-width: 90rem;
+  overflow-y: auto;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.editAddmodalContent h2 {
+  margin-bottom: 1rem;
+}
+.editAddmodalContent .addIteminputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.editAddmodalContent input {
+  padding: 0.5rem;
+  border: 1px solid var(--color-secondary-500);
+  border-radius: 0.25rem;
+}
+.editAddmodalContent button {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-secondary-500);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  width: max-content;
+}
+
+.editAddmodalContent button:last-of-type{
+  margin-left: 1rem;
+}
+
+.addIteminputs >div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.addIteminputs label {
+  font-weight: bold;
+}
+
 </style>
