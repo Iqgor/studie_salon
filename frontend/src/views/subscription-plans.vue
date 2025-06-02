@@ -405,7 +405,7 @@ export default {
 .container {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 5rem;
     justify-content: center;
     align-items: center;
 }

@@ -82,6 +82,7 @@
 </template>
 <script>
 import { auth } from '@/auth';
+import router from '@/router';
 import { toastService } from '@/services/toastService';
 
 
@@ -174,6 +175,7 @@ export default {
                 if (incommingdata?.type == 'success') {
                     localStorage.removeItem('temp_used')
                     auth.temp_used = false
+                    router.push('/profiel')
                 }
 
                 auth.checkAction(incommingdata?.action)
