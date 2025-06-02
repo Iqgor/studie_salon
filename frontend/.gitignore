@@ -28,4 +28,8 @@ coverage
 *.sw?
 .env
 
+songs
+img
+
+
 *.tsbuildinfo
