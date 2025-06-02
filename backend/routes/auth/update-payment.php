@@ -74,7 +74,42 @@ switch ($status) {
             exit();
         }
 
-        break;
+        $subject = 'Betaling geslaagd – abonnement actief';
+
+        $htmlBody = "
+            Beste gebruiker,<br><br>
+            We hebben je betaling succesvol ontvangen. Je abonnement is nu actief.<br><br>
+            Details van je betaling:<br>
+            <ul>
+            <li><b>Abonnement:</b> $subscriptionId</li>
+            <li><b>Periode:</b> $subscriptionPeriod</li>
+            <li><b>Bedrag:</b> €" . number_format($price, 2, ',', '.') . "</li>
+            </ul>
+            <br>
+            Je kunt nu gebruikmaken van alle functionaliteiten die bij je abonnement horen.<br><br>
+            Bedankt voor je vertrouwen!<br><br>
+            Met vriendelijke groet,<br>
+            Studie salon
+        ";
+
+        $altBody =
+            "Beste gebruiker,\n\n" .
+            "We hebben je betaling succesvol ontvangen. Je abonnement is nu actief.\n\n" .
+            "Details van je betaling:\n" .
+            "- Abonnement: $subscriptionId\n" .
+            "- Periode: $subscriptionPeriod\n" .
+            "- Bedrag: €" . number_format($price, 2, ',', '.') . "\n\n" .
+            "Je kunt nu gebruikmaken van alle functionaliteiten die bij je abonnement horen.\n\n" .
+            "Bedankt voor je vertrouwen!\n\n" .
+            "Met vriendelijke groet,\n" .
+            "Het Studie salon"
+        ;
+
+        sendMail($userEmail, $subject, $htmlBody, $altBody);
+
+        http_response_code(200);
+        exit();
+
 
     case 'open':
     case 'pending':
