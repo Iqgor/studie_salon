@@ -108,6 +108,7 @@ export default {
     position: relative;
     overflow: auto;
     min-height: 80vh;
+    padding: 5rem;
 }
 
 .profiel_list {

@@ -84,7 +84,10 @@
 
                 <div class="buttons">
                     <button type="submit" class="btn">Stuur wachtwoord</button>
-                    <p class="text">Nog geen account? <RouterLink href="/abonnementen" class="link">Neem eerst een abonnement</RouterLink>
+                    <p class="text">Nog geen account? <a href="/abonnementen" class="link">Neem eerst een abonnement</a>
+                    </p>
+
+                    <p class="text"> Wachtwoord herinnerd? <a class="link" @click="showForm = 'login'">Terug naar inloggen</a>
                     </p>
                 </div>
             </form>
