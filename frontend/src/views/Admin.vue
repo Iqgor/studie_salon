@@ -196,6 +196,7 @@ export default {
         }
         this.allData = await response.json();
         this.table = this.allData.table || '';
+        this.changeDB(); // Call changeDB to filter data based on zoekDB input
       } catch (error) {
         console.error('There has been a problem with your fetch operation:', error);
       }

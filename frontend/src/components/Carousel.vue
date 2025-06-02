@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import CarouselItem from "./carouselItem.vue";
+import CarouselItem from "./CarouselItem.vue";
 export default {
   name: "ImageCarousel",
   components: {

@@ -11,7 +11,7 @@
 
                     <div class="bars">
                         <span class="bar" :class="slideIndex == index + 1 ? 'active' : ''"
-                            v-for="(slide, index) in slides"></span>
+                            v-for="(slide, index) in slides" :key="index"></span>
                     </div>
                 </div>
 
@@ -99,8 +99,7 @@
 import { auth } from '@/auth';
 import router from '@/router';
 import { toastService } from '@/services/toastService';
-import { sharedfunctions } from '@/sharedFunctions';
-import { jwtDecode } from 'jwt-decode';
+
 
 
 export default {
@@ -180,12 +179,12 @@ export default {
         validateInput() {
             if (this.email === '' && this.password === '') {
                 // * inputs zijn leeg
-                addToast('error', 'Gebruikersnaam', 'Gebruikersnaam mag niet leeg zijn', 4000)
-                addToast('error', 'Wachtwoord', 'Wachtwoord mag niet leeg zijn', 4000)
+                toastService.addToast('error', 'Gebruikersnaam', 'Gebruikersnaam mag niet leeg zijn', 4000)
+                toastService.addToast('error', 'Wachtwoord', 'Wachtwoord mag niet leeg zijn', 4000)
             } else if (this.email === '') {
-                addToast('error', 'Gebruikersnaam', 'Gebruikersnaam mag niet leeg zijn', 4000)
+                toastService.addToast('error', 'Gebruikersnaam', 'Gebruikersnaam mag niet leeg zijn', 4000)
             } else if (this.password === '') {
-                addToast('error', 'Wachtwoord', 'Wachtwoord mag niet leeg zijn', 4000)
+                toastService.addToast('error', 'Wachtwoord', 'Wachtwoord mag niet leeg zijn', 4000)
             } else {
                 this.login()
 
@@ -258,6 +257,7 @@ export default {
                 }
             } catch (err) {
                 // error handling hier
+                console.error(err);
             }
         },
         async forgotPassword() {
@@ -277,6 +277,7 @@ export default {
 
             } catch (err) {
                 // error handling hier
+                console.error(err);
             }
 
         }
