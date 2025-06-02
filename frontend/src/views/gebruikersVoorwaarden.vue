@@ -439,7 +439,7 @@ export default {
 .card {
     padding: 2rem;
     margin-bottom: 2rem;
-    background-color: var(--color-background-700);
+    background-color: var(--color-card-500);
     border-radius: 0.8rem;
     box-shadow: 0.5rem 0.5rem 0.4rem rgba(0, 0, 0, 0.3);
 }
