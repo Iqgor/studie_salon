@@ -10,10 +10,10 @@
                 <i title="Voeg item toe" v-if="isEditClicked[index]" @click="makeNewItem = !makeNewItem" class="fa-solid fa-plus"></i>
               </span>
             </h2>
-            <i v-if="isOverflowing" @click="changeIsClicked(indexNumber)"  class="fa-solid fa-arrow-down" :class="!isClickedout ? 'rotate': ''"></i>
+            <i @click="changeIsClicked(indexNumber)"  class="fa-solid fa-arrow-down" :class="!isClickedout ? 'rotate': ''"></i>
         </div>
 
-        <div v-if="isOverflowing" class="views">
+        <div class="views">
           <i @click="changeView('table',indexNumber)" :class="{'isActive' : view == 'table'}" class="fa-solid fa-table"></i>
           <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
         </div>
@@ -26,7 +26,7 @@
             <i @click="makeNewItem = false, newItemName= ''" class="fa-solid fa-xmark"></i>
           </span>
         </p>
-        <p v-for="(text,i) in info" class="carousel-inhoud">
+        <p v-for="(text,i) in info" :key="i" class="carousel-inhoud">
           <router-link v-if="!isEditClicked[i]"  :to="text.url"  class="carousel-informatie">
             <span v-html="text.title"></span>
           </router-link>
@@ -68,7 +68,7 @@ export default {
   },
   watch:{
     carouselData: {
-      handler(newValue) {
+      handler() {
         this.$nextTick(() => {
           this.checkOverflowing();
         });
@@ -370,7 +370,7 @@ export default {
   flex-shrink: 1;
   justify-content: center;
   padding: 0;
-
+  padding-top: 1rem;
 }
 
 

@@ -1,7 +1,7 @@
 <?php
 function generate_jwt(array $payload): string {
     // key ophalen uit de env
-    $secret_key = getenv('SECRET_KEY');
+    $secret_key = getenv('jwt_KEY');
 
     // standaard header
     $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);

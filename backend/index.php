@@ -25,7 +25,7 @@ $conn = getDBConnection();
 
 
 //global env variables
-$secret_key = getenv('SECRET_KEY');
+$secret_key = getenv('jwt_KEY');
 $mail_host = getenv('MAIL_HOST');
 $mail_username = getenv('MAIL_USERNAME');
 $mail_password = getenv('MAIL_PASSWORD');
@@ -49,7 +49,6 @@ $publicRoutes = [
     'create-payment',
     'update-payment'
 ];
-
 
 
 // JWT verificatie function
