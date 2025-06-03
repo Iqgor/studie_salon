@@ -1,6 +1,6 @@
 <?php
 $tegel = $_POST['slug'] ?? null;
-$stmt = $conn->prepare("SELECT slug, name, tegel_naam FROM teksten WHERE tegel = ?");
+$stmt = $conn->prepare("SELECT slug, name, tegel_naam FROM teksten WHERE tegel = ? and weergeven = 1");
 $stmt->bind_param("s", $tegel);
 $stmt->execute();
 $result = $stmt->get_result();

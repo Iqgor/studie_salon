@@ -36,7 +36,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = trim($path, '/');
 $segments = explode('/', $path);
-$resource = $segments[2] ?? null;
+$resource = $segments[1] ?? null;
 
 // List of public routes that don't need auth
 $publicRoutes = [

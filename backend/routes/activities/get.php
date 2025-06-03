@@ -9,7 +9,7 @@ if (!$userId) {
 }
 
 // Prepare base query
-$query = "SELECT * FROM activities WHERE user_id = ?";
+$query = "SELECT * FROM activities WHERE user_id = ? and weergeven = 1";
 $params = [$userId];
 $types = "i";
 

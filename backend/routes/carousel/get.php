@@ -1,5 +1,5 @@
 <?php
-$stmt = $conn->prepare("SELECT * FROM `coursel_items`");
+$stmt = $conn->prepare("SELECT * FROM `coursel_items` WHERE `weergeven` = 1 ");
 $stmt->execute();
 $result = $stmt->get_result();
 $carouselItems = [];

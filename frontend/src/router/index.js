@@ -14,7 +14,7 @@ import Disclaimer from '@/views/disclaimer.vue'
 const savedScrollPositions = {};
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
