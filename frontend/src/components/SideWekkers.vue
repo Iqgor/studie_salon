@@ -54,9 +54,9 @@
         <button class="alarm-button" v-if="alarmRinging" @click="stopAlarm">🔕 Stop Alarm</button>
       </div>
       <div class="pomodoro-buttons">
-        <button class="pomodoro-button" @click="selectPomodoroDuration(TimerDuration)">Timer</button>
-        <button class="pomodoro-button" @click="selectPomodoroDuration(5 * 60)">Korte pauze</button>
-        <button class="pomodoro-button" @click="selectPomodoroDuration(longBreakDuration)">Lange pauze</button>
+        <button class="pomodoro-button pomodoro-button-onder" @click="selectPomodoroDuration(TimerDuration)">Timer</button>
+        <button class="pomodoro-button pomodoro-button-onder" @click="selectPomodoroDuration(5 * 60)">Korte pauze</button>
+        <button class="pomodoro-button pomodoro-button-onder" @click="selectPomodoroDuration(longBreakDuration)">Lange pauze</button>
       </div>
 
     </div>
@@ -462,12 +462,9 @@ export default {
   list-style: none;
   font-size: 2rem;
   text-align: center;
-
-
 }
 
 .wekker-remove-button{
-
   background: none;
   border: none;
   font-size: 2rem;
@@ -523,6 +520,47 @@ export default {
   font-size: 2.5rem;
   color: var(--color-text);
   background-color: var(--color-background-400);
+}
+
+@media screen and (max-width: 768px) {
+  .alarm, .pomodoro {
+    width: 100%;
+    height: 100%;
+    padding: 2rem;
+  }
+    .timer-box, .pomodoro-box {
+    width: 100%;
+  }
+  .alarm-header, .pomodoro-header {
+    width: 100%;
+    font-size: 2.5rem;
+  }
+    .pomodoro-settings-menu {
+      width: 100%;
+    }
+    .pomodoro-header-top, .pomodoro-header-bottom {
+      width: 100%;
+      font-size: 2.5rem;
+    }
+}
+@media screen and (max-width: 590px) {
+  .pomodoro-buttons {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+
+  }
+  .pomodoro-button-onder {
+    width: 100%;
+  }
+}
+
+  @media screen and (max-width: 500px) {
+  .timer-text, .pomodoro-text {
+    font-size: 6rem;
+  }
 }
 
 </style>

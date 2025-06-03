@@ -27,7 +27,6 @@
               {{ category }}
             </p>
           </div>
-
           <div class="muziek-tracklist">
             <div class="muziek-track" v-for="(track, index) in currentTracks" :key="index" @click="selectTrack(index)">
               <img :src="`/img/${selectedCategory}/${track.img}`" alt="img" class="track-icon" />
@@ -54,8 +53,7 @@
             </div>
             <div class="volume">
               <span>{{ Math.round(volume * 100) }}</span>
-              <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume"
-                class="volume-bar" />
+              <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume" class="volume-bar" />
               <span>🔊</span>
             </div>
           </div>
@@ -285,6 +283,7 @@ export default {
   justify-content: left;
   align-items: center;
   gap: 1rem;
+
 }
 
 .muziek-stemmen-button:hover {
@@ -306,6 +305,8 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+
 }
 
 .muziek-button {
@@ -461,4 +462,48 @@ input[type="range"]::-moz-range-thumb {
 .stemmen-keuze>p {
   margin-top: 0.5rem;
 }
+
+
+
+ @media screen and (max-width: 768px) {
+  .muziek-stemmen-popup {
+    height: 100%;
+    width: 100%;
+    padding: 2rem;
+  }
+      .track-icon {
+      object-fit: cover;
+  }
+.muziek-stemmen-header {
+      width: 100%;
+    }
+
+  @media screen and (max-width: 500px) {
+    .muziek-stemmen-popup {
+      width: 100%;
+      height: 100%;
+      padding: 1rem;
+    }
+    .muziek-stemmen-header {
+      font-size: 2.5rem;
+      width: 100%;
+    }
+    .muziek-button {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    .muziek-tracklist {
+      grid-template-columns: 1fr;
+    }
+}
+    .stemmen-keuzes {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .stemmen-text {
+    font-size: 2rem;
+    text-align: center;
+    margin: 1rem;
+}
+  }
 </style>
+
