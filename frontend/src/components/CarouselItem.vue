@@ -430,15 +430,17 @@ export default {
 }
 
 
-.carousel-inhoud > .fa-regular {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
+@media (min-width: 769px) {
+  .carousel-inhoud > .fa-regular {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
 
-.carousel-inhoud:hover > .fa-regular {
-  opacity: 1;
-  pointer-events: auto;
+  .carousel-inhoud:hover > .fa-regular {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 

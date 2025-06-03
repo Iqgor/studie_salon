@@ -423,16 +423,17 @@ export default {
   color: var(--color-primary-700);
 }
 
+@media (min-width: 769px) {
+  .tableView>li>i {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
 
-.tableView>li>i {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-
-.tableView>li:hover  .fa-regular {
-  opacity: 1;
-  pointer-events: auto;
+  .tableView>li:hover  .fa-regular {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .links {

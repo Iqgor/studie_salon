@@ -847,17 +847,18 @@ export default {
 .calendar-header input[type="month"]{
   background-color: var(--color-background-500);
   border: none;
-  color: var(--color-primary-500);
+  /* color: var(--color-primary-500); */
   font-size: 90%;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   font-weight: bold;
+    border-bottom: 0.5px solid transparent;
+
 }
 
 .calendar-header input[type="month"]:focus {
   outline: none;
-  background-color: var(--color-secondary-500);
-  color: white;
+  border-bottom: 0.5px solid var(--color-primary-500);
 }
 
 
