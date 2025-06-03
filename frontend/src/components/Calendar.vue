@@ -664,15 +664,20 @@ export default {
 
           if (activity.done === 1) {
             activityElement.style.backgroundColor = 'var(--color-primary-500)';
-          }
-
-
-          activityElement.innerHTML = `
+            activityElement.innerHTML = `
             <strong>${activity.title}</strong>
             <p style="font-size:60%">${activity.vak}</p>
             <p style="font-size:60%">${activity.maakwerk}</p>
-
+            <i class="afvinken uitvinken fa-solid fa-circle-check"></i>
           `;
+          }else{
+            activityElement.innerHTML = `
+            <strong>${activity.title}</strong>
+            <p style="font-size:60%">${activity.vak}</p>
+            <p style="font-size:60%">${activity.maakwerk}</p>
+            <i class="afvinken fa-regular fa-circle-check"></i>
+          `;
+          }
           activityElement.addEventListener('mouseenter', () => {
             if (activityElement.scrollHeight > activityElement.offsetHeight) {
               activityElement.style.height = 'auto';
@@ -683,11 +688,45 @@ export default {
             activityElement.style.height = `${height}rem`;
           });
 
-          activityElement.addEventListener('click', () => {
+          activityElement.addEventListener('click', (event) => {
+            // Prevent click if the afvinken icon was clicked
+            if (event.target.classList.contains('afvinken')) return;
             this.activityClicked = true;
             this.activityClickedInfo = activity;
           })
           slotElement.appendChild(activityElement);
+
+            // Add click event listener to the "afvinken" (check) icon
+            const afvinkenIcon = activityElement.querySelector('.afvinken');
+            if (afvinkenIcon) {
+            afvinkenIcon.addEventListener('click', (e) => {
+              e.stopPropagation();
+              // Toggle done state and update on server
+              const updatedActivity = { ...activity, done: activity.done === 1 ? 0 : 1 };
+              const formData = new FormData();
+              formData.append('shownActivity', JSON.stringify(updatedActivity));
+              fetch(`${import.meta.env.VITE_APP_API_URL}backend/edit_activity`, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                Authorization: auth.bearerToken
+              }
+              })
+              .then(response => response.json())
+              .then(() => {
+                toastService.addToast(
+                updatedActivity.done === 1 ? 'Afgevinkt!' : 'Niet afgevinkt!',
+                `Activiteit is ${updatedActivity.done === 1 ? 'afgevinkt' : 'niet afgevinkt'} door ${auth.user.name}`,
+                'success'
+                );
+                this.fetchActivities();
+              })
+              .catch(error => {
+                console.error('Error updating activity:', error);
+              });
+            });
+            }
+
           const correspondingLi = slotElement.querySelectorAll('li')[dayIndex];
           if (correspondingLi) {
             correspondingLi.appendChild(activityElement);
@@ -808,17 +847,18 @@ export default {
 .calendar-header input[type="month"]{
   background-color: var(--color-background-500);
   border: none;
-  color: var(--color-primary-500);
+  /* color: var(--color-primary-500); */
   font-size: 90%;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   font-weight: bold;
+    border-bottom: 0.5px solid transparent;
+
 }
 
 .calendar-header input[type="month"]:focus {
   outline: none;
-  background-color: var(--color-secondary-500);
-  color: white;
+  border-bottom: 0.5px solid var(--color-primary-500);
 }
 
 
@@ -1019,6 +1059,20 @@ export default {
   cursor: pointer;
   width: 90%;
   margin-left: 0.5rem;
+}
+
+.activity > .afvinken{
+  position: absolute;
+  right: -0.5rem;
+  top: -0.5rem;
+  font-size: 150%;
+  color: var(--color-primary-500);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.activity > .uitvinken{
+  color: var(--color-secondary-500);
 }
 
 

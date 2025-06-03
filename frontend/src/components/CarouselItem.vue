@@ -1,4 +1,5 @@
 <template>
+
   <div class="carousel-top">
     <div class="carousel-titel">
       <h2>
@@ -46,12 +47,16 @@
         <i v-if="isAdmin" @click="isEditClicked[i] = !isEditClicked[i]; lastTitle = text.title"
           class="fa-solid fa-pen"></i>
         <i v-if="isEditClicked[i]" @click="editLink(i)" class="fa-regular fa-circle-check"></i>
-      </span></div>
+      </span>
+                <i v-if="!likes.find(liked => liked.slug === text.url)"  @click="likeLink(text,$event)" class="fa-regular fa-heart"></i>
+          <i v-else @click="likeLink(text,$event)" class="fa-solid fa-heart"></i>
+          </div>
     </p>
 
 
 
   </div>
+
 </template>
 <script>
 import { toastService } from '@/services/toastService';
@@ -72,17 +77,19 @@ export default {
       required: true
     }
   },
-  emits: ['getCarouselData'],
-  mounted() {
-    this.changeIsClicked()
+
+  emits:['getCarouselData'],
+  mounted(){
     this.checkOverflowing()
     this.initOverflowing()
+    this.changeIsClicked()
+    this.getLikes();
     this.isAdmin = auth.user.role === 'admin'
     
   },
   watch: {
     carouselData: {
-      handler(newValue) {
+      handler() {
         this.$nextTick(() => {
           this.checkOverflowing();
         });
@@ -100,9 +107,15 @@ export default {
       lastTitle: '',
       newItemName: '',
       makeNewItem: false,
+      likes: [],
+      oldLikes: [],
     };
   },
+  unmounted() {
+    this.sendLikes()
+  },
   methods: {
+
     shouldShowTile(featureName, index) {
       const access = auth.getFeatureAccess(featureName);
       
@@ -120,6 +133,91 @@ export default {
     return true;
   },
     addItem(index) {
+
+    sendLikes() {
+      if(this.likes.length === 0){
+        return;
+      }
+
+      // Compare oldLikes and likes arrays deeply
+      if (JSON.stringify(this.oldLikes) === JSON.stringify(this.likes)) {
+        console.log('No changes in likes, skipping send.');
+        return;
+      }
+
+      const formData = new FormData();
+
+      formData.append('userId', auth.user.id);
+      formData.append('slug', this.index);
+      formData.append('likes', JSON.stringify(this.likes));
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/sendLikes`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Likes sent successfully:', data);
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    },
+    likeLink(item, event) {
+      // Toggle like status in the likes array
+      const index = this.likes.findIndex(liked => liked.slug === item.url);
+      if (index !== -1) {
+        // Unlike: remove from likes
+        this.likes.splice(index, 1);
+        if (event && event.target) {
+          event.target.classList.remove('fa-solid');
+          event.target.classList.add('fa-regular');
+        }
+      } else {
+        // Like: add to likes
+        this.likes.push({'slug':item.url});
+        if (event && event.target) {
+          event.target.classList.remove('fa-regular');
+          event.target.classList.add('fa-solid');
+        }
+      }
+    },
+    getLikes() {
+      const formData = new FormData();
+      formData.append('slug', this.index);
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/getLikes`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: auth.bearerToken
+        }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          auth.checkAction(data?.action)
+          if (data.length !== 0) {
+            this.likes = data.likes.map(item => ({ slug: item }));
+            this.oldLikes = JSON.parse(JSON.stringify(data.likes.map(item => ({ slug: item })))); // Store the old likes for comparison
+          }
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    },
+    addItem(index){
+
       const formData = new FormData();
       formData.append('carouselName', index);
       formData.append('itemName', this.newItemName);
@@ -378,7 +476,22 @@ export default {
 }
 
 
-.carousel span {
+
+@media (min-width: 769px) {
+  .carousel-inhoud > .fa-regular {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .carousel-inhoud:hover > .fa-regular {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+
+.carousel  span{
   display: flex;
   gap: 1rem;
   align-items: center;
@@ -408,7 +521,7 @@ export default {
   flex-shrink: 1;
   justify-content: center;
   padding: 0;
-
+  padding-top: 1rem;
 }
 
 

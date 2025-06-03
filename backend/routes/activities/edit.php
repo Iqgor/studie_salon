@@ -1,5 +1,5 @@
 <?php
-$activityData = $_POST['shownActivity'] ?? null; // Get activityId from POST data
+$activityData = $_POST['shownActivity'] ?? null; // Get activityId from POST dataMore actions
 if (!$activityData) {
     jsonResponse(['error' => 'Activity data is required'], 400);
     exit;

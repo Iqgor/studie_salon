@@ -52,7 +52,6 @@ export default {
     Calander,
     Carousel,
     SideWekkers,
-    auth
   },
   data() {
     return {
@@ -99,7 +98,7 @@ export default {
         if (savedView && savedView.index === index) {
           this.view = savedView.view;
         } else {
-          this.view = 'list';
+          this.view = 'table';
         }
       }
 
@@ -147,7 +146,7 @@ export default {
         Object.entries(this.CarouselData).map(([category, items]) => [
           category,
           items.filter(item => item.title.toLowerCase().includes(search))
-        ]).filter(([_, items]) => items.length > 0)
+        ]).filter(([, items]) => items.length > 0)
       );
     },
     getDay() {

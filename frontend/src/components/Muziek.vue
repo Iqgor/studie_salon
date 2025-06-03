@@ -5,12 +5,12 @@
     </div>
   </div>
 
-  <div class="achtergrondblur" v-if="muziekClicked">
+  <div class="achtergrondblur" v-show="muziekClicked">
     <div class="muziek-stemmen-popup">
       <div class="muziek-stemmen-header">
         <div class="muziek-stemmen-buttons">
           <p class="muziek-stemmen-button" :class="{ active: selectedTab === 'muziek' }" @click="selectedTab = 'muziek'">Muziek</p>
-          <p> / </p>
+          <p>/</p>
           <p class="muziek-stemmen-button" :class="{ active: selectedTab === 'stemmen' }" @click="selectedTab = 'stemmen'">Stemmen</p>
         </div>
         <p class="pomodoro-x" @click="toggleMuziek">
@@ -22,35 +22,55 @@
         <!-- muziek sectie -->
         <div v-if="selectedTab === 'muziek'" class="muziek-sectie">
           <div class="muziek-buttons">
-            <p v-for="category in Object.keys(muziekTracks)" :key="category" class="muziek-button" :class="{ active: selectedCategory === category }" @click="selectedCategory = category">
+            <p v-for="category in Object.keys(muziekTracks)" :key="category" class="muziek-button"
+              :class="{ active: selectedCategory === category }" @click="selectedCategory = category">
               {{ category }}
             </p>
           </div>
           <div class="muziek-tracklist">
-            <div class="muziek-track" v-for="(track, index) in currentTracks" :key="index">
+            <div class="muziek-track" v-for="(track, index) in currentTracks" :key="index" @click="selectTrack(index)">
+              <img :src="`/img/${selectedCategory}/${track.img}`" alt="img" class="track-icon" />
               <p class="track-title">{{ track.title }}</p>
-              <div class="custom-player">
-                <audio ref="audioElements" :data-index="index" :src="track.url" @timeupdate="updateProgress(index)" @loadedmetadata="setDuration(index)"></audio>
-                <div class="controls">
-                  <button @click="togglePlay(index)">
-                    {{ trackStates[index]?.isPlaying ? '❚❚' : '▶' }}
-                  </button>
-                  <span>{{ formatTime(trackStates[index]?.currentTime) }}</span>
-                  <input type="range" min="0" :max="trackStates[index]?.duration || 0" step="0.1" v-model="trackStates[index].currentTime" @input="seek(index)" class="progress-bar"/>
-                  <span>{{ formatTime(trackStates[index]?.duration) }}</span>
-                </div>
-                <div class="volume">
-                  <span>{{ Math.round(trackStates[index]?.volume * 100) }}</span>
-                  <input type="range" min="0" max="1" step="0.01" v-model="trackStates[index].volume" @input="changeVolume(index)" class="volume-bar"/>
-                  <span>🔊</span>
-                </div>
-              </div>
+            </div>
+          </div>
+          <div class="muziek-balk">
+            <audio ref="audioPlayer" v-if="currentTrack" :src="currentTrack.url" @timeupdate="updateProgress"
+              @loadedmetadata="setDuration" @ended="handleEnded"></audio>
+            <div v-if="currentTrack" class="now-playing">
+              <p class="now-playing-title">{{ currentTrack.title }}</p>
+            </div>
+            <div v-if="currentTrack" class="controls">
+              <button @click="togglePlay">
+                {{ isPlaying ? '❚❚' : '▶' }}
+              </button>
+              <span>{{ formatTime(currentTime) }}</span>
+              <input type="range" min="0" :max="duration" step="0.1" v-model="currentTime" @input="seek"
+                class="progress-bar" />
+              <span>{{ formatTime(duration) }}</span>
+            </div>
+            <div v-else class="controls">
+              <p>Selecteer een nummer om af te spelen 🎶</p>
+            </div>
+            <div class="volume">
+              <span>{{ Math.round(volume * 100) }}</span>
+              <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume" class="volume-bar" />
+              <span>🔊</span>
             </div>
           </div>
         </div>
-        <!-- stemmen sectie -->
+
+        <!-- Stemmen sectie -->
         <div v-else-if="selectedTab === 'stemmen'" class="stem-sectie">
-          <p class="muziek-tekst">Hier komt de stem sectie</p>
+          <div>
+            <p class="stemmen-text">Kies de stem waarnaar je graag luistert.</p>
+          </div>
+          <div class="stemmen-keuzes">
+            <div v-for="(keuze, index) in stemmenKeuzes" :key="index" class="stemmen-keuze" :class="{ 'stemmen-keuze-active': selectedKeuzeIndex === index }" @click="selecteerKeuze(index)">
+              <img :src="keuze.img" :alt="keuze.naam" />
+              <p>{{ keuze.naam }}</p>
+            </div>
+          </div>
+          <audio ref="stemAudioPlayer"></audio>
         </div>
       </div>
     </div>
@@ -65,28 +85,14 @@ export default {
       muziekClicked: false,
       selectedTab: 'muziek',
       selectedCategory: 'Concentratie',
-      trackStates: [],
-      muziekTracks: {
-        Concentratie: [
-          { title: "Concentratie 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-          { title: "Concentratie 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-          { title: "Concentratie 6", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-
-        ],
-        Ontspanning: [
-          { title: "Ontspanning 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 2", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 3", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 4", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-          { title: "Ontspanning 5", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
-        ],
-        Slaap: [
-          { title: "Slaap 1", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
-        ],
-      },
+      muziekTracks: {},
+      currentTrack: null,
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+      volume: 1,
+      stemmenKeuzes: [],
+      selectedKeuzeIndex: 0,
     };
   },
   computed: {
@@ -94,70 +100,88 @@ export default {
       return this.muziekTracks[this.selectedCategory] || [];
     },
   },
-  watch: {
-    currentTracks() {
-      this.initTrackStates();
-    },
-  },
-  mounted() {
-    this.initTrackStates();
-  },
   methods: {
     toggleMuziek() {
       this.muziekClicked = !this.muziekClicked;
     },
-    initTrackStates() {
-      this.trackStates = this.currentTracks.map(() => ({
-        isPlaying: false,
-        currentTime: 0,
-        duration: 0,
-        volume: 1,
-      }));
-    },
-    togglePlay(index) {
-      const audioEl = this.$refs.audioElements[index];
-      const state = this.trackStates[index];
-
-      if (!audioEl) return;
-
-      if (audioEl.paused) {
-        audioEl.play();
-        state.isPlaying = true;
-      } else {
-        audioEl.pause();
-        state.isPlaying = false;
+    selecteerKeuze(index) {
+      this.selectedKeuzeIndex = index;
+      const audio = this.$refs.stemAudioPlayer;
+      const keuze = this.stemmenKeuzes[index];
+      if (audio && keuze.audio) {
+        audio.src = keuze.audio;
+        audio.currentTime = 0;
+        audio.play();
       }
-
-      this.trackStates.forEach((s, i) => {
-        if (i !== index) {
-          const el = this.$refs.audioElements[i];
-          if (el && !el.paused) el.pause();
-          s.isPlaying = false;
+    },
+    selectTrack(index) {
+      this.currentTrack = this.currentTracks[index];
+      this.$nextTick(() => {
+        const audio = this.$refs.audioPlayer;
+        if (audio) {
+          audio.currentTime = 0;
+          audio.volume = this.volume;
+          audio.play();
+          this.isPlaying = true;
         }
       });
     },
-    updateProgress(index) {
-      const audioEl = this.$refs.audioElements[index];
-      if (audioEl) {
-        this.trackStates[index].currentTime = audioEl.currentTime;
+    togglePlay() {
+      const audio = this.$refs.audioPlayer;
+      if (!audio) return;
+      if (audio.paused) {
+        audio.play();
+        this.isPlaying = true;
+      } else {
+        audio.pause();
+        this.isPlaying = false;
       }
     },
-    setDuration(index) {
-      const audioEl = this.$refs.audioElements[index];
-      if (audioEl) {
-        this.trackStates[index].duration = audioEl.duration;
+    updateProgress() {
+      const audio = this.$refs.audioPlayer;
+      if (audio) {
+        this.currentTime = audio.currentTime;
       }
     },
-    seek(index) {
-      const audioEl = this.$refs.audioElements[index];
-      if (audioEl) {
-        audioEl.currentTime = this.trackStates[index].currentTime;
+    setDuration() {
+      const audio = this.$refs.audioPlayer;
+      if (audio) {
+        this.duration = audio.duration;
       }
     },
-    changeVolume(index) {
-      const audioEl = this.$refs.audioElements[index];
-      if (audioEl) {
-        audioEl.volume = this.trackStates[index].volume;
+    seek() {
+      const audio = this.$refs.audioPlayer;
+      if (audio) {
+        audio.currentTime = this.currentTime;
+      }
+    },
+    changeVolume() {
+      const audio = this.$refs.audioPlayer;
+      if (audio) {
+        audio.volume = this.volume;
+      }
+    },
+    handleEnded() {
+      const currentIndex = this.currentTracks.findIndex(
+        track => track.title === this.currentTrack.title
+      );
+      const nextIndex = currentIndex + 1;
+      const nextTrack = this.currentTracks[nextIndex];
+
+      if (nextTrack) {
+        this.currentTrack = nextTrack;
+        this.$nextTick(() => {
+          const audio = this.$refs.audioPlayer;
+          if (audio) {
+            audio.currentTime = 0;
+            audio.volume = this.volume;
+            audio.play();
+            this.isPlaying = true;
+          }
+        });
+      } else {
+        this.isPlaying = false;
+        this.currentTime = 0;
       }
     },
     formatTime(time) {
@@ -167,11 +191,35 @@ export default {
       return `${minutes}:${seconds}`;
     },
   },
+  watch: {
+    muziekClicked(newVal) {
+      document.documentElement.style.overflow = newVal ? 'hidden' : 'auto';
+    }
+  },
+  mounted() {
+    fetch('/muziek.json')
+      .then(res => res.json())
+      .then(data => {
+        this.muziekTracks = {};
+        for (const category in data) {
+          this.muziekTracks[category] = data[category].map(track => ({
+            ...track,
+            url: `/songs/${category}/${track.filename}`
+          }));
+        }
+      });
+
+    fetch('/stemmen.json')
+      .then(res => res.json())
+      .then(data => {
+        this.stemmenKeuzes = data;
+      });
+  }
 };
 </script>
 
-<style>
 
+<style>
 .muziek-stemmen-section {
   position: fixed;
   bottom: 0;
@@ -200,7 +248,7 @@ export default {
   z-index: 100;
   min-height: 30rem;
   padding: 5rem;
-  min-width: 60rem;
+  width: 65rem;
   border-radius: 5px;
   position: fixed;
   background: var(--color-background-400);
@@ -235,11 +283,14 @@ export default {
   justify-content: left;
   align-items: center;
   gap: 1rem;
+
 }
+
 .muziek-stemmen-button:hover {
   cursor: pointer;
   color: var(--color-primary-500);
 }
+
 .muziek-stemmen-button.active {
   color: var(--color-primary-500);
 }
@@ -254,7 +305,10 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+
 }
+
 .muziek-button {
   width: 15rem;
   background-color: var(--color-primary-500);
@@ -265,6 +319,7 @@ export default {
   font-size: 2rem;
   text-align: center;
 }
+
 .muziek-button:hover {
   cursor: pointer;
   background-color: var(--color-primary-600);
@@ -272,40 +327,36 @@ export default {
 
 .muziek-tracklist {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-top: 2rem;
-  max-height: 30rem;
+  max-height: 25rem;
   overflow-y: auto;
-  padding-right: 1rem;
   overflow-x: hidden;
 }
 
 .muziek-track {
   background-color: var(--color-primary-300);
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 1rem;
   color: var(--color-text-500);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+
+}
+
+.muziek-track:hover {
+  cursor: pointer;
+  background-color: var(--color-primary-400);
+  transition: 0.3s ease;
 }
 
 .track-title {
   font-size: 1.6rem;
-  margin-bottom: 1rem;
 }
 
-.custom-player {
-  border: 2px solid #000;
-  padding: 1rem;
-  border-radius: 8px;
-  background: white;
-  font-family: sans-serif;
-  margin-top: 1rem;
-}
-
-.controls, .volume {
+.controls,
+.volume {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -324,8 +375,8 @@ input[type="range"] {
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 20px;
-  width: 20px;
+  height: 2rem;
+  width: 2rem;
   background: black;
   border-radius: 50%;
   cursor: pointer;
@@ -334,11 +385,125 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
+  height: 2rem;
+  width: 2rem;
   background: black;
   border-radius: 50%;
   cursor: pointer;
   border: 1px solid black;
 }
+
+.now-playing-title {
+  text-align: center;
+}
+
+.muziek-balk {
+  bottom: 0;
+  padding: 1rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.controls,
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.track-icon {
+  width: 100%;
+  height: 15rem;
+  padding-bottom: 1rem;
+}
+
+
+/* stemmen */
+
+.stemmen-text {
+  font-size: 2.5rem;
+  text-align: center;
+  margin: 2rem;
+}
+
+.stemmen-keuzes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  justify-items: center;
+  padding: 2rem;
+}
+
+.stemmen-keuze {
+  text-align: center;
+}
+
+.stemmen-keuze>img {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: 0.3s ease;
+  object-position: 100% 10%;
+}
+
+.stemmen-keuze>img:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+}
+
+.stemmen-keuze-active img {
+  box-shadow: 0 0 12px 5px var(--color-secondary-300);
+}
+
+.stemmen-keuze>p {
+  margin-top: 0.5rem;
+}
+
+
+
+ @media screen and (max-width: 768px) {
+  .muziek-stemmen-popup {
+    height: 100%;
+    width: 100%;
+    padding: 2rem;
+  }
+      .track-icon {
+      object-fit: cover;
+  }
+.muziek-stemmen-header {
+      width: 100%;
+    }
+
+  @media screen and (max-width: 500px) {
+    .muziek-stemmen-popup {
+      width: 100%;
+      height: 100%;
+      padding: 1rem;
+    }
+    .muziek-stemmen-header {
+      font-size: 2.5rem;
+      width: 100%;
+    }
+    .muziek-button {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    .muziek-tracklist {
+      grid-template-columns: 1fr;
+    }
+}
+    .stemmen-keuzes {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .stemmen-text {
+    font-size: 2rem;
+    text-align: center;
+    margin: 1rem;
+}
+  }
 </style>
+

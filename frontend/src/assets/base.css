@@ -357,6 +357,12 @@ select:focus {
   border-bottom: 0.25rem solid var(--color-primary-500);
 }
 
+textarea{
+  font-family: 'Roboto', sans-serif;
+  padding: 0.5rem 0.5rem;
+  border: 1px solid var(--color-secondary-500);
+}
+
 .not-found {
   text-align: center;
   margin-top: 50px;

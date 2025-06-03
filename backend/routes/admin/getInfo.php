@@ -15,9 +15,11 @@ if ($table && in_array($table, $tables)) {
     // Get all columns except 'created_at' and 'updated_at'
     $columnsResult = $conn->query("SHOW COLUMNS FROM `$table`");
     $columns = [];
+    $columnTypes = [];
     while ($col = $columnsResult->fetch_assoc()) {
         if ($col['Field'] !== 'created_at' && $col['Field'] !== 'updated_at') {
             $columns[] = "`" . $col['Field'] . "`";
+            $columnTypes[$col['Field']] = $col['Type'];
         }
     }
     $columnsList = implode(', ', $columns);
@@ -33,5 +35,6 @@ if ($table && in_array($table, $tables)) {
 jsonResponse([
     'tables' => $tables,
     'data' => $tableData,
-    'table' => $table
+    'table' => $table,
+    'columnTypes' => $columnTypes ?? null
 ], 200);

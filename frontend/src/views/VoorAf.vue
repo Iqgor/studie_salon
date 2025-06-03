@@ -423,6 +423,19 @@ export default {
   color: var(--color-primary-700);
 }
 
+@media (min-width: 769px) {
+  .tableView>li>i {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .tableView>li:hover  .fa-regular {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .links {
   padding: 2rem 0rem;
   display: flex;
@@ -449,7 +462,7 @@ export default {
 
 .tableView {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(23rem, 1fr));
   padding-left: 0;
   gap: 2rem;
 }
@@ -464,6 +477,13 @@ export default {
   border-radius: 1.5rem;
   padding: 1rem;
   transition: background-color 0.4s ease;
+  height: 13rem;
+  width: 23rem;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .tableView>li>i {

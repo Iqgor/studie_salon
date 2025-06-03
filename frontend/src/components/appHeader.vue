@@ -9,7 +9,6 @@
 
             <li><a href="/">Home</a></li>
             <li><a href="/abonnementen">Abonnementen</a></li>
-            <li><a href="/disclaimer">Disclaimer</a></li>
             <li v-if="auth.isLoggedIn"><a href="/">Teksten</a></li>
 
           </ul>

@@ -7,8 +7,10 @@
 </template>
 
 <script>
+
 import { auth } from '@/auth';
 import CarouselItem from '@/components/CarouselItem.vue';
+
 export default {
   name: "ImageCarousel",
   components: {

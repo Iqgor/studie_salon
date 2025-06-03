@@ -1,5 +1,5 @@
 <template>
-    <RouterLink v-if="!isEditClicked" :to="`${slug}/${item.slug}`">{{ item.name }}</RouterLink>
+    <RouterLink v-if="!isEditClicked" :to="`${slug}/${item.slug}`" v-html="item.name "></RouterLink>
     <input v-else type="text" v-model="item.name" class="editLink" />
     <i v-if="isAdmin" @click="isEditClicked = !isEditClicked" class="fa-solid fa-pen"></i>
     <i v-if="isEditClicked" @click="editLink" class="fa-regular fa-circle-check"></i>
@@ -80,7 +80,7 @@ export default {
 .tableView>li>a {
   display: block;
   width: 100%;
-  height: 100%;
+
 }
 
 .tableView>li:hover {

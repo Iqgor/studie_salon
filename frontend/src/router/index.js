@@ -10,8 +10,11 @@ import { auth } from '@/auth'
 import Disclaimer from '@/views/disclaimer.vue'
 
 
+// Object to store scroll positions by route fullPath
+const savedScrollPositions = {};
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
@@ -84,10 +87,39 @@ const router = createRouter({
       component: () => import('@/views/404.vue')
     }
   ],
+  scrollBehavior(to, from, savedPosition) {
+    // Restore scroll position for the route we are entering, if it exists
+    const pos = savedScrollPositions[to.fullPath];
+    if (pos) {
+      // Remove the saved position after using it
+      delete savedScrollPositions[to.fullPath];
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ left: pos.left, top: pos.top, behavior: 'smooth' });
+        }, 300);
+      });
+    }
+    // Default behavior
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (savedPosition) {
+          resolve({ left: savedPosition.left, top: savedPosition.top, behavior: 'smooth' });
+        } else {
+          resolve(false); // Don't change scroll position
+        }
+      }, 300);
+    });
+  }
 })
 
-// Admin route guard
+// Admin route beveiliging en scroll position saving
 router.beforeEach((to, from, next) => {
+    if (from && from.fullPath) {
+    savedScrollPositions[from.fullPath] = {
+      left: window.scrollX,
+      top: window.scrollY
+    };
+  }
   if (to.matched.some(record => record.meta.requiresAdmin)) {
     if (!auth.isLoggedIn || !auth.user || auth.user.role !== 'admin') {
       return next('/login')
