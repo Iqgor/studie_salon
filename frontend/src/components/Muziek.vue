@@ -9,11 +9,9 @@
     <div class="muziek-stemmen-popup">
       <div class="muziek-stemmen-header">
         <div class="muziek-stemmen-buttons">
-          <p class="muziek-stemmen-button" :class="{ active: selectedTab === 'muziek' }"
-            @click="selectedTab = 'muziek'">Muziek</p>
+          <p class="muziek-stemmen-button" :class="{ active: selectedTab === 'muziek' }" @click="selectedTab = 'muziek'">Muziek</p>
           <p>/</p>
-          <p class="muziek-stemmen-button" :class="{ active: selectedTab === 'stemmen' }"
-            @click="selectedTab = 'stemmen'">Stemmen</p>
+          <p class="muziek-stemmen-button" :class="{ active: selectedTab === 'stemmen' }" @click="selectedTab = 'stemmen'">Stemmen</p>
         </div>
         <p class="pomodoro-x" @click="toggleMuziek">
           <i class="fa-solid fa-x"></i>
@@ -69,13 +67,7 @@
             <p class="stemmen-text">Kies de stem waarnaar je graag luistert.</p>
           </div>
           <div class="stemmen-keuzes">
-            <div
-              v-for="(keuze, index) in stemmenKeuzes"
-              :key="index"
-              class="stemmen-keuze"
-              :class="{ 'stemmen-keuze-active': selectedKeuzeIndex === index }"
-              @click="selecteerKeuze(index)"
-            >
+            <div v-for="(keuze, index) in stemmenKeuzes" :key="index" class="stemmen-keuze" :class="{ 'stemmen-keuze-active': selectedKeuzeIndex === index }" @click="selecteerKeuze(index)">
               <img :src="keuze.img" :alt="keuze.naam" />
               <p>{{ keuze.naam }}</p>
             </div>
@@ -207,7 +199,6 @@ export default {
     }
   },
   mounted() {
-    // Laad muziekdata
     fetch('/muziek.json')
       .then(res => res.json())
       .then(data => {
@@ -220,7 +211,6 @@ export default {
         }
       });
 
-    // Laad stemdata
     fetch('/stemmen.json')
       .then(res => res.json())
       .then(data => {
