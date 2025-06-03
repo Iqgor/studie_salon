@@ -132,7 +132,7 @@ export default {
     // Voor S/M niveau of andere gevallen: altijd tonen
     return true;
   },
-    addItem(index) {
+
 
     sendLikes() {
       if(this.likes.length === 0){
