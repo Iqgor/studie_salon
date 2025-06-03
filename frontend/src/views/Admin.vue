@@ -332,7 +332,7 @@ export default {
   display: flex;
   width: 100%;
   flex-wrap: wrap;
-  justify-content: space-between;
+  gap: 1rem;
   border-radius: 0.25rem;
 
 }
@@ -344,6 +344,7 @@ export default {
   box-sizing: border-box;
   cursor: pointer;
   border-radius: 0.25rem;
+  display: block;
 }
 
 .isClicked {

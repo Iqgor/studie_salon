@@ -1,44 +1,62 @@
 <template>
-      <div class="carousel-top">
-        <div  class="carousel-titel">
-            <h2 >
-              <span @click="changeIsClicked(indexNumber)" v-if="!isEditClicked[index]">{{ index }}</span>
-              <input v-else type="text" v-model="lastTitle" class="editLink" />
-              <span v-if="isAdmin">
-                <i v-if="isAdmin" @click="isEditClicked[index] = !isEditClicked[index], lastTitle = index" class="fa-solid fa-pen"></i>
-                <i v-if="isEditClicked[index]" @click="editLink(index)" class="fa-regular fa-circle-check"></i>
-                <i title="Voeg item toe" v-if="isEditClicked[index]" @click="makeNewItem = !makeNewItem" class="fa-solid fa-plus"></i>
-              </span>
-            </h2>
-            <i @click="changeIsClicked(indexNumber)"  class="fa-solid fa-arrow-down" :class="!isClickedout ? 'rotate': ''"></i>
-        </div>
 
-        <div class="views">
-          <i @click="changeView('table',indexNumber)" :class="{'isActive' : view == 'table'}" class="fa-solid fa-table"></i>
-          <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
-        </div>
-      </div>
-      <div v-if="isClickedout && view === 'list' || view === 'table'" :class="{'clickedOut':isClickedout && view === 'table' }" :id="`carousel-${indexNumber}`"  class="carousel-container">
-        <p v-if="makeNewItem" class="carousel-inhoud">
-          <input type="text" v-model="newItemName" placeholder="Voeg nieuwe item toe" class="editLink" />
-          <span>
-            <i @click="addItem(index)" class="fa-solid fa-check"></i>
-            <i @click="makeNewItem = false, newItemName= ''" class="fa-solid fa-xmark"></i>
-          </span>
-        </p>
-        <p v-for="(text,i) in info" :key="i" class="carousel-inhoud">
-          <router-link v-if="!isEditClicked[i]"  :to="text.url"  class="carousel-informatie">
-            <span v-html="text.title"></span>
-          </router-link>
-          <input v-else type="text" v-model="lastTitle" class="editLink" />
-          <span>
-            <i v-if="isAdmin" @click="isEditClicked[i] = !isEditClicked[i], lastTitle = text.title" class="fa-solid fa-pen"></i>
-            <i v-if="isEditClicked[i]" @click="editLink(i)" class="fa-regular fa-circle-check"></i>
-          </span>
-          <i v-if="!likes.find(liked => liked.slug === text.url)"  @click="likeLink(text,$event)" class="fa-regular fa-heart"></i>
+  <div class="carousel-top">
+    <div class="carousel-titel">
+      <h2>
+        <span @click="changeIsClicked(indexNumber)" v-if="!isEditClicked[index]">{{ index }}</span>
+        <input v-else type="text" v-model="lastTitle" class="editLink" />
+        <span v-if="isAdmin">
+          <i v-if="isAdmin" @click="isEditClicked[index] = !isEditClicked[index], lastTitle = index"
+            class="fa-solid fa-pen"></i>
+          <i v-if="isEditClicked[index]" @click="editLink(index)" class="fa-regular fa-circle-check"></i>
+          <i title="Voeg item toe" v-if="isEditClicked[index]" @click="makeNewItem = !makeNewItem"
+            class="fa-solid fa-plus"></i>
+        </span>
+      </h2>
+      <i v-if="isOverflowing" @click="changeIsClicked(indexNumber)" class="fa-solid fa-arrow-down"
+        :class="!isClickedout ? 'rotate' : ''"></i>
+    </div>
+
+    <div v-if="isOverflowing" class="views">
+      <i @click="changeView('table', indexNumber)" :class="{ 'isActive': view == 'table' }"
+        class="fa-solid fa-table"></i>
+      <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
+    </div>
+  </div>
+  <div v-if="isClickedout && view === 'list' || view === 'table'"
+    :class="{ 'clickedOut': isClickedout && view === 'table' }" :id="`carousel-${indexNumber}`"
+    class="carousel-container">
+    <p v-if="makeNewItem" class="carousel-inhoud">
+      <input type="text" v-model="newItemName" placeholder="Voeg nieuwe item toe" class="editLink" />
+      <span>
+        <i @click="addItem(index)" class="fa-solid fa-check"></i>
+        <i @click="makeNewItem = false, newItemName = ''" class="fa-solid fa-xmark"></i>
+      </span>
+    </p>
+
+
+    <p v-for="(text, i) in info" :key="i" class="carousel-tekst">
+      <div class="carousel-inhoud" v-if="shouldShowTile(text.coursel_name, i)">
+      <router-link v-if="!isEditClicked[i]" :to="text.url" class="carousel-informatie">
+        <span>{{ text.title }}</span>
+      </router-link>
+
+      <input v-else type="text" v-model="lastTitle" class="editLink" />
+
+      <span>
+        <i v-if="isAdmin" @click="isEditClicked[i] = !isEditClicked[i]; lastTitle = text.title"
+          class="fa-solid fa-pen"></i>
+        <i v-if="isEditClicked[i]" @click="editLink(i)" class="fa-regular fa-circle-check"></i>
+      </span>
+                <i v-if="!likes.find(liked => liked.slug === text.url)"  @click="likeLink(text,$event)" class="fa-regular fa-heart"></i>
           <i v-else @click="likeLink(text,$event)" class="fa-solid fa-heart"></i>
-        </p>
-      </div>
+          </div>
+    </p>
+
+
+
+  </div>
+
 </template>
 <script>
 import { toastService } from '@/services/toastService';
@@ -59,6 +77,7 @@ export default {
       required: true
     }
   },
+
   emits:['getCarouselData'],
   mounted(){
     this.checkOverflowing()
@@ -66,8 +85,9 @@ export default {
     this.changeIsClicked()
     this.getLikes();
     this.isAdmin = auth.user.role === 'admin'
+    
   },
-  watch:{
+  watch: {
     carouselData: {
       handler() {
         this.$nextTick(() => {
@@ -80,11 +100,11 @@ export default {
   data() {
     return {
       view: 'table',
-      isClickedout:false,
+      isClickedout: false,
       isOverflowing: false,
       isEditClicked: [],
       isAdmin: false,
-      lastTitle:'',
+      lastTitle: '',
       newItemName: '',
       makeNewItem: false,
       likes: [],
@@ -95,6 +115,25 @@ export default {
     this.sendLikes()
   },
   methods: {
+
+    shouldShowTile(featureName, index) {
+      const access = auth.getFeatureAccess(featureName);
+      
+    if (!access) return false;
+
+    // Altijd toegang bij admin of onbeperkt
+    if (access.isFullAccess) return true;
+
+    // Als er tileCount is, kijk of index binnen de limiet valt
+    if (access.tileCount !== null) {
+      return index < access.tileCount;
+    }
+
+    // Voor S/M niveau of andere gevallen: altijd tonen
+    return true;
+  },
+    addItem(index) {
+
     sendLikes() {
       if(this.likes.length === 0){
         return;
@@ -178,6 +217,7 @@ export default {
         });
     },
     addItem(index){
+
       const formData = new FormData();
       formData.append('carouselName', index);
       formData.append('itemName', this.newItemName);
@@ -192,7 +232,7 @@ export default {
           this.$emit('getCarouselData');
           this.newItemName = '';
           this.makeNewItem = false;
-          toastService.addToast('Item toegevoegd',`Item is zojuist toegevoegd`, 'success');
+          toastService.addToast('Item toegevoegd', `Item is zojuist toegevoegd`, 'success');
         } else {
           console.error('Error adding item:', response.statusText);
         }
@@ -203,17 +243,17 @@ export default {
     editLink(index) {
       const formData = new FormData();
 
-      if(typeof index !== 'string'){
+      if (typeof index !== 'string') {
         const item = this.info[index];
         formData.append('id', item.id);
         formData.append('title', this.lastTitle);
-      }else{
+      } else {
         const carouselName = index;
         formData.append('carouselName', carouselName);
         formData.append('newCarouselName', this.lastTitle);
       }
 
-      fetch(`${import.meta.env.VITE_APP_API_URL}backend/editCarouselLink`,{
+      fetch(`${import.meta.env.VITE_APP_API_URL}backend/editCarouselLink`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -224,7 +264,7 @@ export default {
           this.$emit('getCarouselData');
           this.isEditClicked[index] = false;
           this.lastTitle = '';
-          toastService.addToast('Naam aangepast',`Naam is zojuist aangepast`, 'success');
+          toastService.addToast('Naam aangepast', `Naam is zojuist aangepast`, 'success');
 
         } else {
           console.error('Error updating link:', response.statusText);
@@ -233,7 +273,7 @@ export default {
         console.error('Error:', error);
       });
     },
-    initOverflowing(){
+    initOverflowing() {
       const carouselContainer = document.getElementById(`carousel-${this.indexNumber}`);
       if (carouselContainer.scrollWidth > carouselContainer.clientWidth) {
         this.isOverflowing = true;
@@ -250,14 +290,14 @@ export default {
       }
 
     },
-    changeView(view = '' , index) {
-      if(view.length !== 0){
+    changeView(view = '', index) {
+      if (view.length !== 0) {
         this.view = view;
         localStorage.setItem('viewPreference', JSON.stringify({ index, view }));
         this.$nextTick(() => {
           this.checkOverflowing();
         });
-      }else{
+      } else {
         const savedView = JSON.parse(localStorage.getItem('viewPreference'));
         if (savedView && savedView.index === index) {
           this.view = savedView.view;
@@ -268,17 +308,17 @@ export default {
 
     },
     changeIsClicked(index = null) {
-      if(!this.isOverflowing){
+      if (!this.isOverflowing) {
         this.isClickedout = false;
         return;
       }
-      if(typeof index === 'number'){
+      if (typeof index === 'number') {
         this.isClickedout = !this.isClickedout;
         localStorage.setItem('isClickedout', JSON.stringify({ index, isClickedout: this.isClickedout }));
         this.$nextTick(() => {
           this.checkOverflowing();
-       });
-      }else{
+        });
+      } else {
         const savedClicked = JSON.parse(localStorage.getItem('isClickedout'));
         if (savedClicked && savedClicked.index === this.indexNumber) {
           this.isClickedout = savedClicked.isClickedout;
@@ -292,7 +332,7 @@ export default {
 };
 </script>
 <style scoped>
-.carousel input[type="text"]{
+.carousel input[type="text"] {
   padding-bottom: 0.25rem;
   font-size: 2rem;
   transition: all 0.3s ease;
@@ -300,17 +340,18 @@ export default {
   color: white;
 }
 
-.carousel input[type="text"]:focus{
+.carousel input[type="text"]:focus {
   padding-bottom: 0.5rem;
   outline: none;
 }
+
 .carousel-container {
   display: flex;
   flex-direction: row;
   gap: 2rem;
   margin-right: -10rem;
   margin-left: -10rem;
-  padding-left:10rem;
+  padding-left: 10rem;
   padding-top: 1rem;
 
 }
@@ -324,20 +365,22 @@ export default {
   gap: 1rem;
   font-size: 200%;
 }
-.views > .fa-solid {
+
+.views>.fa-solid {
   color: white;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
-.views > .fa-solid:hover {
+.views>.fa-solid:hover {
   color: var(--color-primary-700);
 }
 
-.rotate{
+.rotate {
   transform: rotate(180deg);
 }
-.fa-solid{
+
+.fa-solid {
   font-size: 75%;
   cursor: pointer;
   transition: transform 0.4s ease;
@@ -354,7 +397,8 @@ export default {
   margin-right: -10rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
-.carousel-titel{
+
+.carousel-titel {
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -371,7 +415,7 @@ export default {
   gap: 2rem;
 }
 
-.carousel-titel h2 > span{
+.carousel-titel h2>span {
   display: flex;
   gap: 1rem;
   align-items: center;
@@ -379,7 +423,7 @@ export default {
 }
 
 
-.isActive{
+.isActive {
   transform: scale(1.2);
   cursor: default !important;
 }
@@ -402,24 +446,26 @@ export default {
   border-radius: 1.5rem;
   padding: 1rem;
 }
+
+
 .carousel-inhoud:hover {
   cursor: pointer;
   background-color: var(--color-primary-200);
   transition: background-color 0.4s ease;
 }
 
-.carousel-inhoud > a {
+.carousel-inhoud>a {
   text-decoration: none;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-    color: black;
+  color: black;
 
 }
 
-.carousel-inhoud > i {
+.carousel-inhoud>i {
   position: absolute;
   top: -1rem;
   right: -1rem;
@@ -428,6 +474,7 @@ export default {
   cursor: pointer;
   transition: color 0.3s ease;
 }
+
 
 
 @media (min-width: 769px) {
@@ -452,18 +499,20 @@ export default {
   text-wrap: pretty;
 
 }
-.carousel  span > i{
+
+.carousel span>i {
   font-size: 75%;
   cursor: pointer;
   transition: transform 0.4s ease;
   color: white;
 }
-.carousel span > i:hover{
+
+.carousel span>i:hover {
   transform: scale(1.2);
 }
 
-.carousel-inhoud > a:hover{
-  color:var(--color-text);
+.carousel-inhoud>a:hover {
+  color: var(--color-text);
 }
 
 .clickedOut {
@@ -482,23 +531,28 @@ export default {
     margin-right: 0;
     margin-left: 0;
   }
+
   .carousel-titel {
     margin-left: 0;
     margin-right: 0;
-    padding-left: 1rem;  }
-    .carousel-container::-webkit-scrollbar {
+    padding-left: 1rem;
+  }
+
+  .carousel-container::-webkit-scrollbar {
     display: none;
   }
-  .carousel-top{
+
+  .carousel-top {
     margin-right: 0;
     margin-left: 0;
     padding: 1rem 1rem;
   }
-  .carousel-titel> h2{
+
+  .carousel-titel>h2 {
     gap: 1rem;
   }
 
-  .carousel-titel >h2 > span {
+  .carousel-titel>h2>span {
     font-size: 2rem;
   }
 }

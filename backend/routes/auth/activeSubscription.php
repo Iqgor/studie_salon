@@ -31,7 +31,7 @@ $subscription = $subscriptionResult->fetch_assoc();
 if ($subscription) {
     // Fetch features as before
 $stmtFeatures = $conn->prepare("
-    SELECT f.*
+    SELECT f.*, sf.access_level
     FROM subscription_features sf
     JOIN features f ON sf.feature_id = f.id
     WHERE sf.subscription_id = ?
@@ -42,10 +42,11 @@ $featuresResult = $stmtFeatures->get_result();
 
 $features = [];
 while ($row = $featuresResult->fetch_assoc()) {
-    $features[] = $row; // Entire row now, not just 'name'
+    $features[] = $row; // bevat nu ook 'access_level'
 }
 
 $subscription['features'] = $features;
+
 
 
     jsonResponse($subscription, 200);

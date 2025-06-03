@@ -7,7 +7,10 @@
 </template>
 
 <script>
-import CarouselItem from "./CarouselItem.vue";
+
+import { auth } from '@/auth';
+import CarouselItem from '@/components/CarouselItem.vue';
+
 export default {
   name: "ImageCarousel",
   components: {
@@ -19,7 +22,7 @@ export default {
       required: true,
     },
   },
-  emits:['getCarouselData'],
+  emits: ['getCarouselData'],
 };
 </script>
 
