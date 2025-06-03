@@ -61,9 +61,9 @@ export default {
   },
   emits:['getCarouselData'],
   mounted(){
-    this.changeIsClicked()
     this.checkOverflowing()
     this.initOverflowing()
+    this.changeIsClicked()
     this.isAdmin = auth.user.role === 'admin'
   },
   watch:{
