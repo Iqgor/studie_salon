@@ -124,16 +124,18 @@ export const auth = reactive({
     },
     getFeatureAccess(ft) {
 
-            const feature = this.subscriptionFeatures.find(
-        f => f.feature.toLowerCase() === ft.toLowerCase()
-    );
+        const feature = this.subscriptionFeatures.find(
+            f => f.feature.toLowerCase() === ft.toLowerCase()
+        );
         if (!feature) return null;
 
         const level = feature.access_level;
 
         const isAdmin = this.user.role === 'admin';
-                
+
         const isFullAccess = isAdmin || level === 'onbeperkt';
+        
+        
 
         const isNiveau = level.includes('niveau');
         const isS = level === 'S_niveau';

@@ -4,8 +4,12 @@
       < Terug naar Home</RouterLink>
         <div class="title-views">
           <h2>
-            <span v-if="!isTitleEditClicked">{{  tegelTitle.length>0  ? tegelTitle : capitalizeWords(slug.replaceAll('-', ' ')) }}</span>
-            <input v-else type="text" @change="titleEdited = $event.target.value" :value="tegelTitle.length>0  ? tegelTitle : capitalizeWords(slug.replaceAll('-', ' '))" class="editLink" />
+            <span v-if="!isTitleEditClicked">{{ tegelTitle.length > 0 ? tegelTitle :
+              capitalizeWords(slug.replaceAll('-',
+              ' ')) }}</span>
+            <input v-else type="text" @change="titleEdited = $event.target.value"
+              :value="tegelTitle.length > 0 ? tegelTitle : capitalizeWords(slug.replaceAll('-', ' '))"
+              class="editLink" />
             <i v-if="isAdmin" @click="isTitleEditClicked = !isTitleEditClicked" class="fa-solid fa-pen"></i>
             <i v-if="isTitleEditClicked" @click="editTitleLink" class="fa-regular fa-circle-check"></i>
           </h2>
@@ -16,10 +20,11 @@
         </div>
         <div v-if="links.l">
           <div class="niveaus">
-            <div v-for="niveau in niveaus">
-                <button :class="{ 'isActive': clickedNiveau === niveau }"v-if="links[niveau.toLowerCase()].length > 1"  @click="changeNiveau(niveau)">
-                  {{ niveau }}
-                </button>
+            <div v-for="niveau in niveaus" :key="niveau">
+              <button v-if="canAccessNiveau(niveau)" :class="{ isActive: clickedNiveau === niveau }"
+                @click="changeNiveau(niveau)">
+                {{ niveau }}
+              </button>
             </div>
           </div>
           <div :key="type" v-for="(link, type) in links">
@@ -28,8 +33,9 @@
               <ul class="view" :class="{ 'tableView': view === 'table' }">
                 <li v-for="(item, index) in link" :key="index">
                   <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
-                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
-                  <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
+                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item, $event)"
+                    class="fa-regular fa-heart"></i>
+                  <i v-else @click="likeLink(item, $event)" class="fa-solid fa-heart"></i>
                 </li>
               </ul>
               <div v-if="isAdmin" class="addLink">
@@ -43,8 +49,9 @@
               <ul class="view" :class="{ 'tableView': view === 'table' }">
                 <li v-for="(item, index) in link" :key="index">
                   <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
-                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
-                  <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
+                  <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item, $event)"
+                    class="fa-regular fa-heart"></i>
+                  <i v-else @click="likeLink(item, $event)" class="fa-solid fa-heart"></i>
                 </li>
               </ul>
             </div>
@@ -54,8 +61,9 @@
           <ul class="view" :class="{ 'tableView': view === 'table' }">
             <li v-for="(item, index) in links" :key="index">
               <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
-                <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item,$event)" class="fa-regular fa-heart"></i>
-                <i v-else @click="likeLink(item,$event)" class="fa-solid fa-heart"></i>
+              <i v-if="!likes.find(liked => liked.slug === item.slug)" @click="likeLink(item, $event)"
+                class="fa-regular fa-heart"></i>
+              <i v-else @click="likeLink(item, $event)" class="fa-solid fa-heart"></i>
             </li>
           </ul>
           <div v-if="isAdmin" class="addLink">
@@ -124,7 +132,21 @@ export default {
     this.isAdmin = auth.user.role === 'admin';
   },
   methods: {
-    makeSinglefile(){
+    canAccessNiveau(niveau) {
+      return true;
+      
+      const access = auth.getFeatureAccess('');
+      if (!access) return false;
+
+      if (access.isFullAccess) return true;
+
+      // Toegang op basis van niveau
+      if (access.isS && niveau === 'S') return true;
+      if (access.isSM && (niveau === 'S' || niveau === 'M')) return true;
+
+      return false; // Geen toegang tot dit niveau
+    },
+    makeSinglefile() {
       const formData = new FormData();
       formData.append('slug', this.slug);
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/makeSinglefile`, {
@@ -139,7 +161,7 @@ export default {
           if (data && data.new_url) {
             window.location.href = data.new_url;
           }
-          })
+        })
         .catch(error => {
           console.error('Error sending text', error);
         });
@@ -177,7 +199,7 @@ export default {
         }
       } else {
         // Like: add to likes
-        this.likes.push({'slug':item.slug});
+        this.likes.push({ 'slug': item.slug });
         if (event && event.target) {
           event.target.classList.remove('fa-regular');
           event.target.classList.add('fa-solid');
@@ -390,18 +412,19 @@ export default {
   align-items: center;
 }
 
-.title-views >  h2 {
+.title-views>h2 {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.title-views >  h2 > i{
+.title-views>h2>i {
   color: var(--color-primary-400);
   transition: all 0.3s ease;
   cursor: pointer;
 }
-.title-views >  h2 > i:hover {
+
+.title-views>h2>i:hover {
   color: var(--color-primary-700);
 }
 
@@ -430,7 +453,7 @@ export default {
     transition: opacity 0.2s;
   }
 
-  .tableView>li:hover  .fa-regular {
+  .tableView>li:hover .fa-regular {
     opacity: 1;
     pointer-events: auto;
   }
@@ -553,7 +576,7 @@ export default {
     padding: 2rem 1rem;
   }
 
-  .tableView{
+  .tableView {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 
