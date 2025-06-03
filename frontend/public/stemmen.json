@@ -1,0 +1,22 @@
+[
+  {
+    "naam": "John",
+    "img": "ai text/John/John.png",
+    "audio": "ai text/John/John.mp3"
+  },
+  {
+    "naam": "Chris",
+    "img": "ai text/Chris/Chris.png",
+    "audio": "ai text/Chris/Chris.mp3"
+  },
+  {
+    "naam": "Yasmin",
+    "img": "ai text/Yasmin/Yasmin.png",
+    "audio": "ai text/Yasmin/Yasmin.mp3"
+  },
+  {
+    "naam": "Lily",
+    "img": "ai text/Lily/Lily.png",
+    "audio": "ai text/Lily/Lily.mp3"
+  }
+]
