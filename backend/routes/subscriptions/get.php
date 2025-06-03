@@ -12,9 +12,8 @@ $stmt = $conn->prepare("
             s.is_trial AS subscription_is_trial,
             f.id AS feature_id,
             f.name AS feature_name,
-            f.description AS feature_description,
-            f.icon AS feature_icon,
-            sf.display AS feature_display
+            f.feature AS feature_feature,
+            f.icon AS feature_icon
         FROM subscriptions s
         LEFT JOIN subscription_features sf ON s.id = sf.subscription_id
         LEFT JOIN features f ON sf.feature_id = f.id
@@ -46,9 +45,8 @@ $stmt = $conn->prepare("
                         $subscriptions[$subscriptionId]['features'][] = [
                             'id' => $row['feature_id'],
                             'name' => $row['feature_name'],
-                            'description' => $row['feature_description'],
+                            'feature' => $row['feature_feature'],
                             'icon' => $row['feature_icon'],
-                            'display' => $row['feature_display'] // ← now correctly pulled from subscription_features
                         ];
                     }
                 }

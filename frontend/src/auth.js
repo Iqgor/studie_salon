@@ -61,7 +61,7 @@ export const auth = reactive({
             if (this.bearerToken !== ``) {
                 this.getSubscription()
             }
-            
+
 
 
         }
@@ -110,6 +110,8 @@ export const auth = reactive({
             this.subscriptionFeatures = data.features
             this.checkAction(data?.action)
 
+            console.log(this.subscriptionFeatures);
+
 
             if (data?.title == 'Geen abonnement') {
                 this.logout()
@@ -120,8 +122,33 @@ export const auth = reactive({
             console.error(error.message);
         }
     },
-    hasFeature(feature) {
-        return this.subscriptionFeatures.includes(feature)
+    getFeatureAccess(ft) {
+
+            const feature = this.subscriptionFeatures.find(
+        f => f.feature.toLowerCase() === ft.toLowerCase()
+    );
+        if (!feature) return null;
+
+        const level = feature.access_level;
+
+        const isAdmin = this.role === 'admin';
+        const isFullAccess = isAdmin || level === 'onbeperkt';
+
+        const isNiveau = level.includes('niveau');
+        const isS = level === 'S_niveau';
+        const isSM = level === 'S+M_niveau';
+
+        const tegelMatch = level.match(/^(\d+)_tegels$/);
+        const tileCount = tegelMatch ? parseInt(tegelMatch[1]) : null;
+
+        return {
+            access_level: level,
+            isFullAccess,
+            isNiveau,
+            isS,
+            isSM,
+            tileCount
+        };
     },
     isRole(role) {
         return this.user.role === role
