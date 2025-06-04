@@ -13,11 +13,11 @@
             class="fa-solid fa-plus"></i>
         </span>
       </h2>
-      <i v-if="isOverflowing" @click="changeIsClicked(indexNumber)" class="fa-solid fa-arrow-down"
+      <i @click="changeIsClicked(indexNumber)" class="fa-solid fa-arrow-down"
         :class="!isClickedout ? 'rotate' : ''"></i>
     </div>
 
-    <div v-if="isOverflowing" class="views">
+    <div class="views">
       <i @click="changeView('table', indexNumber)" :class="{ 'isActive': view == 'table' }"
         class="fa-solid fa-table"></i>
       <i :class="{ 'isActive': view == 'list' }" @click="changeView('list')" class="fa-solid fa-list"></i>
@@ -35,7 +35,7 @@
     </p>
 
 
-    <p v-for="(text, i) in info" :key="i" class="carousel-tekst">
+    <div v-for="(text, i) in info" :key="i" class="carousel-tekst">
       <div class="carousel-inhoud" v-if="shouldShowTile(text.coursel_name, i)">
       <router-link v-if="!isEditClicked[i]" :to="text.url" class="carousel-informatie">
         <span>{{ text.title }}</span>
@@ -51,7 +51,7 @@
                 <i v-if="!likes.find(liked => liked.slug === text.url)"  @click="likeLink(text,$event)" class="fa-regular fa-heart"></i>
           <i v-else @click="likeLink(text,$event)" class="fa-solid fa-heart"></i>
           </div>
-    </p>
+    </div>
 
 
 
@@ -80,12 +80,10 @@ export default {
 
   emits:['getCarouselData'],
   mounted(){
-    this.checkOverflowing()
-    this.initOverflowing()
     this.changeIsClicked()
     this.getLikes();
     this.isAdmin = auth.user.role === 'admin'
-    
+
   },
   watch: {
     carouselData: {
@@ -101,7 +99,6 @@ export default {
     return {
       view: 'table',
       isClickedout: false,
-      isOverflowing: false,
       isEditClicked: [],
       isAdmin: false,
       lastTitle: '',
@@ -118,7 +115,7 @@ export default {
 
     shouldShowTile(featureName, index) {
       const access = auth.getFeatureAccess(featureName);
-      
+
     if (!access) return false;
 
     // Altijd toegang bij admin of onbeperkt
@@ -273,23 +270,6 @@ export default {
         console.error('Error:', error);
       });
     },
-    initOverflowing() {
-      const carouselContainer = document.getElementById(`carousel-${this.indexNumber}`);
-      if (carouselContainer.scrollWidth > carouselContainer.clientWidth) {
-        this.isOverflowing = true;
-      } else {
-        this.isOverflowing = false;
-      }
-    },
-    checkOverflowing() {
-      const carouselContainer = document.getElementById(`carousel-${this.indexNumber}`);
-      if (carouselContainer.scrollWidth > carouselContainer.clientWidth) {
-        carouselContainer.classList.add('showScroll');
-      } else {
-        carouselContainer.classList.remove('showScroll');
-      }
-
-    },
     changeView(view = '', index) {
       if (view.length !== 0) {
         this.view = view;
@@ -308,10 +288,7 @@ export default {
 
     },
     changeIsClicked(index = null) {
-      if (!this.isOverflowing) {
-        this.isClickedout = false;
-        return;
-      }
+
       if (typeof index === 'number') {
         this.isClickedout = !this.isClickedout;
         localStorage.setItem('isClickedout', JSON.stringify({ index, isClickedout: this.isClickedout }));
@@ -353,7 +330,7 @@ export default {
   margin-left: -10rem;
   padding-left: 10rem;
   padding-top: 1rem;
-
+  overflow-x: auto;
 }
 
 .showScroll {
@@ -519,9 +496,7 @@ export default {
   overflow: hidden;
   flex-wrap: wrap;
   flex-shrink: 1;
-  justify-content: center;
-  padding: 0;
-  padding-top: 1rem;
+  justify-content: flex-start;
 }
 
 
