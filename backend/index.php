@@ -29,6 +29,7 @@ $secret_key = getenv('jwt_KEY');
 $mail_host = getenv('MAIL_HOST');
 $mail_username = getenv('MAIL_USERNAME');
 $mail_password = getenv('MAIL_PASSWORD');
+$mollie_key = getenv('mollie_KEY');
 
 
 // Parse URL and method

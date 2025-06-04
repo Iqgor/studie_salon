@@ -1,5 +1,4 @@
 <?php
-$apiKey = getenv('mollie_KEY');
 $paymentId = $_POST['id'];
 
 $ch = curl_init();
@@ -7,7 +6,7 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "https://api.mollie.com/v2/payments/$paymentId");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Authorization: Bearer ' . $apiKey,
+    'Authorization: Bearer ' . $mollie_key,
     'Content-Type: application/json',
 ]);
 
