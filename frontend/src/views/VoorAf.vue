@@ -19,6 +19,7 @@
           </span>
         </div>
         <div v-if="links.l">
+
           <div class="niveaus">
             <div v-for="niveau in niveaus" :key="niveau">
               <button v-if="canAccessNiveau(niveau)" :class="{ isActive: clickedNiveau === niveau }"
@@ -27,6 +28,7 @@
               </button>
             </div>
           </div>
+
           <div :key="type" v-for="(link, type) in links">
             <div v-if="link.length !== 0 && type.toUpperCase() === clickedNiveau" class="links">
               <h3>Teksten voor niveau {{ type.toUpperCase() }}</h3>
@@ -58,6 +60,7 @@
           </div>
         </div>
         <div v-else-if="links.length <= 4" class="links">
+          
           <ul class="view" :class="{ 'tableView': view === 'table' }">
             <li v-for="(item, index) in links" :key="index">
               <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
@@ -66,6 +69,7 @@
               <i v-else @click="likeLink(item, $event)" class="fa-solid fa-heart"></i>
             </li>
           </ul>
+
           <div v-if="isAdmin" class="addLink">
             <h4>Voeg meer links toe</h4>
             <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
@@ -118,6 +122,7 @@ export default {
       isTitleEditClicked: false,
       titleEdited: '',
       tegelTitle: '',
+      courselName: '',
     };
   },
   unmounted() {
@@ -133,9 +138,9 @@ export default {
   },
   methods: {
     canAccessNiveau(niveau) {
-      return true;
       
-      const access = auth.getFeatureAccess('');
+      
+      const access = auth.getFeatureAccess(this.courselName);
       if (!access) return false;
 
       if (access.isFullAccess) return true;
@@ -323,6 +328,7 @@ export default {
             this.succes = true;
             this.loading = false;
             this.tegelTitle = data[0].tegel_naam;
+            this.courselName = data[0].coursel_name;
             let categorized;
             if (data.length > 4) {
               categorized = {
