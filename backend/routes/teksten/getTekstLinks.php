@@ -1,7 +1,7 @@
 <?php
 $tegel = $_POST['slug'] ?? null;
 
-if (!$tegel || !preg_match('/^[a-zA-Z0-9_-]+$/', $tegel)) {
+if (!$tegel) {
     jsonResponse(['error' => 'Invalid or missing slug'], 400);
 }
 
