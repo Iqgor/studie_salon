@@ -8,6 +8,7 @@ import GebruikersVoorwaarden from '@/views/gebruikersVoorwaarden.vue'
 import Profile from '@/views/profile.vue'
 import { auth } from '@/auth'
 import Disclaimer from '@/views/disclaimer.vue'
+import Bedankt from '@/views/bedankt.vue'
 
 
 // Object to store scroll positions by route fullPath
@@ -70,6 +71,11 @@ const router = createRouter({
       name: 'admin',
       component: () => import('@/views/Admin.vue'),
       meta: { requiresAuth: true, requiresAdmin: true }
+    },
+        {
+      path:'/bedankt',
+      name: 'bedankt',
+      component: Bedankt,
     },
     {
       path: '/:slug',
