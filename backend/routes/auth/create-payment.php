@@ -6,7 +6,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 $price = $data['price'] ?? null;
 $currency = 'EUR'; // Naar euro want wij zijn in Nederland
 $description = 'Betaling voor StudieSalon'; // Standaard beschrijving
-$redirectUrl = 'https://33993.hosts1.ma-cloud.nl/login'; // Standaard redirect URL
+$redirectUrl = 'https://33993.hosts1.ma-cloud.nl/bedankt'; // Standaard redirect URL
 $webhookUrl = 'https://33993.hosts1.ma-cloud.nl/backend/update-payment'; // optioneel
 $method = 'ideal'; // Standaard betaalmethode
 

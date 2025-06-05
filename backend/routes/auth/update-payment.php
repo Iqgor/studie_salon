@@ -73,15 +73,34 @@ switch ($status) {
             exit();
         }
 
+        $subject = 'Betaling ontvangen';
+        $htmlBody = "Bedankt voor je betaling!<br>Je abonnement is nu actief tot <b>$expiryDate</b>.";
+        $altBody = "Bedankt voor je betaling! Je abonnement is nu actief tot $expiryDate.";
+
+        sendMail($userEmail, $subject, $htmlBody, $altBody);
+
+
         break;
 
     case 'open':
     case 'pending':
     case 'authorized':
+        // Geen actie, betaling is nog bezig
+        http_response_code(200);
+        break;
+
+        
     case 'canceled':
     case 'expired':
     case 'failed':
-        // Log or handle these statuses as needed
+        // Mail sturen bij mislukte betaling
+        if ($userEmail) {
+            $subject = 'Betaling mislukt';
+            $htmlBody = "Je betaling is helaas <b>niet gelukt</b>. Probeer het opnieuw of neem contact op met onze support.";
+            $altBody = "Je betaling is helaas niet gelukt. Probeer het opnieuw of neem contact op met onze support.";
+            sendMail($userEmail, $subject, $htmlBody, $altBody);
+        }
+
         http_response_code(200);
         break;
 
