@@ -19,8 +19,7 @@
           </span>
         </div>
         <div v-if="links.l">
-
-          <div class="niveaus">
+          <div v-if="links.l.length > 1" class="niveaus">
             <div v-for="niveau in niveaus" :key="niveau">
               <button v-if="canAccessNiveau(niveau)" :class="{ isActive: clickedNiveau === niveau }"
                 @click="changeNiveau(niveau)">
@@ -118,15 +117,11 @@ export default {
       isAdmin: false,
       newLink: '',
       likes: [],
-      oldLikes: [],
       isTitleEditClicked: false,
       titleEdited: '',
       tegelTitle: '',
       courselName: '',
     };
-  },
-  unmounted() {
-    this.sendLikes()
   },
   mounted() {
     document.title = `Studie Salon - ${this.slug}`;
@@ -210,14 +205,9 @@ export default {
           event.target.classList.add('fa-solid');
         }
       }
+      this.sendLikes()
     },
     sendLikes() {
-      // Compare oldLikes and likes arrays deeply
-      if (JSON.stringify(this.oldLikes) === JSON.stringify(this.likes)) {
-        console.log('No changes in likes, skipping send.');
-        return;
-      }
-
       const formData = new FormData();
 
       formData.append('userId', auth.user.id);
@@ -453,13 +443,13 @@ export default {
 }
 
 @media (min-width: 769px) {
-  .tableView>li>i {
+  .tableView>li>.fa-regular {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
   }
 
-  .tableView>li:hover .fa-regular {
+  .tableView >li:hover .fa-regular {
     opacity: 1;
     pointer-events: auto;
   }

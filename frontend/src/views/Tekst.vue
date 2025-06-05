@@ -213,8 +213,13 @@ export default {
 
 .containerTekst p {
   line-height: 1.5;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
+
+.containerTekst td > p {
+  margin: 0; 
+}
+
 
 .containerTekst h1 {
   font-size: 3rem;

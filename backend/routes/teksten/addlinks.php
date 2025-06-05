@@ -9,6 +9,7 @@ $slug = strtolower(trim($link));
 $slug = str_replace(' ', '-', $slug);
 $slug = str_replace('/', '', $slug);
 
+
 $tegelNaam = str_replace('-', ' ', $tegel);
 if ($link !== '') {
     $link = "➔ " . $link;

@@ -13,10 +13,21 @@
       </div>
       <div v-if="allData.data" class="pagination">
         <div>
-          <button v-if="beginLimit !== 0"
-            @click="beginLimit = beginLimit - 20, endLimit = endLimit - 20">Vorige</button>
-          <button v-if="endLimit < allData.data.length"
-            @click="endLimit = endLimit + 20, beginLimit = beginLimit + 20">Volgende</button>
+          <button
+            v-if="beginLimit !== 0 && beginLimit > 1"
+            @click="beginLimit = Math.max(1, beginLimit - 20); endLimit = Math.max(20, endLimit - 20)"
+          >
+            Vorige
+          </button>
+          <button
+            :disabled="(filteredData.length > 0
+              ? endLimit >= filteredData.length
+              : endLimit >= allData.data.length)"
+            v-if="endLimit < (filteredData.length > 0 ? filteredData.length : allData.data.length)"
+            @click="endLimit = Math.min((filteredData.length > 0 ? filteredData.length : allData.data.length), endLimit + 20); beginLimit = beginLimit + 20"
+          >
+            Volgende
+          </button>
         </div>
         Items
         {{ filteredData.length > 0 ? '' : beginLimit + 1 }} -
@@ -74,21 +85,23 @@
       </table>
       <div v-if="allData.data" class="pagination">
         <div>
-          <button v-if="beginLimit !== 0"
-            @click="beginLimit = beginLimit - 20, endLimit = endLimit - 20">Vorige</button>
-          <button v-if="endLimit < allData.data.length"
-            @click="endLimit = endLimit + 20, beginLimit = beginLimit + 20">Volgende</button>
+          <button
+            v-if="beginLimit !== 0 && beginLimit > 1"
+            @click="beginLimit = Math.max(1, beginLimit - 20); endLimit = Math.max(20, endLimit - 20)"
+          >
+            Vorige
+          </button>
+          <button
+            :disabled="(filteredData.length > 0
+              ? endLimit >= filteredData.length
+              : endLimit >= allData.data.length)"
+            v-if="endLimit < (filteredData.length > 0 ? filteredData.length : allData.data.length)"
+            @click="endLimit = Math.min((filteredData.length > 0 ? filteredData.length : allData.data.length), endLimit + 20); beginLimit = beginLimit + 20"
+          >
+            Volgende
+          </button>
         </div>
-        Items
-        {{ filteredData.length > 0 ? '' : beginLimit + 1 }} -
-        {{
-          (filteredData.length > 0
-            ? (endLimit < filteredData.length ? endLimit : filteredData.length) : (endLimit < allData.data.length ? endLimit
-              : allData.data.length)) }} van {{ filteredData.length > 0
-            ? filteredData.length
-            : (allData.data ? allData.data.length : 0)
-          }}
-      </div>
+      </div>  
     </div>
   </main>
   <div v-if="isEditClicked[newData.id] || isEditClicked['add']" class="editAddmodal">

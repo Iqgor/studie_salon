@@ -105,11 +105,7 @@ export default {
       newItemName: '',
       makeNewItem: false,
       likes: [],
-      oldLikes: [],
     };
-  },
-  unmounted() {
-    this.sendLikes()
   },
   methods: {
 
@@ -132,16 +128,8 @@ export default {
 
 
     sendLikes() {
-      if(this.likes.length === 0){
-        return;
-      }
 
-      // Compare oldLikes and likes arrays deeply
-      if (JSON.stringify(this.oldLikes) === JSON.stringify(this.likes)) {
-        console.log('No changes in likes, skipping send.');
-        return;
-      }
-
+      
       const formData = new FormData();
 
       formData.append('userId', auth.user.id);
@@ -185,6 +173,7 @@ export default {
           event.target.classList.add('fa-solid');
         }
       }
+      this.sendLikes();
     },
     getLikes() {
       const formData = new FormData();
@@ -214,7 +203,6 @@ export default {
         });
     },
     addItem(index){
-
       const formData = new FormData();
       formData.append('carouselName', index);
       formData.append('itemName', this.newItemName);
