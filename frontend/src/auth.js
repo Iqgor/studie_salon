@@ -1,6 +1,7 @@
 // auth.js.
 import { reactive } from 'vue'
 import { jwtDecode } from 'jwt-decode'
+import { toastService } from './services/toastService'
 
 
 //TODO import { getCookie, deleteCookie } from "./cookie.js"
@@ -108,6 +109,14 @@ export const auth = reactive({
             this.subscriptionId = data.id
             this.subscriptionName = data.name
             this.subscriptionFeatures = data.features
+            if (data.title && data.message) {
+                toastService.addToast(
+                    data.title,
+                    data.message,
+                    data.type || 'info'
+                );
+
+            }
             this.checkAction(data?.action)
 
             console.log(this.subscriptionFeatures);

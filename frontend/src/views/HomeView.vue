@@ -107,7 +107,8 @@ export default {
       fetch(`${import.meta.env.VITE_APP_API_URL}backend/getCarouselItems`,{
         method: 'POST',
         headers: {
-          Authorization: auth.bearerToken
+          Authorization: auth.bearerToken,
+          'Content-Type': 'application/json'
         }
       })
         .then(response => {

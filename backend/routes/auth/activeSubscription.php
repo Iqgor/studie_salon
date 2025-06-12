@@ -1,17 +1,9 @@
 <?php
 $userId = $_GET['user_id'];
-$role = $_GET['role'] ?? 'user'; // default to 'user' if not provided
 
 // STEP 1: Retrieve the user's active or any subscription (if admin)
-if ($role === 'admin') {
-    $stmt = $conn->prepare("
-        SELECT us.*, s.name AS subscription_name
-        FROM users_subscriptions us
-        JOIN subscriptions s ON us.subscription_id = s.id
-        WHERE us.user_id = ?
-        ORDER BY us.end_date DESC
-        LIMIT 1
-    ");
+if ($currentUser['role'] === 'admin') {
+    jsonResponse(['title' => 'Admin access', 'message' => 'Admin Gebruikers mogen alles doen', 'type' => 'success'], 200);
 } else {
     $stmt = $conn->prepare("
         SELECT us.*, s.name AS subscription_name
