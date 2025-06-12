@@ -80,7 +80,7 @@ export default {
 .tableView>li>a {
   display: block;
   width: 100%;
-
+  text-align: center;
 }
 
 .tableView>li:hover {

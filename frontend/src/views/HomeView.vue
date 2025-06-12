@@ -157,7 +157,7 @@ export default {
       } else if (hours >= 12 && hours < 18) {
         this.typeofDay = 'Goedemiddag';
       } else {
-        this.typeofDay = 'Goedeavond';
+        this.typeofDay = 'Goedenavond';
       }
     },
     calculateTextLength() {

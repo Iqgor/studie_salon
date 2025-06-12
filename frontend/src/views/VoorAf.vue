@@ -30,7 +30,6 @@
 
           <div :key="type" v-for="(link, type) in links">
             <div v-if="link.length !== 0 && type.toUpperCase() === clickedNiveau" class="links">
-              <h3>Teksten voor niveau {{ type.toUpperCase() }}</h3>
               <ul class="view" :class="{ 'tableView': view === 'table' }">
                 <li v-for="(item, index) in link" :key="index">
                   <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
@@ -39,14 +38,8 @@
                   <i v-else @click="likeLink(item, $event)" class="fa-solid fa-heart"></i>
                 </li>
               </ul>
-              <div v-if="isAdmin" class="addLink">
-                <h4>Voeg meer links toe</h4>
-                <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
-                <button @click="addLink">Voeg link toe</button>
-              </div>
             </div>
             <div v-else-if="link.length !== 0 && type === 'anders'" class="links">
-              <h3>Links naar:</h3>
               <ul class="view" :class="{ 'tableView': view === 'table' }">
                 <li v-for="(item, index) in link" :key="index">
                   <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
@@ -57,9 +50,13 @@
               </ul>
             </div>
           </div>
+          <div v-if="isAdmin" class="addLink">
+            <h4>Voeg meer links toe</h4>
+            <input type="text" v-model="newLink" class="editLink" placeholder="Plaats hier de naam van de link" />
+            <button @click="addLink">Voeg link toe</button>
+          </div>
         </div>
         <div v-else-if="links.length <= 4" class="links">
-          
           <ul class="view" :class="{ 'tableView': view === 'table' }">
             <li v-for="(item, index) in links" :key="index">
               <voorAfLinks :item="item" :slug="slug" :isAdmin="isAdmin" />
@@ -133,8 +130,6 @@ export default {
   },
   methods: {
     canAccessNiveau(niveau) {
-      
-      
       const access = auth.getFeatureAccess(this.courselName);
       if (!access) return false;
 
@@ -318,7 +313,7 @@ export default {
             this.succes = true;
             this.loading = false;
             this.tegelTitle = data[0].tegel_naam;
-            this.courselName = data[0].coursel_name;
+            this.courselName = data[0].coursel_name || this.slug; // Use coursel_name if available, otherwise use slug
             let categorized;
             if (data.length > 4) {
               categorized = {

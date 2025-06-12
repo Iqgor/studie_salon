@@ -134,8 +134,8 @@ export const auth = reactive({
         const isAdmin = this.user.role === 'admin';
 
         const isFullAccess = isAdmin || level === 'onbeperkt';
-        
-        
+
+
 
         const isNiveau = level.includes('niveau');
         const isS = level === 'S_niveau';

@@ -9,7 +9,8 @@
 
             <li><a href="/">Home</a></li>
             <li><a href="/abonnementen">Abonnementen</a></li>
-            <li v-if="auth.isLoggedIn"><a href="/">Teksten</a></li>
+            <li v-if="auth.isLoggedIn"><a href="/privacy-verklaring">Privacy verklaring</a></li>
+            <li v-if="auth.isLoggedIn"><a href="/gebruikers-voorwaarden">Gebruikers voorwaarden</a></li>
 
           </ul>
         </nav>
