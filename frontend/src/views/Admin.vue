@@ -216,7 +216,6 @@ export default {
     },
     headerClicked(header, isClicked) {
       // Handle header click event
-      console.log(`Header clicked: ${header}, isClicked: ${isClicked}`);
       this.nameHeaderClicked = header;
       // You can implement sorting or other functionality here
       if (!this.allData.data || !this.allData.data.length) return;

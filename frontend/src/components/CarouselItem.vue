@@ -111,20 +111,20 @@ export default {
 
     shouldShowTile(featureName, index) {
       const access = auth.getFeatureAccess(featureName);
+      
+      if (!access) return false;
 
-    if (!access) return false;
+      // Altijd toegang bij admin of onbeperkt
+      if (access.isFullAccess) return true;
 
-    // Altijd toegang bij admin of onbeperkt
-    if (access.isFullAccess) return true;
+      // Als er tileCount is, kijk of index binnen de limiet valt
+      if (access.tileCount !== null) {
+        return index < access.tileCount;
+      }
 
-    // Als er tileCount is, kijk of index binnen de limiet valt
-    if (access.tileCount !== null) {
-      return index < access.tileCount;
-    }
-
-    // Voor S/M niveau of andere gevallen: altijd tonen
-    return true;
-  },
+      // Voor S/M niveau of andere gevallen: altijd tonen
+      return true;
+    },
 
 
     sendLikes() {
@@ -262,9 +262,7 @@ export default {
       if (view.length !== 0) {
         this.view = view;
         localStorage.setItem('viewPreference', JSON.stringify({ index, view }));
-        this.$nextTick(() => {
-          this.checkOverflowing();
-        });
+
       } else {
         const savedView = JSON.parse(localStorage.getItem('viewPreference'));
         if (savedView && savedView.index === index) {
@@ -280,9 +278,6 @@ export default {
       if (typeof index === 'number') {
         this.isClickedout = !this.isClickedout;
         localStorage.setItem('isClickedout', JSON.stringify({ index, isClickedout: this.isClickedout }));
-        this.$nextTick(() => {
-          this.checkOverflowing();
-        });
       } else {
         const savedClicked = JSON.parse(localStorage.getItem('isClickedout'));
         if (savedClicked && savedClicked.index === this.indexNumber) {
