@@ -51,7 +51,7 @@ export default {
   },
   data() {
     return {
-      slug: this.$route.params.slug,
+      slug: window.location.pathname.split('/')[2],
       firstSlug: window.location.pathname.split('/')[1],
       tekst: '',
       succes: false,
@@ -217,7 +217,7 @@ export default {
 }
 
 .containerTekst td > p {
-  margin: 0; 
+  margin: 0;
 }
 
 

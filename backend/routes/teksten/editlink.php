@@ -5,8 +5,13 @@ if (!$link || !$slug) {
     jsonResponse(['error' => 'link and slug are required'], 400);
     exit;
 }
-$stmt = $conn->prepare("UPDATE teksten SET name = ? WHERE slug = ?");
-$stmt->bind_param("ss", $link, $slug);
+$newSlug = strtolower(trim($link));
+$newSlug = str_replace(' ', '-', $newSlug);
+$newSlug = str_replace('/', '', $newSlug);
+$newSlug = str_replace('?', '', $newSlug);
+// Ensure the slug is unique
+$stmt = $conn->prepare("UPDATE teksten SET name = ?, slug = ? WHERE slug = ?");
+$stmt->bind_param("sss", $link, $newSlug, $slug);
 if ($stmt->execute()) {
     jsonResponse(['success' => 'Link updated successfully'], 200);
 } else {
