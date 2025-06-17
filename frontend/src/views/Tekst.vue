@@ -51,7 +51,7 @@ export default {
   },
   data() {
     return {
-      slug: window.location.pathname.split('/')[2],
+      slug: this.$route.params.slug || '',
       firstSlug: window.location.pathname.split('/')[1],
       tekst: '',
       succes: false,
