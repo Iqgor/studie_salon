@@ -14,7 +14,7 @@
     define('DB_NAME', 'c7637studie');
 
 // live
-    // naar db: https://teams.microsoft.com/l/message/19:4227a46d-c0ee-4734-ad95-f8d543207b89_f0ecb4fb-a2c9-45d0-8a7e-9a95ea6e2462@unq.gbl.spaces/1749728624215?context=%7B%22contextType%22%3A%22chat%22%7D
+    // naar db: https://auth-db1805.hstgr.io/index.php?db=u511577715_studysaloon
     // define('DB_HOST', 'localhost');
     // define('DB_USER', 'u511577715_studysaloon');
     // define('DB_PASS', 'v8$Ve8x!4VT^');
